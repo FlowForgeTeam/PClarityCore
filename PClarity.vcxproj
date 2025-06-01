@@ -124,12 +124,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Functions_file_system.cpp" />
+    <ClCompile Include="Functions_win32.cpp" />
+    <ClCompile Include="Global_state.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Functions_networking.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
     <None Include="LICENCE" />
     <None Include="README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Functions_file_system.h" />
+    <ClInclude Include="Functions_win32.h" />
+    <ClInclude Include="Global_state.h" />
+    <ClInclude Include="Functions_networking.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
