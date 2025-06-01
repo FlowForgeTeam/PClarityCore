@@ -1,7 +1,7 @@
 # PClarity  
 > Desktop productivity analytics that respects your privacy  
 
-[?? Jump to Development Setup](#development-environment-setup)
+[🚀 Jump to Development Setup](#development-environment-setup)
 
 ## What is PClarity?  
 
@@ -9,9 +9,9 @@ PClarity is an open-source Windows application that helps you understand how you
 
 ## Key Features  
 
-- ?? **Automatic Time Tracking** - Track application usage without manual timers 
-- ?? **Productivity Analytics** - Visualize your computer usage patterns 
-- ?? **System Monitoring** - CPU, RAM, GPU usage in one place  
+- 📊 **Automatic Time Tracking** - Track application usage without manual timers 
+- 📈 **Productivity Analytics** - Visualize your computer usage patterns 
+- 💻 **System Monitoring** - CPU, RAM, GPU usage in one place  
 
 ## Why PClarity?  
 
@@ -29,11 +29,11 @@ PClarity is an open-source Windows application that helps you understand how you
 
 ## Status  
 
-?? **Under Development** - First release coming soon!  
+🚧 **Under Development** - First release coming soon!  
 
 ---  
 
-Made with ?? by FlowForge Team  
+Made with ❤️ by FlowForge Team  
 
 ---  
 
