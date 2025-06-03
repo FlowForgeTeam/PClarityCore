@@ -7,7 +7,8 @@ SOCKET initialise_tcp_connection_with_client() {
 	WSADATA wsa_data;
 	
 	// Using MAKEWORD(2,2) since 2.2 is the current spec version for Windows
-	int wsa_err = WSAStartup(MAKEWORD(2, 2), &wsa_data); // NOTE(damian): To better enderstand what this is, read https://stackoverflow.com/questions/4991967/how-does-wsastartup-function-initiates-use-of-the-winsock-dll
+	// NOTE(damian): To better enderstand what this is, read https://stackoverflow.com/questions/4991967/how-does-wsastartup-function-initiates-use-of-the-winsock-dll
+	int wsa_err = WSAStartup(MAKEWORD(2, 2), &wsa_data); 
 	if (wsa_err != 0) {
 		// TODO: handle this, also there are a bunch of different error that might occur, read docs.
 	}

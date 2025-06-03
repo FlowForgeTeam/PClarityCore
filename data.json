@@ -6,7 +6,11 @@
         },
         {
             "process_name": "Telegram.exe",
-            "time_spent": 10
+            "time_spent": 20
+        },
+        {
+            "process_name": "Telegram.exe",
+            "time_spent": 8
         }
     ]
 }
