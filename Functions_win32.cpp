@@ -24,32 +24,34 @@ pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_
     return pair(number_of_bytes_returned, Win32_error::ok);     // Success
 }
 
-Win32_error get_process_name(DWORD process_id, WCHAR* name_buffer, size_t name_buffer_len) {
+pair<int, Win32_error> get_process_name(DWORD process_id, WCHAR* name_buffer, size_t name_buffer_len) {
     // TODO: see if using ACCESS_ALL is better here.
     HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, // These specify the access rights
                                         FALSE,                                       // This is for process creation, we dont need it, so FALSE
                                         process_id);                                 // Process id to get a handle of
-    if (process_handle == NULL) return Win32_error::win32_OpenProcess_failed;
+    if (process_handle == NULL) return pair(0, Win32_error::win32_OpenProcess_failed);
     
     HMODULE module_handle;              // NOTE(damian): this is the same as HINSTANCE. This is a legacy type, back from 16-bit windows. 
     DWORD   number_of_bytes_returned;
 
+    // NOTE(damian): doesnt null terminate. So if overflow, then the name for sure did not fit. No \0.
     int err_code = EnumProcessModules(process_handle, 
                                       &module_handle, 
                                       sizeof(module_handle), 
                                       &number_of_bytes_returned);
-    if (err_code == 0) return Win32_error::win32_EnumProcessModules_failed;
-
+    if (err_code == 0) {
+        return pair(0, Win32_error::win32_EnumProcessModules_failed);
+    }
     DWORD name_buffer_new_len = GetModuleBaseNameW(process_handle, 
                                                    module_handle, 
                                                    name_buffer, 
                                                    name_buffer_len / sizeof(WCHAR));
-    if (name_buffer_new_len == 0) return Win32_error::win32_GetModuleBaseName_failed;
-    if (name_buffer_new_len == name_buffer_len) return Win32_error::win32_GetModuleBaseName_buffer_too_small;
+    if (name_buffer_new_len == 0) return pair(0, Win32_error::win32_GetModuleBaseName_failed);
+    if (name_buffer_new_len == name_buffer_len) return pair(0, Win32_error::win32_GetModuleBaseName_buffer_too_small);
 
     CloseHandle(process_handle);
 
-    return Win32_error::ok;
+    return pair(name_buffer_new_len, Win32_error::ok);
 }
 
 // int get_process_path(DWORD process_id, WCHAR* path_buffer, size_t path_buffer_len) {

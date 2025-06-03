@@ -2,15 +2,19 @@
     "processes_to_track": [
         {
             "process_name": "Battle.net.exe",
-            "time_spent": 115
+            "time_spent": 144
+        },
+        {
+            "process_name": "Telegram.exe",
+            "time_spent": 49
+        },
+        {
+            "process_name": "Telegram.exe",
+            "time_spent": 37
         },
         {
             "process_name": "Telegram.exe",
             "time_spent": 20
-        },
-        {
-            "process_name": "Telegram.exe",
-            "time_spent": 8
         }
     ]
 }

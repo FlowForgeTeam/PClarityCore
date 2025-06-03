@@ -13,7 +13,7 @@ namespace G_state {
 	extern vector<Process_data> process_data_vec;
 
 	extern void set_up_on_startup();
-
 	extern void update_state();
+
 }
 

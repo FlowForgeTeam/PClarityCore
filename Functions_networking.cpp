@@ -2,7 +2,7 @@
 
 // TODO: dont knwo how to handle different types of errors here, there are too many of them shits.
 
-SOCKET initialise_tcp_connection_with_client() {
+pair<SOCKET, Network_error> initialise_tcp_connection_with_client() {
 	// Getting data about windows socket implementation
 	WSADATA wsa_data;
 	
@@ -53,5 +53,5 @@ SOCKET initialise_tcp_connection_with_client() {
 		//		 close_err is not jsut 0 or 1 here. Use WASGetLastError to retrive error. 
 	}
 
-	return client_socket;
+	return pair(client_socket, Network_error::ok);
 }

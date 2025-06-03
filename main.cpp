@@ -47,7 +47,10 @@ int main() {
 	}
 	
 	std::cout << "Waiting for connection with a client. \n";
-	SOCKET client_socket = initialise_tcp_connection_with_client();
+	SOCKET client_socket;
+	pair<SOCKET, Network_error> result = initialise_tcp_connection_with_client();
+	if (result.second == Network_error::ok) client_socket = result.first;
+	else assert(false);
 	std::cout << "Client connected. \n\n";
 	
 	// NOTE: dont forget to maybe extend it id needed, or error if the message is to long or something.

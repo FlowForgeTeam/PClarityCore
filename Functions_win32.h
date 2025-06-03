@@ -20,7 +20,7 @@ enum class Win32_error {
 };
 
 pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_t arr_len);
-Win32_error get_process_name(DWORD process_id,  WCHAR* name_buffer, size_t name_buffer_len);
+pair<int, Win32_error> get_process_name(DWORD process_id,  WCHAR* name_buffer, size_t name_buffer_len);
 
 // NOTE(damian): this works, but not yet ussed, so commented out.
 // int get_process_path(DWORD process_id, WCHAR* path_buffer, size_t path_buffer_len);
