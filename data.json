@@ -1,4 +1,12 @@
 {
-    "is_active": true,
-    "time_spent_active": 9
+    "processes_to_track": [
+        {
+            "process_name": "Battle.net.exe",
+            "time_spent": 115
+        },
+        {
+            "process_name": "Telegram.exe",
+            "time_spent": 10
+        }
+    ]
 }
