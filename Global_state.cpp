@@ -49,8 +49,8 @@ namespace G_state {
 
     }
 
-    static const int process_ids_buffer_len  = 20; // NOTE(damian): tested this with buffer size of 20, seems to be working.
-    static const int process_name_buffer_len = 20; // NOTE(damian): tested this with buffer size of 20, seems to be working.
+    static const int process_ids_buffer_len  = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
+    static const int process_name_buffer_len = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
     static pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len);
     static std::tuple<WCHAR*, int, Win32_error> helper_get_process_name(DWORD process_id, WCHAR* stack_process_name_buffer, int stack_process_name_buffer_len);
 	void update_state() {
