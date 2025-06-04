@@ -49,8 +49,8 @@ namespace G_state {
 
     }
 
-    static const int process_ids_buffer_len  = 512;
-    static const int process_name_buffer_len = 512;
+    static const int process_ids_buffer_len  = 20; // NOTE(damian): tested this with buffer size of 20, seems to be working.
+    static const int process_name_buffer_len = 20; // NOTE(damian): tested this with buffer size of 20, seems to be working.
     static pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len);
     static std::tuple<WCHAR*, int, Win32_error> helper_get_process_name(DWORD process_id, WCHAR* stack_process_name_buffer, int stack_process_name_buffer_len);
 	void update_state() {
@@ -59,22 +59,19 @@ namespace G_state {
         pair<DWORD*, int> pointer_len_pair = helper_get_all_active_processe_ids(stack_process_ids_buffer, process_ids_buffer_len);
 
         DWORD* process_ids_buffer = nullptr;
-        bool heap_used            = false;
+        bool heap_used_for_ids    = false;
         if (pointer_len_pair.first == nullptr) { 
             process_ids_buffer = stack_process_ids_buffer;
-            heap_used          = false;
+            heap_used_for_ids  = false;
         }
         else {
             process_ids_buffer = pointer_len_pair.first;
-            heap_used          = true;
+            heap_used_for_ids  = true;
         }
         int bytes_returned = pointer_len_pair.second;
         
-        // TODO: comment here
+        // Getting names for processes, comparing to the once we are tracking, update respectively.
         int ids_returned = bytes_returned / sizeof(DWORD);
-
-
-
         for (int i = 0; i < ids_returned; ++i) {
             
             WCHAR stack_process_name_buffer[process_name_buffer_len];
@@ -89,14 +86,14 @@ namespace G_state {
             }
 
             WCHAR* process_name_buffer = nullptr;
-            bool heap_used             = false;
+            bool heap_used_for_name    = false;
             if (pointer_len_pair.first == nullptr) { 
                 process_name_buffer = stack_process_name_buffer;
-                heap_used           = false;
+                heap_used_for_name  = false;
             }
             else {
                 process_name_buffer = std::get<0>(triple);
-                heap_used           = true;
+                heap_used_for_name  = true;
             }
             int process_name_str_len = std::get<1>(triple);
 
@@ -109,6 +106,9 @@ namespace G_state {
                     process_data.update_active();
                 }
             }
+
+            // TODO(damian): think about having this a reusable heap buffer, dyn allocation multiple times should be avoided
+            if (heap_used_for_name) free(process_name_buffer);
             
         }
 
@@ -121,6 +121,9 @@ namespace G_state {
         for (Process_data& process_data : G_state::process_data_vec) {
             process_data.was_updated = false;
         }
+
+        if (heap_used_for_ids) free(process_ids_buffer);
+
 
     }
 
@@ -151,7 +154,8 @@ namespace G_state {
                 }
                 else {
                     process_ids_buffer_on_heap_len *= 2;
-                    process_ids_buffer_on_heap = (DWORD*) realloc(process_ids_buffer_on_heap, process_ids_buffer_on_heap_len);
+                    int bytes_needed                = sizeof(DWORD) * process_ids_buffer_on_heap_len;
+                    process_ids_buffer_on_heap = (DWORD*) realloc(process_ids_buffer_on_heap, bytes_needed);
                 }
 
                 if (process_ids_buffer_on_heap == NULL) {
@@ -211,7 +215,8 @@ namespace G_state {
                 }
                 else {
                     process_name_buffer_on_heap_len *= 2;
-                    process_name_buffer_on_heap = (WCHAR*) realloc(process_name_buffer_on_heap, process_name_buffer_on_heap_len);
+                    int bytes_needed                 = sizeof(WCHAR) * process_name_buffer_on_heap_len;
+                    process_name_buffer_on_heap = (WCHAR*) realloc(process_name_buffer_on_heap, bytes_needed);
                 }
 
                 if (process_name_buffer_on_heap == NULL) {

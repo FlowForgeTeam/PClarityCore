@@ -57,11 +57,12 @@ int main() {
 	char receive_buffer[512];
 	int  receive_buffer_len = 512;
 
+	int n = 0;
 	while (true) {
 		// This is the requst message in bytes
 		receive_buffer[0] = '\0';
 		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL);
-
+		std::cout << n << std::endl;
 		G_state::update_state();
 
 		// Handle messages here

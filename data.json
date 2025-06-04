@@ -15,6 +15,14 @@
         {
             "process_name": "Telegram.exe",
             "time_spent": 20
+        },
+        {
+            "process_name": "Telegram.exe",
+            "time_spent": 0
+        },
+        {
+            "process_name": "Telegram.exe",
+            "time_spent": 0
         }
     ]
 }
