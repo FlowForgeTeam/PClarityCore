@@ -18,35 +18,44 @@
 // TODO(damian): 
 // 		Messages to handle:
 //			-- (get_complete_data)      --> get complete data
+//			-- (disconnect)				--> disconnect the current client
+//			-- (stop)					--> stop the tracking completely
+//
 //			-- (start_tracking_process) --> add a process to be tracked
 // 			-- (stop_tracking_process)  --> remove a process from the tracking list
 
 void split_std_string(std::string* str, char delimeter, std::vector<std::string>* sub_strings);
 
 void wait_for_client_to_connect();
+
 void handle_get_complete_data();
 void handle_disconnect();
 void handle_stop();
+void handle_start_tracking_process();
+void handle_stop_tracking_process();
 
-// TODO(damian): move them somewhere better, here for now.
+// TODO(damian): move these somewhere better, here for now.
 static bool   running = true;
 static SOCKET client_socket;
+static vector<string> message_parts;
+static bool need_new_client = true;
 
 
 int main() {
 	 G_state::set_up_on_startup();
 	 std::cout << "Done setting up. \n" << std::endl;
 
-	 wait_for_client_to_connect();
-
 	 while (running) {
+
+		 if (need_new_client) {
+			 wait_for_client_to_connect();
+			 need_new_client = false;
+		 }
 		
 	 	// NOTE: dont forget to maybe extend it id needed, or error if the message is to long or something.
 	 	char receive_buffer[512];
 	 	int  receive_buffer_len = 512;
 
-		// This is the requst message in bytes
-		// TODO(damian): this has unknown behaviour is the sended tries to send "", handle this.
 		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
 		receive_buffer[n_bytes_returned] = '\0';
 
@@ -64,14 +73,23 @@ int main() {
 
 		// TODO(damian): create separate handlers for messages. Code would be cleaner. 
 
-		vector<string> message_parts;
 		string message_as_std_string = receive_buffer;
-		split_std_string(&message_as_std_string, message_as_std_string.length(), &message_parts);
+		split_std_string(&message_as_std_string, ' ', &message_parts);
+
+		std::cout << "\n\n";
+		for (string& part : message_parts) {
+			std::cout << part << " --> ";
+		}
+		std::cout << "\n\n";
 
 		if (message_parts.empty()) assert(false); // TODO(damian): handle better.
 
 		if (message_parts[0] == "get_complete_data")
 			handle_get_complete_data();
+		else if (message_parts[0] == "start_tracking_process")
+			handle_start_tracking_process();
+		else if (message_parts[0] == "stop_tracking_process")
+			handle_stop_tracking_process();
 		else if (message_parts[0] == "disconnect")
 			handle_disconnect();
 		else if (message_parts[0] == "stop") {
@@ -85,6 +103,8 @@ int main() {
 			}
 
 		}
+
+		message_parts.clear();
 	 		
 	 	// Preserve the new state
 	 	std::ofstream data_file("data.json");
@@ -114,6 +134,8 @@ int main() {
 void split_std_string(std::string* str, char delimeter, std::vector<std::string>* sub_strings) {
 	if (str->empty()) return;
 
+	bool have_seen_non_space_char = false;
+
 	size_t start_idx = 0;
 	for (int i = 0; i < str->length(); ++i) {
 		if (str->c_str()[i] == delimeter) {
@@ -121,10 +143,15 @@ void split_std_string(std::string* str, char delimeter, std::vector<std::string>
 			sub_strings->push_back(sub_string);
 			start_idx = i + 1;
 		}
+		else {
+			have_seen_non_space_char = true;
+		}
 	}
 
-	std::string sub_string(str->c_str() + start_idx, str->length() - start_idx);
-	sub_strings->push_back(sub_string);
+	if (have_seen_non_space_char) {
+		std::string sub_string(str->c_str() + start_idx, str->length() - start_idx);
+		sub_strings->push_back(sub_string);
+	}
 
 }
 
@@ -171,7 +198,7 @@ void handle_disconnect() {
 
 	std::cout << "Message handling: " << message << "\n" << std::endl;
 
-	wait_for_client_to_connect();
+	need_new_client = true;
 }
 
 void handle_stop() {
@@ -188,6 +215,75 @@ void handle_stop() {
 	
 	running = false;
 }
+
+void handle_start_tracking_process() {
+	string path = message_parts[1];
+
+	G_state::Error err_code = G_state::add_process_to_track(&path);
+
+	if (err_code == G_state::Error::ok) return;
+	if (err_code == G_state::Error::trying_to_track_the_same_process_more_than_once) {
+		string message = "Cant add the track process twice, it is alredy beeing tracked.";
+		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+		if (send_err_code == SOCKET_ERROR) {
+			// TODO: handle
+		}
+	} 
+
+	string message = "Started tracking a process.";
+	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+	if (send_err_code == SOCKET_ERROR) {
+		// TODO: handle
+	}
+
+	// TODO(damian): maybe add some cmd printing here. 
+
+	std::cout << "Unhandled G_state::Error error." << std::endl;
+	assert(false);
+
+}
+
+void handle_stop_tracking_process() {
+	string process_to_stop_path = message_parts[1];
+	bool   stopped_tracking     = false;
+
+	for (auto it = G_state::process_data_vec.begin(); it != G_state::process_data_vec.end(); ++it) {
+		if (it->path == process_to_stop_path) {
+			G_state::process_data_vec.erase(it);
+			stopped_tracking = true;
+			break;
+		}
+	}
+
+	if (stopped_tracking == false) {
+		string message = "The provided process was not beeing tracked, so nothing was removed.";
+		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+		if (send_err_code == SOCKET_ERROR) {
+			// TODO: handle
+		}
+	}
+	else {
+		string message = "Stopped tracking a process.";
+		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+		if (send_err_code == SOCKET_ERROR) {
+			// TODO: handle
+		}
+	}
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 //else if (match_part_of_string(receive_buffer, n_bytes_returned, "add_process*", 12)) {

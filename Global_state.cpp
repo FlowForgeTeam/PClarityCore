@@ -129,23 +129,24 @@ namespace G_state {
 
     }
 
-	void add_process_to_track(Process_data new_process) {
+	G_state::Error add_process_to_track(string* path) {
+        Process_data new_process(*path);
+        
         bool already_tracking = false;
         for (Process_data& process : G_state::process_data_vec) {
             if (process == new_process)
                 already_tracking = true;
         }
 
-        if (already_tracking) {
-            // NOTE(damian): This should not be happening probably. 
-            //               It might be ok for the cmd application, since in cmd user provides path himself.
-            //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
-            //               Ability to choose a process to track twice is invalid data.
-            assert(false); // TODO(damian): handle better. 
-        }
+        // NOTE(damian): This should not be happening probably. 
+        //               It might be ok for the cmd application, since in cmd user provides path himself.
+        //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
+        //               Ability to choose a process to track twice is invalid data.
+        if (already_tracking)
+            return G_state::Error::trying_to_track_the_same_process_more_than_once;    
 
         G_state::process_data_vec.push_back(new_process);
-
+        return G_state::Error::ok;
     }
 
 

@@ -9,6 +9,11 @@ using std::vector, std::string;
 using nlohmann::json;
 
 namespace G_state {
+	enum class Error {
+		ok,
+		trying_to_track_the_same_process_more_than_once,
+	};
+
 	extern const char* data_file_name;
 	extern vector<Process_data> process_data_vec;
 
@@ -16,7 +21,7 @@ namespace G_state {
 	extern void update_state();
 
 	// TODO(damian): see if maybe passing apointer or just string for name and path is better
-	extern void add_process_to_track(Process_data new_process);
+	G_state::Error add_process_to_track(string* path);
 
 }
 
