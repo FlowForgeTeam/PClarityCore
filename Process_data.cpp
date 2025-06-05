@@ -13,8 +13,7 @@ std::string wchar_to_utf8(const WCHAR* wstr) {
     return result;
 }
 
-Process_data::Process_data(string name, string path, int time_spent) {
-    this->name        = name;
+Process_data::Process_data(string path, int time_spent) {
     this->path        = path;
     this->start       = std::chrono::steady_clock::now();
     this->sessions    = std::vector<Process_data::Session>();
@@ -55,11 +54,7 @@ void Process_data::update_inactive() {
 
 
 bool Process_data::operator==(const Process_data& other) {
-    if (   this->name == other.name
-        && this->path == other.path
-    ) return true;
-
-    return false;
+    return this->path == other.path;
 }
 
 // == Process_data::Session =================================================================
@@ -78,7 +73,6 @@ int convert_from_json(const json* data, Process_data* process_data) {
         && data->contains("process_path")
         && data->contains("sessions")
     ) {
-        process_data->name       = (*data)["process_name"];
         process_data->path       = (*data)["process_path"];
         process_data->is_active  = false;
 
@@ -107,7 +101,6 @@ int convert_from_json(const json* data, Process_data* process_data) {
             }
 
         }
-        
 
         return 0;
     }
@@ -119,7 +112,9 @@ int convert_from_json(const json* data, Process_data* process_data) {
 #include <iostream>
 
 void convert_to_json(json* data, const Process_data* process_data) {
-    (*data)["process_name"] = process_data->name;
+    size_t idx = process_data->path.find_last_of("\\");
+
+    (*data)["process_name"] = process_data->path.c_str() + idx + 1;
     (*data)["process_path"] = process_data->path;
     
     (*data)["last_time_was_active"] = process_data->is_active;

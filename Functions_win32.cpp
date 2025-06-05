@@ -24,7 +24,7 @@ pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_
     return pair(number_of_bytes_returned, Win32_error::ok);     // Success
 }
 
-pair<int, Win32_error> get_process_name(DWORD process_id, WCHAR* name_buffer, size_t name_buffer_len) {
+pair<int, Win32_error> get_process_path(DWORD process_id, WCHAR* path_buffer, size_t path_buffer_len) {
     // TODO: see if using ACCESS_ALL is better here.
     HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, // These specify the access rights
                                         FALSE,                                       // This is for process creation, we dont need it, so FALSE
@@ -42,48 +42,17 @@ pair<int, Win32_error> get_process_name(DWORD process_id, WCHAR* name_buffer, si
     if (err_code == 0) {
         return pair(0, Win32_error::win32_EnumProcessModules_failed);
     }
-    DWORD name_buffer_new_len = GetModuleBaseNameW(process_handle, 
-                                                   module_handle, 
-                                                   name_buffer, 
-                                                   name_buffer_len / sizeof(WCHAR));
-    if (name_buffer_new_len == 0) return pair(0, Win32_error::win32_GetModuleBaseName_failed);
-    if (name_buffer_new_len == name_buffer_len) return pair(0, Win32_error::win32_GetModuleBaseName_buffer_too_small);
+    DWORD path_buffer_new_len =  GetModuleFileNameExW(process_handle, 
+                                                      module_handle, 
+                                                      path_buffer, 
+                                                      path_buffer_len / sizeof(WCHAR));
+    if (path_buffer_new_len == 0) return pair(0, Win32_error::win32_GetModuleFileNameExW_failed);
+    if (path_buffer_new_len == path_buffer_len) return pair(0, Win32_error::win32_GetModuleFileNameExW_buffer_too_small);
 
     CloseHandle(process_handle);
 
-    return pair(name_buffer_new_len, Win32_error::ok);
+    return pair(path_buffer_new_len, Win32_error::ok);
 }
-
-// int get_process_path(DWORD process_id, WCHAR* path_buffer, size_t path_buffer_len) {
-//     // TODO: see if using ACCESS_ALL is better here.
-//     HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, // These specify the access rights
-//                                         FALSE,                                       // This is for process creation, we dont need it, so FALSE
-//                                         process_id);                                // Process id to get a handle of
-    
-//     if (process_handle != NULL) {
-//         // NOTE(damian): This does not need to be closed.
-//         // NOTE(damian): this is the same as HINSTANCE. This is a legacy type, back from 16-bit windows.
-//         HMODULE module_handle;               
-//         DWORD   number_of_bytes_returned;
-
-//         // Getting module for the process_id
-//         if (EnumProcessModules(process_handle, &module_handle, sizeof(module_handle), &number_of_bytes_returned) != 0) {        
-//             // Getting the path of the module handle.
-//             DWORD path_buffer_new_len = 
-//                 GetModuleFileNameExW(process_handle, module_handle, path_buffer, path_buffer_len / sizeof(WCHAR));
-//             if (path_buffer_new_len == 0) return 1;
-//             if (path_buffer_new_len == path_buffer_len) return 2;
-
-//         }
-//         else return 3;
-
-//         CloseHandle(process_handle);  // Have to close it. Shit goes south If not closed --> // TODO: see why
-//         return 0;
-//     }
-
-//     return 4;
-// }
-
 
 
 

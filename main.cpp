@@ -13,31 +13,31 @@
 #include <string>
 
 // TEMPORARY
-bool c_str_equals(const char* str1, int len1, const char* str2, int len2) {
-	if (len1 != len2) return false;
+//bool c_str_equals(const char* str1, int len1, const char* str2, int len2) {
+//	if (len1 != len2) return false;
+//
+//	for (int i = 0; i < len1; ++i) {
+//		if (str1[i] != str2[i])	return false;
+//	}
+//
+//	return true;
+//}
 
-	for (int i = 0; i < len1; ++i) {
-		if (str1[i] != str2[i])	return false;
-	}
-
-	return true;
-}
-
-bool match_part_of_string(const char* str, int len_str, const char* str_to_match, int len_str_to_match) {
-	for (int i = 0; i < len_str; ++i)
-		std::cout << str[i];
-	std::cout << "\n";
-
-	for (int i = 0; i < len_str_to_match; ++i)
-		std::cout << str_to_match[i];
-	std::cout << "\n";
-	
-	for (int i = 0; i < len_str_to_match; ++i) {
-		if (str[i] != str_to_match[i])
-			return false;
-	}
-	return true;
-}
+//bool match_part_of_string(const char* str, int len_str, const char* str_to_match, int len_str_to_match) {
+//	for (int i = 0; i < len_str; ++i)
+//		std::cout << str[i];
+//	std::cout << "\n";
+//
+//	for (int i = 0; i < len_str_to_match; ++i)
+//		std::cout << str_to_match[i];
+//	std::cout << "\n";
+//	
+//	for (int i = 0; i < len_str_to_match; ++i) {
+//		if (str[i] != str_to_match[i])
+//			return false;
+//	}
+//	return true;
+//}
 
 int main() {
 	G_state::set_up_on_startup();
@@ -57,19 +57,26 @@ int main() {
 	char receive_buffer[512];
 	int  receive_buffer_len = 512;
 
-	int n = 0;
 	while (true) {
 		// This is the requst message in bytes
-		receive_buffer[0] = '\0';
+		// TODO(damian): this has unknown behaviour is the sended tries to send "", handle this.
 		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL);
-		std::cout << n << std::endl;
+		
 		G_state::update_state();
 
 		// Handle messages here
 		if (n_bytes_returned > 0) {
-			// NOTE: dont use strcmp, since the message does noy end with \0. 
-			// TODO: Would like a switch more here.		
-			if (c_str_equals(receive_buffer, n_bytes_returned, "get_data", 8)) {
+			// TODO(damian): Would like a switch more here.		
+
+			// NOTE(damian): recv doesnt null terminate the string buffer, 
+			//	     so terminating it myself, to then be able to use strcmp.
+
+			// TODO(damian): this might over_flow, handle it, just in case.
+			receive_buffer[n_bytes_returned] = '\0';
+
+			std::cout << "TESTING BUFFER --> " << receive_buffer << std::endl;
+
+			if (strcmp(receive_buffer, "get_data") == 0) {
 				vector<json> process_as_jsons;
 				for (Process_data& data : G_state::process_data_vec) {
 					json temp;
@@ -90,7 +97,7 @@ int main() {
 				std::cout << "Bytes sent." << std::endl;;
 				std::cout << message_as_str << std::endl;
 			}
-			else if (match_part_of_string(receive_buffer, n_bytes_returned, "add_process*", 12)) {
+			//else if (match_part_of_string(receive_buffer, n_bytes_returned, "add_process*", 12)) {
 				// string buffer_as_str(receive_buffer, n_bytes_returned);
 				// int idx_of_delim = buffer_as_str.find("*");
 				
@@ -107,15 +114,34 @@ int main() {
 											  string("C:\\Program Files (x86)\\Steam\\steam.exe"));*/
 
 				//G_state::add_process_to_track(new_process);
-			}
-			else if (c_str_equals(receive_buffer, n_bytes_returned, "stop", 4)) {
-				closesocket(client_socket);
+			//}
+			else if (strcmp(receive_buffer, "stop") == 0) {
+				string message = "stopped the connection.";
 				
+				int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+				if (send_err_code == SOCKET_ERROR) {
+					// TODO: handle
+				}
+
+				closesocket(client_socket);
+
 				std::cout << "Connection with current client closed. \n";
+
 				break;
 			}
 			else {
+				string message = "message is unsupported. Connection closed.";
+
+				int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+				if (send_err_code == SOCKET_ERROR) {
+					// TODO: handle
+				}
+
 				std::cout << "Message is ussuported: " << receive_buffer << std::endl;
+				
+				closesocket(client_socket);
+				break;
+
 			}
 
 		}

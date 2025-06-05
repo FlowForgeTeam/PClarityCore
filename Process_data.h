@@ -20,7 +20,6 @@ public:
     
     class Session;
 
-    string name;
     string path;
     std::chrono::steady_clock::time_point start;
     vector<Process_data::Session> sessions;
@@ -30,7 +29,7 @@ public:
     bool was_updated;
 
     // Process_data(wstring name, int time_spent = 0);
-    Process_data(string name, string path, int time_spent = 0);
+    Process_data(string path, int time_spent = 0);
     ~Process_data();
     
     void update_active();

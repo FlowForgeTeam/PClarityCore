@@ -31,7 +31,7 @@ namespace G_state {
                 for(json& process_json : processes_to_track) {
                     // TODO(damian): this has to chawenge, 
                     //               this is put here, to be re initialised inside the convert_from_json
-                    Process_data process_data(string("fake_name"), string("C:\\"), 123); 
+                    Process_data process_data(string("fake_path"), 123); 
                     convert_from_json(&process_json, &process_data);
 
                     G_state::process_data_vec.push_back(process_data);
@@ -52,9 +52,9 @@ namespace G_state {
     }
 
     static const int process_ids_buffer_len  = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
-    static const int process_name_buffer_len = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
+    static const int process_path_buffer_len = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
     static pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len);
-    static std::tuple<WCHAR*, int, Win32_error> helper_get_process_name(DWORD process_id, WCHAR* stack_process_name_buffer, int stack_process_name_buffer_len);
+    static std::tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len);
 	void update_state() {
         // Getting active processes. The original buffer might be too small, so might need to allocate dyn.
         DWORD  stack_process_ids_buffer[process_ids_buffer_len];                            
@@ -76,10 +76,10 @@ namespace G_state {
         int ids_returned = bytes_returned / sizeof(DWORD);
         for (int i = 0; i < ids_returned; ++i) {
             
-            WCHAR stack_process_name_buffer[process_name_buffer_len];
-            std::tuple<WCHAR*, int, Win32_error> triple = helper_get_process_name(process_ids_buffer[i], 
-                                                                          stack_process_name_buffer, 
-                                                                          process_name_buffer_len);  
+            WCHAR stack_process_path_buffer[process_path_buffer_len];
+            std::tuple<WCHAR*, int, Win32_error> triple = helper_get_process_path(process_ids_buffer[i], 
+                                                                                  stack_process_path_buffer, 
+                                                                                  process_path_buffer_len);  
             if (std::get<2>(triple) == Win32_error::win32_OpenProcess_failed) continue;
             if (std::get<2>(triple) == Win32_error::win32_EnumProcessModules_failed) continue;
             if (std::get<2>(triple) != Win32_error::ok) {
@@ -87,30 +87,30 @@ namespace G_state {
                 assert(false);
             }
 
-            WCHAR* process_name_buffer = nullptr;
+            WCHAR* process_path_buffer = nullptr;
             bool heap_used_for_name    = false;
             if (pointer_len_pair.first == nullptr) { 
-                process_name_buffer = stack_process_name_buffer;
+                process_path_buffer = stack_process_path_buffer;
                 heap_used_for_name  = false;
             }
             else {
-                process_name_buffer = std::get<0>(triple);
+                process_path_buffer = std::get<0>(triple);
                 heap_used_for_name  = true;
             }
-            int process_name_str_len = std::get<1>(triple);
+            int process_path_str_len = std::get<1>(triple);
 
-            auto temp = wchar_to_utf8(process_name_buffer);
+            auto temp = wchar_to_utf8(process_path_buffer);
 
             for (Process_data& process_data : G_state::process_data_vec) {
-                // auto test_1 = process_data.name;
-                // auto test_2 = wchar_to_utf8(process_name_buffer);
-                if (process_data.name == wchar_to_utf8(process_name_buffer) && process_data.was_updated == false) {
+                if (  
+                    process_data.path == wchar_to_utf8(process_path_buffer)
+                    && process_data.was_updated == false) {
                     process_data.update_active();
                 }
             }
 
             // TODO(damian): think about having this a reusable heap buffer, dyn allocation multiple times should be avoided
-            if (heap_used_for_name) free(process_name_buffer);
+            if (heap_used_for_name) free(process_path_buffer);
             
         }
 
@@ -128,6 +128,26 @@ namespace G_state {
 
 
     }
+
+	void add_process_to_track(Process_data new_process) {
+        bool already_tracking = false;
+        for (Process_data& process : G_state::process_data_vec) {
+            if (process == new_process)
+                already_tracking = true;
+        }
+
+        if (already_tracking) {
+            // NOTE(damian): This should not be happening probably. 
+            //               It might be ok for the cmd application, since in cmd user provides path himself.
+            //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
+            //               Ability to choose a process to track twice is invalid data.
+            assert(false); // TODO(damian): handle better. 
+        }
+
+        G_state::process_data_vec.push_back(new_process);
+
+    }
+
 
     // NOTE(damian): this gets all the active process, deals with static buffer overflow. 
     //               if static buffer is too small, uses a bigger dynamic one. 
@@ -186,17 +206,17 @@ namespace G_state {
     //                  else returs nullptr.
     //               Error is returned as the thirf element, this is done in order to skip the unaccesible processes.
     //               DONT FORGET TO DELETE THE DYNAMIC MEMORY LATER
-    static std::tuple<WCHAR*, int, Win32_error> helper_get_process_name(DWORD process_id, WCHAR* stack_process_name_buffer, int stack_process_name_buffer_len) {
-        WCHAR* process_name_buffer_on_heap     = nullptr;
-        int    process_name_buffer_on_heap_len = stack_process_name_buffer_len * 2;
-        int    process_name_str_len            = -1;  
+    static std::tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len) {
+        WCHAR* process_path_buffer_on_heap     = nullptr;
+        int    process_path_buffer_on_heap_len = stack_process_path_buffer_len * 2;
+        int    process_path_str_len            = -1;  
 
         while(true) {
             std::pair<int, Win32_error> result;
-            if (process_name_buffer_on_heap == nullptr)
-                result = get_process_name(process_id, stack_process_name_buffer, stack_process_name_buffer_len);
+            if (process_path_buffer_on_heap == nullptr)
+                result = get_process_path(process_id, stack_process_path_buffer, stack_process_path_buffer_len);
             else 
-                result = get_process_name(process_id, process_name_buffer_on_heap, process_name_buffer_on_heap_len);
+                result = get_process_path(process_id, process_path_buffer_on_heap, process_path_buffer_on_heap_len);
             
             if (result.second == Win32_error::win32_OpenProcess_failed) {
                 /*std::cout << "Error, was not able to open a process." << std::endl;
@@ -211,23 +231,23 @@ namespace G_state {
                 // NOTE(damian): Not sure if this failing is ok.
                 return std::tuple(nullptr, -1, Win32_error::win32_EnumProcessModules_failed);
             }
-            else if (result.second == Win32_error::win32_GetModuleBaseName_buffer_too_small) {
-                if (process_name_buffer_on_heap == nullptr) {
-                    process_name_buffer_on_heap = (WCHAR*) malloc(sizeof(WCHAR) * process_name_buffer_on_heap_len);
+            else if (result.second == Win32_error::win32_GetModuleFileNameExW_buffer_too_small) {
+                if (process_path_buffer_on_heap == nullptr) {
+                    process_path_buffer_on_heap = (WCHAR*) malloc(sizeof(WCHAR) * process_path_buffer_on_heap_len);
                 }
                 else {
-                    process_name_buffer_on_heap_len *= 2;
-                    int bytes_needed                 = sizeof(WCHAR) * process_name_buffer_on_heap_len;
-                    process_name_buffer_on_heap = (WCHAR*) realloc(process_name_buffer_on_heap, bytes_needed);
+                    process_path_buffer_on_heap_len *= 2;
+                    int bytes_needed                 = sizeof(WCHAR) * process_path_buffer_on_heap_len;
+                    process_path_buffer_on_heap = (WCHAR*) realloc(process_path_buffer_on_heap, bytes_needed);
                 }
 
-                if (process_name_buffer_on_heap == NULL) {
+                if (process_path_buffer_on_heap == NULL) {
                     std::cout << "Not enought memory to allocate a buffer." << std::endl;
                     assert(false);
                 }
             }
             else if (result.second == Win32_error::ok) {
-                process_name_str_len = result.first;
+                process_path_str_len = result.first;
                 break;
             }
             else {
@@ -235,28 +255,9 @@ namespace G_state {
                     assert(false);
             }
         }
-        assert(process_name_str_len != -1);
+        assert(process_path_str_len != -1);
 
-        return std::tuple(process_name_buffer_on_heap, process_name_str_len, Win32_error::ok);
-
-    }
-
-	void add_process_to_track(Process_data new_process) {
-        bool already_tracking = false;
-        for (Process_data& process : G_state::process_data_vec) {
-            if (process == new_process)
-                already_tracking = true;
-        }
-
-        if (already_tracking) {
-            // NOTE(damian): This should not be happening probably. 
-            //               It might be ok for the cmd application, since in cmd user provides path himself.
-            //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
-            //               Ability to choose a process to track twice is invalid data.
-            assert(false); // TODO(damian): handle better. 
-        }
-
-        G_state::process_data_vec.push_back(new_process);
+        return std::tuple(process_path_buffer_on_heap, process_path_str_len, Win32_error::ok);
 
     }
     
