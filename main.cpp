@@ -42,9 +42,9 @@ bool match_part_of_string(const char* str, int len_str, const char* str_to_match
 int main() {
 	G_state::set_up_on_startup();
 
-	for (Process_data& data: G_state::process_data_vec) {
+	/*for (Process_data& data: G_state::process_data_vec) {
 		std::cout << "name: " << data.name << ", time: " << data.time_spent.count() << " sec" << std::endl;
-	}
+	}*/
 	
 	std::cout << "Waiting for connection with a client. \n";
 	SOCKET client_socket;
@@ -91,15 +91,22 @@ int main() {
 				std::cout << message_as_str << std::endl;
 			}
 			else if (match_part_of_string(receive_buffer, n_bytes_returned, "add_process*", 12)) {
-				string buffer_as_str(receive_buffer, n_bytes_returned);
-				int idx_of_delim = buffer_as_str.find("*");
+				// string buffer_as_str(receive_buffer, n_bytes_returned);
+				// int idx_of_delim = buffer_as_str.find("*");
 				
-				string new_exe_name(buffer_as_str.c_str() + idx_of_delim + 1);
-				std::cout << new_exe_name << std::endl;
+				// string new_exe_name(buffer_as_str.c_str() + idx_of_delim + 1);
+				// std::cout << new_exe_name << std::endl;
+				
+				// TODO(damian): since process path are not doing anything yet, 
+				//				 just manually creating a new process that alredy exists inside data.json
 
-				// Creating a new Process_data obj and string for tracking
-				Process_data new_process_data(new_exe_name);
-				G_state::process_data_vec.push_back(new_process_data);
+				// Process_data new_process(string("Telegram.exe"), 
+				// 							  string("C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe"));
+				
+				/*Process_data new_process(string("steam.exe"), 
+											  string("C:\\Program Files (x86)\\Steam\\steam.exe"));*/
+
+				//G_state::add_process_to_track(new_process);
 			}
 			else if (c_str_equals(receive_buffer, n_bytes_returned, "stop", 4)) {
 				closesocket(client_socket);

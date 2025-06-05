@@ -15,5 +15,8 @@ namespace G_state {
 	extern void set_up_on_startup();
 	extern void update_state();
 
+	// TODO(damian): see if maybe passing apointer or just string for name and path is better
+	extern void add_process_to_track(Process_data new_process);
+
 }
 

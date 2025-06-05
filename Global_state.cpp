@@ -29,7 +29,9 @@ namespace G_state {
             if (data_as_json.contains("processes_to_track")) {
                 vector<json> processes_to_track = data_as_json["processes_to_track"];
                 for(json& process_json : processes_to_track) {
-                    Process_data process_data(wstring(L"fake_name"), 123); // TODO(damian): This fale inti sucks here 
+                    // TODO(damian): this has to chawenge, 
+                    //               this is put here, to be re initialised inside the convert_from_json
+                    Process_data process_data(string("fake_name"), string("C:\\"), 123); 
                     convert_from_json(&process_json, &process_data);
 
                     G_state::process_data_vec.push_back(process_data);
@@ -238,4 +240,25 @@ namespace G_state {
         return std::tuple(process_name_buffer_on_heap, process_name_str_len, Win32_error::ok);
 
     }
+
+	void add_process_to_track(Process_data new_process) {
+        bool already_tracking = false;
+        for (Process_data& process : G_state::process_data_vec) {
+            if (process == new_process)
+                already_tracking = true;
+        }
+
+        if (already_tracking) {
+            // NOTE(damian): This should not be happening probably. 
+            //               It might be ok for the cmd application, since in cmd user provides path himself.
+            //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
+            //               Ability to choose a process to track twice is invalid data.
+            assert(false); // TODO(damian): handle better. 
+        }
+
+        G_state::process_data_vec.push_back(new_process);
+
+    }
+    
+
 }

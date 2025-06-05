@@ -1,6 +1,6 @@
 #include "Process_data.h"
 
-// NOTE(damian): this was gpt generated, need to make sure its is correct. 
+// NOTE(damian): this was claude generated, need to make sure its is correct. 
 std::string wchar_to_utf8(const WCHAR* wstr) {
     if (!wstr) return "";
 
@@ -13,20 +13,14 @@ std::string wchar_to_utf8(const WCHAR* wstr) {
     return result;
 }
 
-Process_data::Process_data(wstring name, int time_spent) {
-    this->name        = wchar_to_utf8(name.c_str());
-    this->time_spent  = std::chrono::seconds(time_spent);
-    this->is_active   = false;
-    this->was_updated = false;
-    this->start       = std::chrono::steady_clock::now();
-}
-
-Process_data::Process_data(string name, int time_spent) {
+Process_data::Process_data(string name, string path, int time_spent) {
     this->name        = name;
-    this->time_spent  = std::chrono::seconds(time_spent);
+    this->path        = path;
+    this->start       = std::chrono::steady_clock::now();
+    this->sessions    = std::vector<Process_data::Session>();
+
     this->is_active   = false;
     this->was_updated = false;
-    this->start       = std::chrono::steady_clock::now();
 }
 
 Process_data::~Process_data() {}
@@ -36,12 +30,11 @@ void Process_data::update_active() {
     if (this->is_active == false) {
         this->is_active = true;
         this->start     = std::chrono::steady_clock::now();
-    }
+    } 
     else {
-        auto elapsed_time = std::chrono::steady_clock::now() - this->start;
-        this->time_spent += std::chrono::duration_cast<std::chrono::seconds>(elapsed_time);
-        this->start       = std::chrono::steady_clock::now();
+        // Nothing here
     }
+
     this->was_updated = true;
 }
 
@@ -49,8 +42,9 @@ void Process_data::update_active() {
 void Process_data::update_inactive() {
     if (this->is_active == true) {
         this->is_active   = false;
-        auto elapsed_time = std::chrono::steady_clock::now() - this->start;
-        this->time_spent  += std::chrono::duration_cast<std::chrono::seconds>(elapsed_time);
+
+        Process_data::Session session(this->start, std::chrono::steady_clock::now());
+        this->sessions.push_back(session);
     }
     else {
         // Nothing here
@@ -59,21 +53,61 @@ void Process_data::update_inactive() {
     this->was_updated = true;
 }
 
-// =====================================================================
 
-void string_into_wstring(const string* str, const wstring* wstr) {
+bool Process_data::operator==(const Process_data& other) {
+    if (   this->name == other.name
+        && this->path == other.path
+    ) return true;
 
-
+    return false;
 }
+
+// == Process_data::Session =================================================================
+
+Process_data::Session::Session(std::chrono::steady_clock::time_point start,  std::chrono::steady_clock::time_point end) {
+    this->start_time = start;
+    this->end_time   = end;
+}
+
+Process_data::Session::~Session() {}
+
+// == Just some functions ===================================================================
 
 int convert_from_json(const json* data, Process_data* process_data) {
     if (   data->contains("process_name")
-        && data->contains("time_spent")
+        && data->contains("process_path")
+        && data->contains("sessions")
     ) {
         process_data->name       = (*data)["process_name"];
-        process_data->time_spent = std::chrono::seconds((*data)["time_spent"]);
+        process_data->path       = (*data)["process_path"];
         process_data->is_active  = false;
-        process_data->start      = std::chrono::steady_clock::now();
+
+        // TODO(damian): i fate this, this is error prone. There should be something like an optional type that we use for values like start_time, before the process was even initialised for tracking.
+        process_data->start      = std::chrono::steady_clock::now(); 
+                    
+        vector<json> sessions = (*data)["sessions"];
+        for (json& j_session : sessions) {
+            if (   j_session.contains("start_time")
+                && j_session.contains("end_time")
+            ) {
+                using time_point = std::chrono::steady_clock::time_point; 
+                using duration   = std::chrono::steady_clock::duration; 
+
+                long long start_as_int64 = j_session["start_time"];
+                long long end_as_int64   = j_session["end_time"];
+                
+                duration start_as_duration = duration(start_as_int64);
+                duration end_as_duration  = duration(end_as_int64);     
+
+                time_point start_as_time_point = time_point(start_as_duration);
+                time_point end_as_time_point   = time_point(end_as_duration); 
+
+                Process_data::Session session(start_as_time_point, end_as_time_point);
+                process_data->sessions.push_back(session);
+            }
+
+        }
+        
 
         return 0;
     }
@@ -82,9 +116,25 @@ int convert_from_json(const json* data, Process_data* process_data) {
     }
 }
 
+#include <iostream>
+
 void convert_to_json(json* data, const Process_data* process_data) {
     (*data)["process_name"] = process_data->name;
-    (*data)["time_spent"]   = process_data->time_spent.count();
+    (*data)["process_path"] = process_data->path;
+    
+    (*data)["last_time_was_active"] = process_data->is_active;
+
+    vector<json> sessions_as_jsons;
+    for (auto& session : process_data->sessions) {
+        json j_session;
+        j_session["start_time"] = session.start_time.time_since_epoch().count();
+        j_session["end_time"]   = session.end_time.time_since_epoch().count();
+
+        sessions_as_jsons.push_back(j_session);
+    }
+
+    (*data)["sessions"] = sessions_as_jsons;
+
 }
 
 

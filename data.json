@@ -1,28 +1,19 @@
 {
     "processes_to_track": [
         {
-            "process_name": "Battle.net.exe",
-            "time_spent": 144
-        },
-        {
+            "last_time_was_active": false,
             "process_name": "Telegram.exe",
-            "time_spent": 49
-        },
-        {
-            "process_name": "Telegram.exe",
-            "time_spent": 37
-        },
-        {
-            "process_name": "Telegram.exe",
-            "time_spent": 20
-        },
-        {
-            "process_name": "Telegram.exe",
-            "time_spent": 0
-        },
-        {
-            "process_name": "Telegram.exe",
-            "time_spent": 0
+            "process_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+            "sessions": [
+                {
+                    "end_time": 161710700637900,
+                    "start_time": 161700597579800
+                },
+                {
+                    "end_time": 161754623770100,
+                    "start_time": 161744544532700
+                }
+            ]
         }
     ]
 }
