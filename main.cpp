@@ -47,7 +47,7 @@ int main() {
 
 		// This is the requst message in bytes
 		// TODO(damian): this has unknown behaviour is the sended tries to send "", handle this.
-		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL);
+		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
 		receive_buffer[n_bytes_returned] = '\0';
 
 		std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
@@ -78,7 +78,12 @@ int main() {
 			handle_stop();
 		}
 		else {
-			assert(false); // TODO(damian): handle better.
+			string message = "Invalid command.";
+			int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+			if (send_err_code == SOCKET_ERROR) {
+				// TODO: handle
+			}
+
 		}
 	 		
 	 	// Preserve the new state

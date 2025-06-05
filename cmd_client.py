@@ -4,7 +4,8 @@ import sys
 
 args    = sys.argv[1:]
 command = " ".join(args) 
-print(f"Message: {command}")
+command  = " " if len(command) == 0 else command
+print(f"Message: '{command}' ")
 
 s    = socket.socket()         
 port = 12345
@@ -17,7 +18,7 @@ print(f"Responce: {responce.decode('utf-8')}")
 
 print("\n")
 
-s.send("stop".encode("utf-8"))
+s.send("disconnect".encode("utf-8"))
 responce = s.recv(1024)
 print(f"Responce: {responce.decode('utf-8')}")
 
