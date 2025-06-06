@@ -16,9 +16,9 @@ s.send(command.encode("utf-8"))
 responce = s.recv(1024)
 print(f"Responce: {responce.decode('utf-8')}")
 
-print("\n")
+print("=========================================")
 
-s.send("disconnect".encode("utf-8"))
+s.send("pclarity_cmd quit".encode("utf-8"))
 responce = s.recv(1024)
 print(f"Responce: {responce.decode('utf-8')}")
 

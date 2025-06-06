@@ -6,6 +6,9 @@
 #include "Functions_win32.h"
 #include "Global_state.h"
 
+#include "Lexer.h"
+#include "Parser.h"
+
 #include <fstream>
 #include <iostream>
 #include <filesystem>
@@ -15,121 +18,149 @@
 // NOTE(damian): Messages have the following strcture:
 //				 <command> <args1> <arg2> ... 
 
-// TODO(damian): 
-// 		Messages to handle:
-//			-- (get_complete_data)      --> get complete data
-//			-- (disconnect)				--> disconnect the current client
-//			-- (stop)					--> stop the tracking completely
-//
-//			-- (start_tracking_process) --> add a process to be tracked
-// 			-- (stop_tracking_process)  --> remove a process from the tracking list
+// NOTE(damian): 
+// 		Messages that are currently supported:
+//			-- (report)   --> get complete data
+//			-- (quit)	  --> disconnect the current client
+//			-- (shutdown) --> stop the tracking completely
+//			-- (track)    --> add a process to be tracked
+// 			-- (untrack)  --> remove a process from the tracking list
 
 void split_std_string(std::string* str, char delimeter, std::vector<std::string>* sub_strings);
 
 void wait_for_client_to_connect();
 
-void handle_get_complete_data();
-void handle_disconnect();
-void handle_stop();
-void handle_start_tracking_process();
-void handle_stop_tracking_process();
+void handle_report  (Report_command*   command);
+void handle_quit    (Quit_command*     command);
+void handle_shutdown(Shutdown_command* command);
+void handle_track   (Track_command*    command);
+void handle_untrack (Untrack_command*  command);
 
 // TODO(damian): move these somewhere better, here for now.
 static bool   running = true;
 static SOCKET client_socket;
-static vector<string> message_parts;
 static bool need_new_client = true;
+// static vector<string> message_parts;
+
+
+
+// int main() {
+//     Parser parser = parser_init(" pclarity track \"C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe\" deadas");
+//     pair<Command, bool> result = start_parsing(&parser);
+
+//     if (result.second == true) {
+//         std::cout << result.first.track.path_token.lexeme << std::endl;
+//     }
+//     else {
+//         std::cout << "invalid" << std::endl;
+//     }
+
+//     return 0;
+// }
+
 
 
 int main() {
-	 G_state::set_up_on_startup();
-	 std::cout << "Done setting up. \n" << std::endl;
 
-	 while (running) {
+ 	G_state::set_up_on_startup();
+ 	std::cout << "Done setting up. \n" << std::endl;
 
-		 if (need_new_client) {
-			 wait_for_client_to_connect();
-			 need_new_client = false;
-		 }
+ 	while (running) {
+
+ 		if (need_new_client) {
+ 			wait_for_client_to_connect();
+ 			need_new_client = false;
+ 		}
 		
-	 	// NOTE: dont forget to maybe extend it id needed, or error if the message is to long or something.
-	 	char receive_buffer[512];
-	 	int  receive_buffer_len = 512;
+ 		// NOTE: dont forget to maybe extend it if needed, or error if the message is to long or something.
+ 		char receive_buffer[512];
+ 		int  receive_buffer_len = 512;
 
-		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
-		receive_buffer[n_bytes_returned] = '\0';
+ 		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
+ 		receive_buffer[n_bytes_returned] = '\0';
 
-		std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
-		std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
+ 		std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
+ 		std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
-		G_state::update_state();
+ 		G_state::update_state();
+	    // TODO(damian): Would like a switch more here.		
 
-		// TODO(damian): Would like a switch more here.		
+ 		// NOTE(damian): recv doesnt null terminate the string buffer, 
+ 		//	     so terminating it myself, to then be able to use strcmp.
 
-		// NOTE(damian): recv doesnt null terminate the string buffer, 
-		//	     so terminating it myself, to then be able to use strcmp.
+ 		// TODO(damian): this might over_flow, handle it, just in case.
 
-		// TODO(damian): this might over_flow, handle it, just in case.
+ 		// TODO(damian): create separate handlers for messages. Code would be cleaner. 
 
-		// TODO(damian): create separate handlers for messages. Code would be cleaner. 
+ 		// string message_as_std_string = receive_buffer;
+ 		// split_std_string(&message_as_std_string, ' ', &message_parts);
 
-		string message_as_std_string = receive_buffer;
-		split_std_string(&message_as_std_string, ' ', &message_parts);
+        // Parsing the request.
+        Parser parser = parser_init(receive_buffer);
+        pair<Command, bool> result = start_parsing(&parser);
 
-		std::cout << "\n\n";
-		for (string& part : message_parts) {
-			std::cout << part << " --> ";
-		}
-		std::cout << "\n\n";
+        if (result.second == false)  {
+            string message = "Invalid command.";
+ 			int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+ 			if (send_err_code == SOCKET_ERROR) {
+ 				// TODO: handle
+ 			}
+        }
+        else {
+            switch (result.first.type) {
+                case Command_type::report: {
+                    handle_report(&result.first.report);
+                } break;
+                
+                case Command_type::quit: {
+                    handle_quit(&result.first.quit);
+                } break;
 
-		if (message_parts.empty()) assert(false); // TODO(damian): handle better.
+                case Command_type::shutdown: {
+                    handle_shutdown(&result.first.shutdown);
+                } break;
 
-		if (message_parts[0] == "get_complete_data")
-			handle_get_complete_data();
-		else if (message_parts[0] == "start_tracking_process")
-			handle_start_tracking_process();
-		else if (message_parts[0] == "stop_tracking_process")
-			handle_stop_tracking_process();
-		else if (message_parts[0] == "disconnect")
-			handle_disconnect();
-		else if (message_parts[0] == "stop") {
-			handle_stop();
-		}
-		else {
-			string message = "Invalid command.";
-			int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
-			if (send_err_code == SOCKET_ERROR) {
-				// TODO: handle
-			}
+                case Command_type::track: {
+                    handle_track(&result.first.track);
+                } break;
 
-		}
+                case Command_type::untrack: {
+                    handle_untrack(&result.first.untrack);
+                } break;
 
-		message_parts.clear();
+                default: {
+                    assert(false);
+                } break;
+        
+        
+        
+            }
+        }
 	 		
-	 	// Preserve the new state
-	 	std::ofstream data_file("data.json");
+ 		// Preserve the new state
+ 		std::ofstream data_file("data.json");
 			
-	 	vector<json> processes_as_jsons;
-	 	for (Process_data& process_data : G_state::process_data_vec) {
-	 		json temp;
-	 		convert_to_json(&temp, &process_data);
-	 		processes_as_jsons.push_back(temp);
-	 	}
-	 	json j_overall_data;
-	 	j_overall_data["processes_to_track"] = processes_as_jsons;
+ 		vector<json> processes_as_jsons;
+ 		for (Process_data& process_data : G_state::process_data_vec) {
+ 	 		json temp;
+ 	 		convert_to_json(&temp, &process_data);
+ 	 		processes_as_jsons.push_back(temp);
+ 		}
+ 		json j_overall_data;
+ 		j_overall_data["processes_to_track"] = processes_as_jsons;
 
-	 	data_file << j_overall_data.dump(4) << std::endl;
-	 	data_file.close();
+ 		data_file << j_overall_data.dump(4) << std::endl;
+ 		data_file.close();
 
-	 	std::cout << "Saved data to file. \n" << std::endl;
+ 		std::cout << "Saved data to file. \n" << std::endl;
 
-	 }
-	
+ 	}
 
 	return 0;
 }
 
-
+// TODO(damian): handle out of bounds for message_parts. 
+// TODO(damian): add something that will represent the expectations for the message command, then it will be responcible for message validity checks.
 
 void split_std_string(std::string* str, char delimeter, std::vector<std::string>* sub_strings) {
 	if (str->empty()) return;
@@ -165,7 +196,7 @@ void wait_for_client_to_connect() {
 	std::cout << "Client connected. \n" << std::endl;
 }
 
-void handle_get_complete_data() {
+void handle_report(Report_command* command) {
 	vector<json> process_as_jsons;
 	for (Process_data& data : G_state::process_data_vec) {
 		json temp;
@@ -186,7 +217,7 @@ void handle_get_complete_data() {
 	std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
 }
 
-void handle_disconnect() {
+void handle_quit(Quit_command* command) {
 	string message = "Client disconnected.";
 	
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
@@ -201,7 +232,7 @@ void handle_disconnect() {
 	need_new_client = true;
 }
 
-void handle_stop() {
+void handle_shutdown(Shutdown_command* command) {
 	string message = "Stopped traking.";
 
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
@@ -216,18 +247,30 @@ void handle_stop() {
 	running = false;
 }
 
-void handle_start_tracking_process() {
-	string path = message_parts[1];
+void handle_track(Track_command* command) {
+    const char* path_start  = command->path_token.lexeme + 1; // Skipping the first " 
+	size_t      path_length = command->path_token.length - 2; // Skipping the first " and the last "
+
+    string path(path_start, path_length);
 
 	G_state::Error err_code = G_state::add_process_to_track(&path);
 
-	if (err_code == G_state::Error::ok) return;
+	if (err_code == G_state::Error::ok) {
+		string message = "Started tracking a new process.";
+		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+		if (send_err_code == SOCKET_ERROR) {
+			// TODO: handle
+		}
+		return;
+	}
+
 	if (err_code == G_state::Error::trying_to_track_the_same_process_more_than_once) {
 		string message = "Cant add the track process twice, it is alredy beeing tracked.";
 		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
 		if (send_err_code == SOCKET_ERROR) {
 			// TODO: handle
 		}
+		return;
 	} 
 
 	string message = "Started tracking a process.";
@@ -243,12 +286,15 @@ void handle_start_tracking_process() {
 
 }
 
-void handle_stop_tracking_process() {
-	string process_to_stop_path = message_parts[1];
-	bool   stopped_tracking     = false;
+void handle_untrack(Untrack_command* command) {
+	const char* path_start  = command->path_token.lexeme + 1; // Skipping the first " 
+	size_t      path_length = command->path_token.length - 2; // Skipping the first " and the last "
 
+    string path(path_start, path_length);
+
+	bool stopped_tracking     = false;
 	for (auto it = G_state::process_data_vec.begin(); it != G_state::process_data_vec.end(); ++it) {
-		if (it->path == process_to_stop_path) {
+		if (it->path == path) {
 			G_state::process_data_vec.erase(it);
 			stopped_tracking = true;
 			break;
@@ -272,53 +318,6 @@ void handle_stop_tracking_process() {
 
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//else if (match_part_of_string(receive_buffer, n_bytes_returned, "add_process*", 12)) {
-				// string buffer_as_str(receive_buffer, n_bytes_returned);
-				// int idx_of_delim = buffer_as_str.find("*");
-
-				// string new_exe_name(buffer_as_str.c_str() + idx_of_delim + 1);
-				// std::cout << new_exe_name << std::endl;
-
-				// TODO(damian): since process path are not doing anything yet, 
-				//				 just manually creating a new process that alredy exists inside data.json
-
-				// Process_data new_process(string("Telegram.exe"), 
-				// 							  string("C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe"));
-
-				/*Process_data new_process(string("steam.exe"),
-											string("C:\\Program Files (x86)\\Steam\\steam.exe"));*/
-
-											//G_state::add_process_to_track(new_process);
-										//}
-
-//else {
-//								string message = "Message is unsupported. Connection closed.";
-
-//								int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
-//								if (send_err_code == SOCKET_ERROR) {
-//									// TODO: handle
-//								}
-
-//								std::cout << "Message is ussuported: " << message << "\n" << std::endl;
-
-//								closesocket(client_socket);
-//								break;
-
-//								}
 
 
 

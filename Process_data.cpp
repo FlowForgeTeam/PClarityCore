@@ -84,8 +84,11 @@ int convert_from_json(const json* data, Process_data* process_data) {
             if (   j_session.contains("start_time")
                 && j_session.contains("end_time")
             ) {
-                using time_point = std::chrono::steady_clock::time_point; 
-                using duration   = std::chrono::steady_clock::duration; 
+                using time_point = std::chrono::steady_clock::time_point;//<std::chrono::system_clock, std::chrono::seconds>; 
+                using duration   = std::chrono::steady_clock::duration;
+
+                // NOTE(damian): these are nanoseconds.
+                // TODO(damian): do seconds instead of nanoseconds.
 
                 long long start_as_int64 = j_session["start_time"];
                 long long end_as_int64   = j_session["end_time"];

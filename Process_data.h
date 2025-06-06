@@ -14,7 +14,6 @@ class Process_data {
 private:
 
 public:
-    // NOTE(damian): might use some else for process identification. 
     // NOTE(damian): std::stringh just stores bytes. So any string can be stored, even UTF-8. 
     //               the behaviour of reading and decoding is then handed to the developer.
     

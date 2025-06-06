@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="Source Files\Commands">
+      <UniqueIdentifier>{389651e6-46bc-4057-8aaf-dddeb86cc134}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,6 +35,12 @@
     </ClCompile>
     <ClCompile Include="Process_data.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Lexer.cpp">
+      <Filter>Source Files\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Parser.cpp">
+      <Filter>Source Files\Commands</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -54,6 +63,12 @@
     </ClInclude>
     <ClInclude Include="Process_data.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Lexer.h">
+      <Filter>Source Files\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Parser.h">
+      <Filter>Source Files\Commands</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

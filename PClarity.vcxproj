@@ -127,8 +127,10 @@
     <ClCompile Include="Functions_file_system.cpp" />
     <ClCompile Include="Functions_win32.cpp" />
     <ClCompile Include="Global_state.cpp" />
+    <ClCompile Include="Lexer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Functions_networking.cpp" />
+    <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Process_data.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +143,8 @@
     <ClInclude Include="Functions_win32.h" />
     <ClInclude Include="Global_state.h" />
     <ClInclude Include="Functions_networking.h" />
+    <ClInclude Include="Lexer.h" />
+    <ClInclude Include="Parser.h" />
     <ClInclude Include="Process_data.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
