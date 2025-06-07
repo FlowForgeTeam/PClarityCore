@@ -141,7 +141,7 @@ int main() {
  		std::ofstream data_file("data.json");
 			
  		vector<json> processes_as_jsons;
- 		for (Process_data& process_data : G_state::process_data_vec) {
+ 		for (Process_data& process_data : G_state::tracked_processes) {
  	 		json temp;
  	 		convert_to_json(&temp, &process_data);
  	 		processes_as_jsons.push_back(temp);
@@ -197,15 +197,23 @@ void wait_for_client_to_connect() {
 }
 
 void handle_report(Report_command* command) {
-	vector<json> process_as_jsons;
-	for (Process_data& data : G_state::process_data_vec) {
+	vector<json> j_tracked;
+	for (Process_data& data : G_state::tracked_processes) {
 		json temp;
 		convert_to_json(&temp, &data);
-		process_as_jsons.push_back(temp);
+		j_tracked.push_back(temp);
+	}
+
+	vector<json> j_cur_active;
+	for (Process_data& data : G_state::currently_active_processes) {
+		json temp;
+		convert_to_json(&temp, &data);
+		j_cur_active.push_back(temp);
 	}
 
 	json global_json;
-	global_json["processes_to_track"] = process_as_jsons;
+	global_json["tracked"]          = j_tracked;
+	global_json["currently_active"] = j_cur_active;
 
 	std::string message_as_str = global_json.dump(4);
 
@@ -292,30 +300,26 @@ void handle_untrack(Untrack_command* command) {
 
     string path(path_start, path_length);
 
-	bool stopped_tracking     = false;
-	for (auto it = G_state::process_data_vec.begin(); it != G_state::process_data_vec.end(); ++it) {
-		if (it->path == path) {
-			G_state::process_data_vec.erase(it);
-			stopped_tracking = true;
-			break;
-		}
-	}
+	G_state::Error err_code = G_state::remove_process_from_track(&path);
 
-	if (stopped_tracking == false) {
+	if (err_code == G_state::Error::trying_to_untrack_a_non_tracked_process) {
 		string message = "The provided process was not beeing tracked, so nothing was removed.";
 		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
 		if (send_err_code == SOCKET_ERROR) {
 			// TODO: handle
 		}
 	}
-	else {
-		string message = "Stopped tracking a process.";
-		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
-		if (send_err_code == SOCKET_ERROR) {
-			// TODO: handle
-		}
+	else if (err_code != G_state::Error::ok) {
+		std::cout << "Unhandles error." << std::endl;
+		assert(false);
 	}
 
+	string message = "Stopped tracking a process.";
+	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+	if (send_err_code == SOCKET_ERROR) {
+		// TODO: handle
+	}
+	
 }
 
 

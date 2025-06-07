@@ -1,3 +1,10 @@
 {
-    "processes_to_track": []
+    "processes_to_track": [
+        {
+            "is_active": true,
+            "is_tracked": true,
+            "process_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+            "sessions": []
+        }
+    ]
 }

@@ -14,7 +14,7 @@ class Process_data {
 private:
 
 public:
-    // NOTE(damian): std::stringh just stores bytes. So any string can be stored, even UTF-8. 
+    // NOTE(damian): std::string just stores bytes. So any string can be stored, even UTF-8. 
     //               the behaviour of reading and decoding is then handed to the developer.
     
     class Session;
@@ -22,6 +22,7 @@ public:
     string path;
     std::chrono::steady_clock::time_point start;
     vector<Process_data::Session> sessions;
+    bool is_tracked;
 
     // These are to track the changes in states. 
     bool is_active;
@@ -48,6 +49,8 @@ public:
             Session(time_point start, time_point end);
             ~Session();
     };
+
+
     
 };
 

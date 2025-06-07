@@ -13,10 +13,13 @@ std::string wchar_to_utf8(const WCHAR* wstr) {
     return result;
 }
 
+
+
 Process_data::Process_data(string path, int time_spent) {
     this->path        = path;
     this->start       = std::chrono::steady_clock::now();
     this->sessions    = std::vector<Process_data::Session>();
+    this->is_tracked  = false;
 
     this->is_active   = false;
     this->was_updated = false;
@@ -37,13 +40,15 @@ void Process_data::update_active() {
     this->was_updated = true;
 }
 
-// Updating a process as if its new state is in_active
+// Updating a process as if its new state is inactive
 void Process_data::update_inactive() {
     if (this->is_active == true) {
-        this->is_active   = false;
-
-        Process_data::Session session(this->start, std::chrono::steady_clock::now());
-        this->sessions.push_back(session);
+        this->is_active = false;
+        
+        if (this->is_tracked) {
+            Process_data::Session session(this->start, std::chrono::steady_clock::now());
+            this->sessions.push_back(session);
+        }
     }
     else {
         // Nothing here
@@ -69,12 +74,14 @@ Process_data::Session::~Session() {}
 // == Just some functions ===================================================================
 
 int convert_from_json(const json* data, Process_data* process_data) {
-    if (   data->contains("process_name")
-        && data->contains("process_path")
+    if (   data->contains("process_path")
+        //&& data->contains("is_tracked")
         && data->contains("sessions")
     ) {
         process_data->path       = (*data)["process_path"];
         process_data->is_active  = false;
+        //process_data->is_tracked = (*data)["is_tracked"];
+        process_data->is_tracked = true;
 
         // TODO(damian): i fate this, this is error prone. There should be something like an optional type that we use for values like start_time, before the process was even initialised for tracking.
         process_data->start      = std::chrono::steady_clock::now(); 
@@ -115,12 +122,13 @@ int convert_from_json(const json* data, Process_data* process_data) {
 #include <iostream>
 
 void convert_to_json(json* data, const Process_data* process_data) {
-    size_t idx = process_data->path.find_last_of("\\");
+    // size_t idx = process_data->path.find_last_of("\\");
+    // (*data)["process_name"] = process_data->path.c_str() + idx + 1;
 
-    (*data)["process_name"] = process_data->path.c_str() + idx + 1;
     (*data)["process_path"] = process_data->path;
-    
-    (*data)["last_time_was_active"] = process_data->is_active;
+    (*data)["is_active"]    = process_data->is_active;
+    (*data)["is_tracked"]    = process_data->is_tracked;
+
 
     vector<json> sessions_as_jsons;
     for (auto& session : process_data->sessions) {
