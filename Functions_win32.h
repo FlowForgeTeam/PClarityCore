@@ -6,7 +6,7 @@
 // NOTE(damian 03.06.2025): This will probably be the way we return errors here.
 //                          std::pair with the second value being the error value.
 #include <utility>
-using std::pair;
+using std::pair, std::tuple;
 
 enum class Win32_error {
     ok,
@@ -22,6 +22,8 @@ enum class Win32_error {
 pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_t arr_len);
 pair<int, Win32_error> get_process_path(DWORD process_id,  WCHAR* path_buffer, size_t path_buffer_len);
 
-// NOTE(damian): this works, but not yet ussed, so commented out.
-// int get_process_path(DWORD process_id, WCHAR* path_buffer, size_t path_buffer_len);
+pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len);
+tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len);
+
+
 

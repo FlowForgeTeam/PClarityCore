@@ -5,9 +5,7 @@
 #include "Functions_networking.h"
 #include "Functions_win32.h"
 #include "Global_state.h"
-
-#include "Lexer.h"
-#include "Parser.h"
+#include "Commands.h"
 
 #include <fstream>
 #include <iostream>
@@ -30,11 +28,11 @@ void split_std_string(std::string* str, char delimeter, std::vector<std::string>
 
 void wait_for_client_to_connect();
 
-void handle_report  (Report_command*   command);
-void handle_quit    (Quit_command*     command);
-void handle_shutdown(Shutdown_command* command);
-void handle_track   (Track_command*    command);
-void handle_untrack (Untrack_command*  command);
+void handle_report  ();
+void handle_quit    ();
+void handle_shutdown();
+void handle_track   (std::string* path);
+void handle_untrack (std::string* path);
 
 // TODO(damian): move these somewhere better, here for now.
 static bool   running = true;
@@ -96,46 +94,74 @@ int main() {
  		// split_std_string(&message_as_std_string, ' ', &message_parts);
 
         // Parsing the request.
-        Parser parser = parser_init(receive_buffer);
-        pair<Command, bool> result = start_parsing(&parser);
+		json j_message = json::parse(receive_buffer);
+		if (   j_message.contains("command_id")
+			&& j_message.contains("extra")) 
+		{
+			int command_id = j_message["command_id"];
+			std::optional<Command> opt = command_from_int(command_id);
+			
+			if (!opt.has_value()) {
+				string message = "Invalid command.";
+				int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
+				if (send_err_code == SOCKET_ERROR) {
+					// TODO: handle
+				}
+			}
 
-        if (result.second == false)  {
-            string message = "Invalid command.";
- 			int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
- 			if (send_err_code == SOCKET_ERROR) {
- 				// TODO: handle
- 			}
-        }
-        else {
-            switch (result.first.type) {
-                case Command_type::report: {
-                    handle_report(&result.first.report);
+			const char* invalid_command_message = nullptr;
+
+			Command command = opt.value();
+			switch (command) {
+                case Command::report: {
+                    handle_report();
                 } break;
                 
-                case Command_type::quit: {
-                    handle_quit(&result.first.quit);
+                case Command::quit: {
+                    handle_quit();
                 } break;
 
-                case Command_type::shutdown: {
-                    handle_shutdown(&result.first.shutdown);
+                case Command::shutdown: {
+                    handle_shutdown();
                 } break;
 
-                case Command_type::track: {
-                    handle_track(&result.first.track);
+                case Command::track: {
+					json j_extra = j_message["extra"];
+					if (!j_extra.contains("path")) {
+						invalid_command_message = "Invalid command. Track has to have path inside extra.";
+						break;
+					}
+					string path = j_extra["path"];
+
+                    handle_track(&path);
                 } break;
 
-                case Command_type::untrack: {
-                    handle_untrack(&result.first.untrack);
+                case Command::untrack: {
+                    json j_extra = j_message["extra"];
+					if (!j_extra.contains("path")) {
+						invalid_command_message = "Invalid command. Untrack has to have path inside extra.";
+						break;
+					}
+					string path = j_extra["path"];
+
+                    handle_untrack(&path);
                 } break;
 
                 default: {
                     assert(false);
                 } break;
         
-        
-        
             }
-        }
+
+			if (invalid_command_message != nullptr) {
+				int send_err_code = send(client_socket, invalid_command_message, strlen(invalid_command_message), NULL);
+				if (send_err_code == SOCKET_ERROR) {
+					// TODO: handle
+				}
+			}
+
+
+		}
 	 		
  		// Preserve the new state
  		std::ofstream data_file("data.json");
@@ -196,7 +222,7 @@ void wait_for_client_to_connect() {
 	std::cout << "Client connected. \n" << std::endl;
 }
 
-void handle_report(Report_command* command) {
+void handle_report() {
 	vector<json> j_tracked;
 	for (Process_data& data : G_state::tracked_processes) {
 		json temp;
@@ -225,7 +251,7 @@ void handle_report(Report_command* command) {
 	std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
 }
 
-void handle_quit(Quit_command* command) {
+void handle_quit() {
 	string message = "Client disconnected.";
 	
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
@@ -240,7 +266,7 @@ void handle_quit(Quit_command* command) {
 	need_new_client = true;
 }
 
-void handle_shutdown(Shutdown_command* command) {
+void handle_shutdown() {
 	string message = "Stopped traking.";
 
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
@@ -255,13 +281,8 @@ void handle_shutdown(Shutdown_command* command) {
 	running = false;
 }
 
-void handle_track(Track_command* command) {
-    const char* path_start  = command->path_token.lexeme + 1; // Skipping the first " 
-	size_t      path_length = command->path_token.length - 2; // Skipping the first " and the last "
-
-    string path(path_start, path_length);
-
-	G_state::Error err_code = G_state::add_process_to_track(&path);
+void handle_track(std::string* path) {
+	G_state::Error err_code = G_state::add_process_to_track(path);
 
 	if (err_code == G_state::Error::ok) {
 		string message = "Started tracking a new process.";
@@ -294,13 +315,8 @@ void handle_track(Track_command* command) {
 
 }
 
-void handle_untrack(Untrack_command* command) {
-	const char* path_start  = command->path_token.lexeme + 1; // Skipping the first " 
-	size_t      path_length = command->path_token.length - 2; // Skipping the first " and the last "
-
-    string path(path_start, path_length);
-
-	G_state::Error err_code = G_state::remove_process_from_track(&path);
+void handle_untrack(std::string* path) {
+	G_state::Error err_code = G_state::remove_process_from_track(path);
 
 	if (err_code == G_state::Error::trying_to_untrack_a_non_tracked_process) {
 		string message = "The provided process was not beeing tracked, so nothing was removed.";

@@ -2,13 +2,14 @@
 == These seems to be working fine.
 
 1. Start the tracked.
-2. run inside cmd: "python <path to cmd_client> pclarity <command>"
+2. run inside cmd: "python <command>
 3. Command list:
-    -- report
-    -- track   @<path to a process to track>@ --> (eg: track   @C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe@)
-    -- untrack @<path to a process to track>@ --> (eg: untrack @C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe@)
-    -- quit
-    -- disconnect
+    NOTE(damian): the following commands are for poweshell. Other cmds might register '"' differently.
+    -- report     --> '{\"command_id\": 0, \"extra\": {}}'
+    -- quit       --> '{\"command_id\": 1, \"extra\": {}}'     
+    -- shutdown   --> '{\"command_id\": 2, \"extra\": {}}'         
+    -- track      --> '{\"command_id\": 3, \"extra\": {\"path\": \"<path>\"}}' 
+    -- untrack    --> '{\"command_id\": 4, \"extra\": {\"path\": \"<path>\"}}' 
 
 
 

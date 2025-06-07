@@ -18,7 +18,7 @@ print(f"Responce: {responce.decode('utf-8')}")
 
 print("=========================================")
 
-s.send("pclarity_cmd quit".encode("utf-8"))
+s.send("{\"command_id\": 1, \"extra\": {}}".encode("utf-8"))
 responce = s.recv(20_000)
 print(f"Responce: {responce.decode('utf-8')}")
 

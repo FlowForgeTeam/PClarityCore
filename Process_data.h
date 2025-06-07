@@ -38,7 +38,8 @@ public:
     bool operator==(const Process_data& other);
 
     class Session {
-        using time_point = std::chrono::steady_clock::time_point;
+        using time_point = std::chrono::steady_clock::time_point; 
+        // TODO(damian): these are nanoseconds, do some else.
 
         private: 
 
@@ -49,8 +50,6 @@ public:
             Session(time_point start, time_point end);
             ~Session();
     };
-
-
     
 };
 

@@ -55,8 +55,7 @@ namespace G_state {
 
     static const int process_ids_buffer_len  = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
     static const int process_path_buffer_len = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
-    static pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len);
-    static std::tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len);
+    
 	void update_state() {
         // Getting active processes. The original buffer might be too small, so might need to allocate dyn.
         DWORD  stack_process_ids_buffer[process_ids_buffer_len];                            
@@ -112,9 +111,9 @@ namespace G_state {
 
             string buffer_as_string = wchar_to_utf8(process_path_buffer);
 
-            if (buffer_as_string == "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe") {
-                int x = 2;
-            }
+            // if (buffer_as_string == "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe") {
+            //     int x = 2;
+            // }
 
             // Checking is this process is tracked, it yes, updating acordingly.
             bool is_tracked = false;
@@ -123,7 +122,7 @@ namespace G_state {
                     // TODO(damian): since process_data.was_updated exists only to then know what to update as inactive,
                     //               we dont need it here as false. But it has to be false, 
                     //               if we reseted the data properly at the end of the state update. 
-                    //                  ASSERT THIS. 
+                    //                   ASSERT THIS. 
 
                     process_data.update_active();
                     is_tracked = true;
@@ -263,117 +262,6 @@ namespace G_state {
         return G_state::Error::ok;
     }
 
-    // NOTE(damian): this gets all the active process, deals with static buffer overflow. 
-    //               if static buffer is too small, uses a bigger dynamic one. 
-    //               if a dynamic one was used, pointer to it, allong with the arr length will be returned, 
-    //                  else returs nullptr.
-    //               DONT FORGET TO DELETE THE DYNAMIC MEMORY LATER
-    static pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len) {
-        DWORD* process_ids_buffer_on_heap     = nullptr;
-        int    process_ids_buffer_on_heap_len = process_ids_buffer_on_stack_len * 2;
-        int    bytes_returned                 = -1;  
-
-        while(true) {
-            std::pair<int, Win32_error> result;
-            if (process_ids_buffer_on_heap == nullptr)
-                result = get_all_active_processe_ids(process_ids_buffer_on_stack, process_ids_buffer_on_stack_len);
-            else 
-                result = get_all_active_processe_ids(process_ids_buffer_on_heap, process_ids_buffer_on_heap_len);
-
-            if (result.second == Win32_error::win32_EnumProcesses_failed) {
-                std::cout << "Error when getting active windows processes." << std::endl;
-                assert(false);
-            }
-            else if (result.second == Win32_error::win32_EnumProcess_buffer_too_small) {
-                if (process_ids_buffer_on_heap == nullptr) {
-                    process_ids_buffer_on_heap = (DWORD*) malloc(sizeof(DWORD) * process_ids_buffer_on_heap_len);
-                }
-                else {
-                    process_ids_buffer_on_heap_len *= 2;
-                    int bytes_needed                = sizeof(DWORD) * process_ids_buffer_on_heap_len;
-                    process_ids_buffer_on_heap = (DWORD*) realloc(process_ids_buffer_on_heap, bytes_needed);
-                }
-
-                if (process_ids_buffer_on_heap == NULL) {
-                    std::cout << "Not enought memory to allocate a buffer." << std::endl;
-                    assert(false);
-                }
-
-            }
-            else if (result.second == Win32_error::ok) {
-                bytes_returned = result.first;
-                break;
-            }
-            else {
-                std::cout << "Unhandeled error." << std::endl;
-                    assert(false);
-            }
-        }
-        assert(bytes_returned != -1);
-
-        return pair(process_ids_buffer_on_heap, bytes_returned);
-    }
-
-    // NOTE(damian): this gets the name for the provided process id, deals with static buffer overflow. 
-    //               if static buffer is too small, uses a bigger dynamic one. 
-    //               if a dynamic one was used, pointer to it, allong with the name string length will be returned, 
-    //                  else returs nullptr.
-    //               Error is returned as the thirf element, this is done in order to skip the unaccesible processes.
-    //               DONT FORGET TO DELETE THE DYNAMIC MEMORY LATER
-    static std::tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len) {
-        WCHAR* process_path_buffer_on_heap     = nullptr;
-        int    process_path_buffer_on_heap_len = stack_process_path_buffer_len * 2;
-        int    process_path_str_len            = -1;  
-
-        while(true) {
-            std::pair<int, Win32_error> result;
-            if (process_path_buffer_on_heap == nullptr)
-                result = get_process_path(process_id, stack_process_path_buffer, stack_process_path_buffer_len);
-            else 
-                result = get_process_path(process_id, process_path_buffer_on_heap, process_path_buffer_on_heap_len);
-            
-            if (result.second == Win32_error::win32_OpenProcess_failed) {
-                /*std::cout << "Error, was not able to open a process." << std::endl;
-                assert(false);*/
-                // NOTE(damian): Some procecces are not accasible due to security and some other reasons, 
-                //               so this failing is probably ok.
-                return std::tuple(nullptr, -1, Win32_error::win32_OpenProcess_failed);
-            }
-            else if (result.second == Win32_error::win32_EnumProcessModules_failed) {
-                /*std::cout << "Error, was not able to enum process modules." << std::endl;
-                assert(false);*/
-                // NOTE(damian): Not sure if this failing is ok.
-                return std::tuple(nullptr, -1, Win32_error::win32_EnumProcessModules_failed);
-            }
-            else if (result.second == Win32_error::win32_GetModuleFileNameExW_buffer_too_small) {
-                if (process_path_buffer_on_heap == nullptr) {
-                    process_path_buffer_on_heap = (WCHAR*) malloc(sizeof(WCHAR) * process_path_buffer_on_heap_len);
-                }
-                else {
-                    process_path_buffer_on_heap_len *= 2;
-                    int bytes_needed                 = sizeof(WCHAR) * process_path_buffer_on_heap_len;
-                    process_path_buffer_on_heap = (WCHAR*) realloc(process_path_buffer_on_heap, bytes_needed);
-                }
-
-                if (process_path_buffer_on_heap == NULL) {
-                    std::cout << "Not enought memory to allocate a buffer." << std::endl;
-                    assert(false);
-                }
-            }
-            else if (result.second == Win32_error::ok) {
-                process_path_str_len = result.first;
-                break;
-            }
-            else {
-                std::cout << "Unhandeled error." << std::endl;
-                    assert(false);
-            }
-        }
-        assert(process_path_str_len != -1);
-
-        return std::tuple(process_path_buffer_on_heap, process_path_str_len, Win32_error::ok);
-
-    }
     
 
 }
