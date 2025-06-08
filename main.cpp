@@ -12,34 +12,76 @@
 #include <vector>
 #include <string>
 #include <thread>
+#include <list>
 
-void data_thread();
+// NOTE(damian): bool represent wheather the command has alredy been 
+struct Command_status {
+	bool    handled;
+	Command command;
+};
+std::list<Command_status> command_queue; 
+
 void client_thread();
 
 void wait_for_client_to_connect();
 
-void handle_report  ();
-void handle_quit    ();
-void handle_shutdown();
-void handle_track   (std::string* path);
-void handle_untrack (std::string* path);
+void handle_report  (Report_command*   command);
+void handle_quit    (Quit_command*     commnad);
+void handle_shutdown(Shutdown_command* commnad);
+void handle_track   (Track_command*    commnad);
+void handle_untrack (Untrack_command*  commnad);
 
 // TODO(damian): move these somewhere better, here for now.
-static bool   running = true;
-static SOCKET client_socket;
-static bool need_new_client = true;
+static bool   running         = true;
+static SOCKET client_socket         ;
+static bool   need_new_client = true;
+static string error_message         ;
 
 int main() {
 
- 	G_state::set_up_on_startup();
+	G_state::set_up_on_startup();
 	G_state::update_state();
 	std::cout << "Done setting up. \n" << std::endl;
 
 	std::thread client (&client_thread); // This starts right away.
 
+	int n = 1;
 	while (running) {
 		std::chrono::duration<int> sleep_length(3);
 		std::this_thread::sleep_for(sleep_length);
+		
+		std::cout << " ------------ N : " << n++ << "------------ " << std::endl;
+
+		G_state::update_state();
+
+		// Getting the first command has not yet been handled
+		auto p_to_command    = command_queue.begin(); 
+		bool unhandled_found = false; 
+		for (; p_to_command != command_queue.end(); ++p_to_command) {
+			if (!p_to_command->handled) {
+				unhandled_found = true;
+				break;
+			}
+		}
+
+		if (unhandled_found) {
+			switch (p_to_command->command.type) {
+				case Command_type::track: {
+					G_state::add_process_to_track(&p_to_command->command.data.track.path);
+				} break;
+				
+				case Command_type::untrack: {
+					G_state::remove_process_from_track(&p_to_command->command.data.untrack.path);
+				} break;
+
+				default: {
+					assert(false);
+				} break;
+			}
+
+			p_to_command->handled = true;
+		}
+
 	}
 
 	return 0;
@@ -47,119 +89,94 @@ int main() {
 
 // TODO(damian): handle out of bounds for message_parts. 
 
-void data_thread() {
-	// This just gets the data. 
-}
-
 // TOOD(damian): think about namespacing function for both thread,
 //				 just to be more sure, that thread use shated data as little as possible.  
 
 void client_thread() {
 	while (running) {
 		if (need_new_client) {
- 			wait_for_client_to_connect();
- 			need_new_client = false;
- 		}
+			wait_for_client_to_connect();
+			need_new_client = false;
+		}
+
+		// Clearing out the command queue.
+		for (auto it = command_queue.begin(); it != command_queue.end();) {
+			if (it->handled)
+				it = command_queue.erase(it);
+			else
+				++it;
+		}
 
 		// NOTE: dont forget to maybe extend it if needed, or error if the message is to long or something.
- 		// NOTE(damian): recv doesnt null terminate the string buffer, 
- 		//	             so terminating it myself, to then be able to use strcmp.
-		
+		// NOTE(damian): recv doesnt null terminate the string buffer, 
+		//	             so terminating it myself, to then be able to use strcmp.
+
 		char receive_buffer[512];
- 		int  receive_buffer_len = 512;
+		int  receive_buffer_len = 512;
 
- 		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
- 		receive_buffer[n_bytes_returned] = '\0';
+		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
+		receive_buffer[n_bytes_returned] = '\0';
 
- 		std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
- 		std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
+		std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
+		std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
 		// Parsing the request.
-		json j_message = json::parse(receive_buffer);
-		
-		const char* invalid_command_message = nullptr;
-
-		if (   !j_message.contains("command_id")
-			|| !j_message.contains("extra")) 
-		{ 
-			invalid_command_message = "Invalid message structure."; 
-		}
-
-		int command_id = j_message["command_id"];
-		std::optional<Command> opt = command_from_int(command_id);
-		
-		if (!opt.has_value()) {
-			invalid_command_message = "Invalid command.";
-		}
-
-		Command command = opt.value();
-		switch (command) {
-			case Command::report: {
-				handle_report();
-			} break;
-			
-			case Command::quit: {
-				handle_quit();
-			} break;
-
-			case Command::shutdown: {
-				handle_shutdown();
-			} break;
-
-			// case Command::track: {
-			// 	json j_extra = j_message["extra"];
-			// 	if (!j_extra.contains("path")) {
-			// 		invalid_command_message = "Invalid command. Track has to have path inside extra.";
-			// 		break;
-			// 	}
-			// 	string path = j_extra["path"];
-
-			// 	handle_track(&path);
-			// } break;
-
-			// case Command::untrack: {
-			// 	json j_extra = j_message["extra"];
-			// 	if (!j_extra.contains("path")) {
-			// 		invalid_command_message = "Invalid command. Untrack has to have path inside extra.";
-			// 		break;
-			// 	}
-			// 	string path = j_extra["path"];
-
-			// 	handle_untrack(&path);
-			// } break;
-
-			default: {
-				assert(false);
-			} break;
-	
-		}
-
-		if (invalid_command_message != nullptr) {
-			int send_err_code = send(client_socket, invalid_command_message, strlen(invalid_command_message), NULL);
+		std::pair<Command, bool> result = command_from_json(receive_buffer);
+		if (!result.second) {
+			const char* message = "Invalid command";
+			int send_err_code = send(client_socket, message, strlen(message), NULL);
 			if (send_err_code == SOCKET_ERROR) {
 				// TODO: handle
 			}
 		}
+		else {
+			switch (result.first.type) {
+			case Command_type::report: {
+				handle_report(&result.first.data.report);
+			} break;
+
+			case Command_type::quit: {
+				handle_quit(&result.first.data.quit);
+			} break;
+
+			case Command_type::shutdown: {
+				handle_shutdown(&result.first.data.shutdown);
+			} break;
+
+			case Command_type::track: {
+				handle_track(&result.first.data.track);
+			} break;
+
+			case Command_type::untrack: {
+				handle_untrack(&result.first.data.untrack);
+			} break;
+
+			default: {
+				assert(false);
+			} break;
+			}
+		}
 
 		// Preserve the new state
- 		std::ofstream data_file("data.json");
-			
- 		vector<json> processes_as_jsons;
- 		for (Process_data& process_data : G_state::tracked_processes) {
- 	 		json temp;
- 	 		convert_to_json(&temp, &process_data);
- 	 		processes_as_jsons.push_back(temp);
- 		}
- 		json j_overall_data;
- 		j_overall_data["processes_to_track"] = processes_as_jsons;
+		std::ofstream data_file("data.json");
 
- 		data_file << j_overall_data.dump(4) << std::endl;
- 		data_file.close();
+		vector<json> processes_as_jsons;
+		for (Process_data& process_data : G_state::tracked_processes) {
+			json temp;
+			convert_to_json(&temp, &process_data);
+			processes_as_jsons.push_back(temp);
+		}
+		json j_overall_data;
+		j_overall_data["processes_to_track"] = processes_as_jsons;
 
- 		std::cout << "Saved data to file. \n" << std::endl;
+		data_file << j_overall_data.dump(4) << std::endl;
+		data_file.close();
+
+		std::cout << "Saved data to file. \n" << std::endl;
+
+
 
 	}
-
 }
 
 void wait_for_client_to_connect() {
@@ -172,7 +189,7 @@ void wait_for_client_to_connect() {
 	std::cout << "Client connected. \n" << std::endl;
 }
 
-void handle_report() {
+void handle_report(Report_command* report) {
 	vector<json> j_tracked;
 	for (Process_data& data : G_state::tracked_processes) {
 		json temp;
@@ -201,7 +218,7 @@ void handle_report() {
 	std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
 }
 
-void handle_quit() {
+void handle_quit(Quit_command* quit) {
 	string message = "Client disconnected.";
 	
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
@@ -216,7 +233,7 @@ void handle_quit() {
 	need_new_client = true;
 }
 
-void handle_shutdown() {
+void handle_shutdown(Shutdown_command* shutdown) {
 	string message = "Stopped traking.";
 
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
@@ -231,62 +248,46 @@ void handle_shutdown() {
 	running = false;
 }
 
-void handle_track(std::string* path) {
-	G_state::Error err_code = G_state::add_process_to_track(path);
+void handle_track(Track_command* track) {
+	Command command;
+	command.type = Command_type::track;
 
-	if (err_code == G_state::Error::ok) {
-		string message = "Started tracking a new process.";
-		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
-		if (send_err_code == SOCKET_ERROR) {
-			// TODO: handle
-		}
-		return;
-	}
+	// Correctly construct the union member using placement new
+	new (&command.data.track) Track_command(*track);
 
-	if (err_code == G_state::Error::trying_to_track_the_same_process_more_than_once) {
-		string message = "Cant add the track process twice, it is alredy beeing tracked.";
-		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
-		if (send_err_code == SOCKET_ERROR) {
-			// TODO: handle
-		}
-		return;
-	} 
+	Command_status status;
+	status.handled = false;
+	status.command = command;
 
-	string message = "Started tracking a process.";
+	command_queue.push_back(status);
+
+	string message = "The procided process will be removed to the list of tracke processes.";
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
 	if (send_err_code == SOCKET_ERROR) {
 		// TODO: handle
 	}
-
-	// TODO(damian): maybe add some cmd printing here. 
-
-	std::cout << "Unhandled G_state::Error error." << std::endl;
-	assert(false);
-
 }
 
-void handle_untrack(std::string* path) {
-	G_state::Error err_code = G_state::remove_process_from_track(path);
+void handle_untrack(Untrack_command* untrack) {
+	Command command;
+	command.type = Command_type::untrack;
 
-	if (err_code == G_state::Error::trying_to_untrack_a_non_tracked_process) {
-		string message = "The provided process was not beeing tracked, so nothing was removed.";
-		int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
-		if (send_err_code == SOCKET_ERROR) {
-			// TODO: handle
-		}
-	}
-	else if (err_code != G_state::Error::ok) {
-		std::cout << "Unhandles error." << std::endl;
-		assert(false);
-	}
+	// Correctly construct the union member using placement new
+	new (&command.data.untrack) Untrack_command(*untrack);
 
-	string message = "Stopped tracking a process.";
+	Command_status status;
+	status.handled = false;
+	status.command = command;
+
+	command_queue.push_back(status);
+
+	string message = "The procided process will be removed to the list of tracke processes.";
 	int send_err_code = send(client_socket, message.c_str(), message.length(), NULL);
 	if (send_err_code == SOCKET_ERROR) {
-		// TODO: handle
+	 	// TODO: handle
 	}
-	
 }
+
 
 
 

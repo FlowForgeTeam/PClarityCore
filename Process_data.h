@@ -29,7 +29,9 @@ public:
     bool was_updated;
 
     // Process_data(wstring name, int time_spent = 0);
-    Process_data(string path, int time_spent = 0);
+    // Process_data(string path, int time_spent = 0);
+    Process_data(string*  path);
+    Process_data(string&& path);
     ~Process_data();
     
     void update_active();

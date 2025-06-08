@@ -13,9 +13,27 @@ std::string wchar_to_utf8(const WCHAR* wstr) {
     return result;
 }
 
+//Process_data::Process_data(const char* path) {
+//    this->path        = std::string(path);
+//    this->start       = std::chrono::steady_clock::now();
+//    this->sessions    = std::vector<Process_data::Session>();
+//    this->is_tracked  = false;
+//
+//    this->is_active   = false;
+//    this->was_updated = false;
+//}
 
+Process_data::Process_data(string* path) {
+    this->path        = *path;
+    this->start       = std::chrono::steady_clock::now();
+    this->sessions    = std::vector<Process_data::Session>();
+    this->is_tracked  = false;
 
-Process_data::Process_data(string path, int time_spent) {
+    this->is_active   = false;
+    this->was_updated = false;
+}
+
+Process_data::Process_data(string&& path) {
     this->path        = path;
     this->start       = std::chrono::steady_clock::now();
     this->sessions    = std::vector<Process_data::Session>();
