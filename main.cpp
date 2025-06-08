@@ -181,8 +181,8 @@ void client_thread() {
 
 void wait_for_client_to_connect() {
 	std::cout << "Waiting for a new connection with a client." << std::endl;
-	pair<SOCKET, Network_error> result = initialise_tcp_connection_with_client();
-	if (result.second == Network_error::ok) {
+	pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
+	if (result.second == G_state::Error::ok) {
 		client_socket = result.first;
 	}
 	else assert(false);

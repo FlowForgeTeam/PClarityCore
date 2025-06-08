@@ -11,11 +11,11 @@ Command::Command() {
 Command::Command(const Command& other) {
     type = other.type;
     switch (type) {
-    case Command_type::report:   new(&data.report)   Report_command(other.data.report); break;
-    case Command_type::quit:     new(&data.quit)     Quit_command(other.data.quit); break;
-    case Command_type::shutdown: new(&data.shutdown) Shutdown_command(other.data.shutdown); break;
-    case Command_type::track:    new(&data.track)    Track_command(other.data.track); break;
-    case Command_type::untrack:  new(&data.untrack)  Untrack_command(other.data.untrack); break;
+        case Command_type::report:   new(&data.report)   Report_command(other.data.report);     break;
+        case Command_type::quit:     new(&data.quit)     Quit_command(other.data.quit);         break;
+        case Command_type::shutdown: new(&data.shutdown) Shutdown_command(other.data.shutdown); break;
+        case Command_type::track:    new(&data.track)    Track_command(other.data.track);       break;
+        case Command_type::untrack:  new(&data.untrack)  Untrack_command(other.data.untrack);   break;
     }
 }
 
@@ -28,11 +28,11 @@ Command& Command::operator=(const Command& other) {
     // Copy
     type = other.type;
     switch (type) {
-    case Command_type::report:   new(&data.report)   Report_command(other.data.report); break;
-    case Command_type::quit:     new(&data.quit)     Quit_command(other.data.quit); break;
-    case Command_type::shutdown: new(&data.shutdown) Shutdown_command(other.data.shutdown); break;
-    case Command_type::track:    new(&data.track)    Track_command(other.data.track); break;
-    case Command_type::untrack:  new(&data.untrack)  Untrack_command(other.data.untrack); break;
+        case Command_type::report:   new(&data.report)   Report_command(other.data.report);     break;
+        case Command_type::quit:     new(&data.quit)     Quit_command(other.data.quit);         break;
+        case Command_type::shutdown: new(&data.shutdown) Shutdown_command(other.data.shutdown); break;
+        case Command_type::track:    new(&data.track)    Track_command(other.data.track);       break;
+        case Command_type::untrack:  new(&data.untrack)  Untrack_command(other.data.untrack);   break;
     }
 
     return *this;
@@ -40,11 +40,11 @@ Command& Command::operator=(const Command& other) {
 
 Command::~Command() {
     switch (type) {
-    case Command_type::report:   data.report.~Report_command(); break;
-    case Command_type::quit:     data.quit.~Quit_command(); break;
-    case Command_type::shutdown: data.shutdown.~Shutdown_command(); break;
-    case Command_type::track:    data.track.~Track_command(); break;
-    case Command_type::untrack:  data.untrack.~Untrack_command(); break;
+        case Command_type::report:   data.report.~Report_command();     break;
+        case Command_type::quit:     data.quit.~Quit_command();         break;
+        case Command_type::shutdown: data.shutdown.~Shutdown_command(); break;
+        case Command_type::track:    data.track.~Track_command();       break;
+        case Command_type::untrack:  data.untrack.~Untrack_command();   break;
     }
 }
 
@@ -52,12 +52,12 @@ Command::~Command() {
 
 pair<Command_type, bool> command_type_from_int(int id) {
     switch (id) {
-    case 0: return pair(Command_type::report, true);
-    case 1: return pair(Command_type::quit, true);
-    case 2: return pair(Command_type::shutdown, true);
-    case 3: return pair(Command_type::track, true);
-    case 4: return pair(Command_type::untrack, true);
-    default: return pair(Command_type::report, false);
+        case 0:  return pair(Command_type::report,   true);
+        case 1:  return pair(Command_type::quit,     true);
+        case 2:  return pair(Command_type::shutdown, true);
+        case 3:  return pair(Command_type::track,    true);
+        case 4:  return pair(Command_type::untrack,  true);
+        default: return pair(Command_type::report,   false);
     }
 }
 
@@ -71,12 +71,12 @@ pair<Command, bool> command_from_json(const char* json_as_c_str) {
     if (!result.second) return pair(Command(), false);
 
     switch (result.first) {
-    case Command_type::report:   return report(&j);
-    case Command_type::quit:     return quit(&j);
-    case Command_type::shutdown: return shutdown(&j);
-    case Command_type::track:    return track(&j);
-    case Command_type::untrack:  return untrack(&j);
-    default:                     return pair(Command(), false);
+            case Command_type::report:   return report(&j);
+            case Command_type::quit:     return quit(&j);
+            case Command_type::shutdown: return shutdown(&j);
+            case Command_type::track:    return track(&j);
+            case Command_type::untrack:  return untrack(&j);
+            default:                     return pair(Command(), false);
     }
 }
 

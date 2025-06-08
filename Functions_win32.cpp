@@ -8,7 +8,6 @@ namespace fs = std::filesystem;
 
 // TODO: maybe have these weird win32 typedefs briefly documented somewhere here.
 
-
 pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_t arr_len) {
     DWORD number_of_bytes_returned;
     int err_code = EnumProcesses(process_ids_arr, 

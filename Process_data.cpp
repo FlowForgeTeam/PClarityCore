@@ -147,7 +147,6 @@ void convert_to_json(json* data, const Process_data* process_data) {
     (*data)["is_active"]    = process_data->is_active;
     (*data)["is_tracked"]    = process_data->is_tracked;
 
-
     vector<json> sessions_as_jsons;
     for (auto& session : process_data->sessions) {
         json j_session;

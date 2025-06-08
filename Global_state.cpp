@@ -11,37 +11,39 @@ namespace G_state {
     vector<Process_data> currently_active_processes;
     vector<Process_data> tracked_processes;
 
-	void set_up_on_startup() {
-        // TODO: dont like all this error handleing here
-        std::error_code err_code;
-
-        bool data_exists = fs::exists(G_state::data_file_name, err_code);
-        if (err_code) {
-            // TODO(damian): handle better.
-            std::cout << "Error on startup, the startup file was not found." << std::endl;
-            assert(false);
-        }
+	G_state::Error set_up_on_startup() {
+        bool data_exists = fs::exists(G_state::data_file_name);
+        // TODO(damian): uncommnet it. Leaving it commented till release.
+        // if (!data_exists) {
+        //     return G_state::Error::data_file_doesnt_exist;
+        // }
 
         if (data_exists) { // Read it, store it
             std::string text;
             read_file(G_state::data_file_name, &text);
 
-            json data_as_json = json::parse(text);
+            json data_as_json; 
+            try {
+                data_as_json = json::parse(text);
+            }
+            catch(...) {
+                return G_state::Error::json_parsing_failed;
+            }
 
             if (data_as_json.contains("processes_to_track")) {
                 vector<json> processes_to_track = data_as_json["processes_to_track"];
                 for(json& process_json : processes_to_track) {
                     // TODO(damian): this has to change, 
                     //               this is put here, to be re initialised inside the convert_from_json
-                    Process_data process_data("fake_path"); 
+                    
+                    Process_data process_data("fake_name");
                     convert_from_json(&process_json, &process_data);
 
                     G_state::tracked_processes.push_back(process_data);
                 }
             }
             else {
-                std::cout << "Error on startup, invalid data json." << std::endl;
-                assert(false);
+                return G_state::Error::json_invalid_strcture;
             }
         
         }
@@ -51,11 +53,12 @@ namespace G_state {
             new_file.close();
         }
 
+        return G_state::Error::ok;
     }
 
-    static const int process_ids_buffer_len  = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
-    static const int process_path_buffer_len = 512; // NOTE(damian): tested this with buffer size of 20, seems to be working.
-	void update_state() {
+    static const int process_ids_buffer_len  = 512; 
+    static const int process_path_buffer_len = 512; 
+	G_state::Error update_state() {
         // Getting active processes. The original buffer might be too small, so might need to allocate dyn.
         DWORD  stack_process_ids_buffer[process_ids_buffer_len];                            
         pair<DWORD*, int> pointer_len_pair = helper_get_all_active_processe_ids(stack_process_ids_buffer, process_ids_buffer_len);
@@ -71,7 +74,7 @@ namespace G_state {
             heap_used_for_ids  = true;
         }
         int bytes_returned = pointer_len_pair.second;
-        
+
         // Getting paths for processes, comparing to the once we are tracking, update respectively.
         int ids_returned = bytes_returned / sizeof(DWORD);
         for (int i = 0; i < ids_returned; ++i) {
@@ -83,17 +86,7 @@ namespace G_state {
             if (std::get<2>(triple) == Win32_error::win32_OpenProcess_failed) continue;
             if (std::get<2>(triple) == Win32_error::win32_EnumProcessModules_failed) continue;
             if (std::get<2>(triple) != Win32_error::ok) {
-                std::cout << "Unhandled err_code." << std::endl;
-                assert(false);
-            }
-
-            // TODO(damian): this is here now for clarity, move somewhere else.
-            for (Process_data& tracked : G_state::tracked_processes) {
-                for (Process_data& current : G_state::currently_active_processes) {
-                    if (tracked == current) {
-                        assert(false);
-                    }
-                }
+                return G_state::Error::unhandled_error_caught;
             }
 
             WCHAR* process_path_buffer = nullptr;
@@ -110,18 +103,12 @@ namespace G_state {
 
             string buffer_as_string = wchar_to_utf8(process_path_buffer);
 
-            // if (buffer_as_string == "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe") {
-            //     int x = 2;
-            // }
-
             // Checking is this process is tracked, it yes, updating acordingly.
             bool is_tracked = false;
             for (Process_data& process_data : G_state::tracked_processes) {
                 if (   process_data.path == buffer_as_string) {
-                    // TODO(damian): since process_data.was_updated exists only to then know what to update as inactive,
-                    //               we dont need it here as false. But it has to be false, 
-                    //               if we reseted the data properly at the end of the state update. 
-                    //                   ASSERT THIS. 
+                    if (process_data.was_updated == true) 
+                        return G_state::Error::process_data_invalid_behaviour;
 
                     process_data.update_active();
                     is_tracked = true;
@@ -135,10 +122,8 @@ namespace G_state {
             if (!is_tracked) {
                 for (Process_data& process_data : G_state::currently_active_processes) {
                     if (process_data.path == buffer_as_string) {
-                        // TODO(damian): since process_data.was_updated exists only to then know what to update as inactive,
-                        //               we dont need it here as false. But it has to be false, 
-                        //               if we reseted the data properly at the end of the state update. 
-                        //                  ASSERT THIS. 
+                        //if (process_data.was_updated == true) 
+                        //    return G_state::Error::process_data_invalid_behaviour;
 
                         process_data.update_active();
                         was_active_before = true;
@@ -201,14 +186,6 @@ namespace G_state {
                 already_tracking = true;
         }
 
-        // see if it is inside the active once at this point, if it is, move it inside the tracke once.
-
-        // maybe add some asserts in here
-
-        // NOTE(damian): This should not be happening probably. 
-        //               It might be ok for the cmd application, since in cmd user provides path himself.
-        //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
-        //               Ability to choose a process to track twice is invalid data.
         if (already_tracking)
             return G_state::Error::trying_to_track_the_same_process_more_than_once;    
 
@@ -236,6 +213,15 @@ namespace G_state {
             G_state::tracked_processes.push_back(new_process);
         }
 
+        // TODO(damian): this is here now for clarity, move somewhere else.
+        for (Process_data& tracked : G_state::tracked_processes) {
+            for (Process_data& current : G_state::currently_active_processes) {
+                if (tracked == current) {
+                    return G_state::Error::tracked_and_current_process_vectors_share_data;
+                }
+            }
+        }
+
         return G_state::Error::ok;
     }
 
@@ -260,77 +246,5 @@ namespace G_state {
 
         return G_state::Error::ok;
     }
-
-    // G_state::Error add_process_to_track(string* path) {
-    //     Process_data new_process(*path);
-        
-    //     bool already_tracking = false;
-    //     for (Process_data& process : G_state::tracked_processes) {
-    //         if (process == new_process)
-    //             already_tracking = true;
-    //     }
-
-    //     // see if it is inside the active once at this point, if it is, move it inside the tracke once.
-
-    //     // maybe add some asserts in here
-
-    //     // NOTE(damian): This should not be happening probably. 
-    //     //               It might be ok for the cmd application, since in cmd user provides path himself.
-    //     //               But in the UI appliocation, ui should never give the ability to user to work with invalid data.
-    //     //               Ability to choose a process to track twice is invalid data.
-    //     if (already_tracking)
-    //         return G_state::Error::trying_to_track_the_same_process_more_than_once;    
-
-    //     // Checking if it is already being tracked inside the vector active once
-    //     auto p_to_active  = G_state::currently_active_processes.begin();
-    //     bool found_active = false;
-    //     for (;
-    //          p_to_active != G_state::currently_active_processes.end(); 
-    //          ++p_to_active)
-    //     {
-    //         if (*p_to_active == new_process)  {
-    //             found_active = true;
-    //             break;
-    //         }
-    //     }
-
-    //     // Moving from cur_active to tracked
-    //     if (found_active) {
-    //         p_to_active->is_tracked = true;
-    //         G_state::tracked_processes.push_back(std::move(*p_to_active));
-    //         G_state::currently_active_processes.erase(p_to_active);
-    //     }
-    //     else { // Just adding to tracked
-    //         new_process.is_tracked = true;
-    //         G_state::tracked_processes.push_back(new_process);
-    //     }
-
-    //     return G_state::Error::ok;
-    // }
-
-    // G_state::Error remove_process_from_track(string* path) {
-    //     Process_data new_process(*path);
-
-    //     bool is_tracked   = false;
-    //     auto p_to_tracked = G_state::tracked_processes.begin(); 
-    //     for (;
-    //          p_to_tracked != G_state::tracked_processes.end();
-    //          ++p_to_tracked) 
-    //     {
-    //         if (*p_to_tracked == new_process) {
-    //             is_tracked = true;
-    //             break;
-    //         }
-    //     }
-
-    //     if (!is_tracked) return G_state::Error::trying_to_untrack_a_non_tracked_process;
-
-    //     G_state::tracked_processes.erase(p_to_tracked);
-
-    //     return G_state::Error::ok;
-    // }
-
-    
-
 
 }
