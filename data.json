@@ -1,21 +1,12 @@
 {
     "processes_to_track": [
         {
-            "is_active": true,
-            "is_tracked": true,
-            "process_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+            "is_active": false,
+            "process_exe_name": "Telegram.exe",
             "sessions": [
                 {
-                    "end_time": 419199596607900,
-                    "start_time": 419187483071600
-                },
-                {
-                    "end_time": 419223878202700,
-                    "start_time": 419214770379900
-                },
-                {
-                    "end_time": 421399330050700,
-                    "start_time": 421221876671700
+                    "end_time": 537601860849600,
+                    "start_time": 537573044424500
                 }
             ]
         }

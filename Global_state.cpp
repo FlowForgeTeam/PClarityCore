@@ -33,11 +33,12 @@ namespace G_state {
             if (data_as_json.contains("processes_to_track")) {
                 vector<json> processes_to_track = data_as_json["processes_to_track"];
                 for(json& process_json : processes_to_track) {
+
                     // TODO(damian): this has to change, 
                     //               this is put here, to be re initialised inside the convert_from_json
-                    
-                    Process_data process_data("fake_name");
+                    Process_data process_data(Win32_process_data{0});
                     convert_from_json(&process_json, &process_data);
+                    process_data.is_tracked = true;
 
                     G_state::tracked_processes.push_back(process_data);
                 }
@@ -56,94 +57,52 @@ namespace G_state {
         return G_state::Error::ok;
     }
 
-    static const int process_ids_buffer_len  = 512; 
-    static const int process_path_buffer_len = 512; 
-	G_state::Error update_state() {
-        // Getting active processes. The original buffer might be too small, so might need to allocate dyn.
-        DWORD  stack_process_ids_buffer[process_ids_buffer_len];                            
-        pair<DWORD*, int> pointer_len_pair = helper_get_all_active_processe_ids(stack_process_ids_buffer, process_ids_buffer_len);
-
-        DWORD* process_ids_buffer = nullptr;
-        bool heap_used_for_ids    = false;
-        if (pointer_len_pair.first == nullptr) { 
-            process_ids_buffer = stack_process_ids_buffer;
-            heap_used_for_ids  = false;
+    G_state::Error G_state::update_state() {
+        pair<vector<Win32_process_data>, Win32_error> result = win32_get_process_data();
+        if (result.second != Win32_error::ok) {
+            // TODO(damian): handle better.
+            assert(false);
         }
-        else {
-            process_ids_buffer = pointer_len_pair.first;
-            heap_used_for_ids  = true;
-        }
-        int bytes_returned = pointer_len_pair.second;
 
-        // Getting paths for processes, comparing to the once we are tracking, update respectively.
-        int ids_returned = bytes_returned / sizeof(DWORD);
-        for (int i = 0; i < ids_returned; ++i) {
+        // NOTE(damian): for code clarity.
+        for (Process_data& data : G_state::tracked_processes) {
+            if (data.was_updated) assert(false);
+        }
+        for (Process_data& data : G_state::currently_active_processes) {
+            if (data.was_updated) assert(false);
+        }
+
+        // Updating the state
+        for (Win32_process_data& win32_data : result.first) {
             
-            WCHAR stack_process_path_buffer[process_path_buffer_len];
-            std::tuple<WCHAR*, int, Win32_error> triple = helper_get_process_path(process_ids_buffer[i], 
-                                                                                  stack_process_path_buffer, 
-                                                                                  process_path_buffer_len);  
-            if (std::get<2>(triple) == Win32_error::win32_OpenProcess_failed) continue;
-            if (std::get<2>(triple) == Win32_error::win32_EnumProcessModules_failed) continue;
-            if (std::get<2>(triple) != Win32_error::ok) {
-                return G_state::Error::unhandled_error_caught;
-            }
-
-            WCHAR* process_path_buffer = nullptr;
-            bool heap_used_for_name    = false;
-            if (pointer_len_pair.first == nullptr) { 
-                process_path_buffer = stack_process_path_buffer;
-                heap_used_for_name  = false;
-            }
-            else {
-                process_path_buffer = std::get<0>(triple);
-                heap_used_for_name  = true;
-            }
-            int process_path_str_len = std::get<1>(triple);
-
-            string buffer_as_string = wchar_to_utf8(process_path_buffer);
-
-            // Checking is this process is tracked, it yes, updating acordingly.
             bool is_tracked = false;
-            for (Process_data& process_data : G_state::tracked_processes) {
-                if (   process_data.path == buffer_as_string) {
-                    if (process_data.was_updated == true) 
-                        return G_state::Error::process_data_invalid_behaviour;
-
-                    process_data.update_active();
+            for (Process_data& g_state_data : G_state::tracked_processes) {
+                if (g_state_data == win32_data) {
+                    g_state_data.update_active();
                     is_tracked = true;
-                    
-                    // break; // This is commented, since we will miis some exes like chromo, since we only use path to identify.
+
+                    // TODO(damian): maybe assert to make sure that there is no other exact process.
                 }
             }
 
-            // It the process is not tracked, updating it acordingly.
             bool was_active_before = false;
             if (!is_tracked) {
-                for (Process_data& process_data : G_state::currently_active_processes) {
-                    if (process_data.path == buffer_as_string) {
-                        //if (process_data.was_updated == true) 
-                        //    return G_state::Error::process_data_invalid_behaviour;
-
-                        process_data.update_active();
+                for (Process_data& g_state_data : G_state::currently_active_processes) {
+                    if (g_state_data == win32_data) {
+                        g_state_data.update_active();
                         was_active_before = true;
                         
-                        // break; // This is commented, since we will miis some exes like chromo, since we only use path to identify.
+                        // TODO(damian): maybe assert to make sure that there is no other exact process.
                     }
                 }
-
             }
 
-            // If the process is not tracked, nor was it active during the last update
             if (!was_active_before && !is_tracked) {
-                Process_data new_process(buffer_as_string.c_str());
+                Process_data new_process(win32_data);
                 new_process.update_active();
                 G_state::currently_active_processes.push_back(new_process);
             }
-            
-            // TODO(damian): think about having this as a reusable heap buffer, dyn allocation multiple times should be avoided.
-            if (heap_used_for_name) free(process_path_buffer);
-            
+
         }
 
         // Removing the processes that are not tracked and stopped being active
@@ -151,7 +110,7 @@ namespace G_state {
                   it != G_state::currently_active_processes.end()  ;)
         {
             if (!it->was_updated) {
-                it = G_state::currently_active_processes.erase(it); // NOTE(damian): this doesnt invalidate iterator pointer.
+                it = G_state::currently_active_processes.erase(it);
             }
             else {
                 ++it;
@@ -173,12 +132,16 @@ namespace G_state {
             process_data.was_updated = false;
         }
 
-        if (heap_used_for_ids) free(process_ids_buffer);
-
+        return G_state::Error::ok;
     }
 
     G_state::Error add_process_to_track(string* path) {
-        Process_data new_process(path);
+        Win32_process_data win32_data = { 0 };
+
+        // TODO(damian): this is temporaty.
+        win32_data.exe_name = *path;
+
+        Process_data new_process(win32_data);
         
         bool already_tracking = false;
         for (Process_data& process : G_state::tracked_processes) {
@@ -193,8 +156,8 @@ namespace G_state {
         auto p_to_active  = G_state::currently_active_processes.begin();
         bool found_active = false;
         for (;
-             p_to_active != G_state::currently_active_processes.end(); 
-             ++p_to_active)
+            p_to_active != G_state::currently_active_processes.end(); 
+            ++p_to_active)
         {
             if (*p_to_active == new_process)  {
                 found_active = true;
@@ -226,13 +189,18 @@ namespace G_state {
     }
 
     G_state::Error remove_process_from_track(string* path) {
-        Process_data new_process(path);
+        Win32_process_data win32_data = { 0 };
+
+        // TODO(damian): this is temporaty.
+        win32_data.exe_name = *path;
+
+        Process_data new_process(win32_data);
 
         bool is_tracked   = false;
         auto p_to_tracked = G_state::tracked_processes.begin(); 
         for (;
-             p_to_tracked != G_state::tracked_processes.end();
-             ++p_to_tracked) 
+            p_to_tracked != G_state::tracked_processes.end();
+            ++p_to_tracked) 
         {
             if (*p_to_tracked == new_process) {
                 is_tracked = true;
@@ -248,3 +216,28 @@ namespace G_state {
     }
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

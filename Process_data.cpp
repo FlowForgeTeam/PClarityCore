@@ -1,18 +1,5 @@
 #include "Process_data.h"
 
-// NOTE(damian): this was claude generated, need to make sure its is correct. 
-std::string wchar_to_utf8(const WCHAR* wstr) {
-    if (!wstr) return "";
-
-    int size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);
-    if (size <= 0) return "";
-
-    std::string result(size - 1, 0); // size-1 to exclude null terminator
-    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, &result[0], size, nullptr, nullptr);
-
-    return result;
-}
-
 //Process_data::Process_data(const char* path) {
 //    this->path        = std::string(path);
 //    this->start       = std::chrono::steady_clock::now();
@@ -23,27 +10,15 @@ std::string wchar_to_utf8(const WCHAR* wstr) {
 //    this->was_updated = false;
 //}
 
-Process_data::Process_data(string* path) {
-    this->path        = *path;
+Process_data::Process_data(Win32_process_data win32_data) {
+    this->data        = win32_data;
     this->start       = std::chrono::steady_clock::now();
     this->sessions    = std::vector<Process_data::Session>();
-    this->is_tracked  = false;
 
+    this->is_tracked = false;
     this->is_active   = false;
     this->was_updated = false;
 }
-
-Process_data::Process_data(string&& path) {
-    this->path        = path;
-    this->start       = std::chrono::steady_clock::now();
-    this->sessions    = std::vector<Process_data::Session>();
-    this->is_tracked  = false;
-
-    this->is_active   = false;
-    this->was_updated = false;
-}
-
-Process_data::~Process_data() {}
 
 // Updating a process as if its new state is active
 void Process_data::update_active() {
@@ -77,8 +52,13 @@ void Process_data::update_inactive() {
 
 
 bool Process_data::operator==(const Process_data& other) {
-    return this->path == other.path;
+    return this->data.exe_name == other.data.exe_name;
 }
+
+bool Process_data::operator==(const Win32_process_data& win32_data) {
+    return this->data.exe_name == win32_data.exe_name;
+}
+
 
 // == Process_data::Session =================================================================
 
@@ -92,14 +72,12 @@ Process_data::Session::~Session() {}
 // == Just some functions ===================================================================
 
 int convert_from_json(const json* data, Process_data* process_data) {
-    if (   data->contains("process_path")
-        //&& data->contains("is_tracked")
+    if (   data->contains("process_exe_name")
         && data->contains("sessions")
     ) {
-        process_data->path       = (*data)["process_path"];
-        process_data->is_active  = false;
-        //process_data->is_tracked = (*data)["is_tracked"];
-        process_data->is_tracked = true;
+        process_data->data          = { 0 };
+        process_data->data.exe_name = (*data)["process_exe_name"];
+        process_data->is_active     = false;
 
         // TODO(damian): i fate this, this is error prone. There should be something like an optional type that we use for values like start_time, before the process was even initialised for tracking.
         process_data->start      = std::chrono::steady_clock::now(); 
@@ -129,7 +107,6 @@ int convert_from_json(const json* data, Process_data* process_data) {
             }
 
         }
-
         return 0;
     }
     else {
@@ -140,12 +117,8 @@ int convert_from_json(const json* data, Process_data* process_data) {
 #include <iostream>
 
 void convert_to_json(json* data, const Process_data* process_data) {
-    // size_t idx = process_data->path.find_last_of("\\");
-    // (*data)["process_name"] = process_data->path.c_str() + idx + 1;
-
-    (*data)["process_path"] = process_data->path;
-    (*data)["is_active"]    = process_data->is_active;
-    (*data)["is_tracked"]    = process_data->is_tracked;
+    (*data)["process_exe_name"] = process_data->data.exe_name;
+    (*data)["is_active"]        = process_data->is_active;
 
     vector<json> sessions_as_jsons;
     for (auto& session : process_data->sessions) {

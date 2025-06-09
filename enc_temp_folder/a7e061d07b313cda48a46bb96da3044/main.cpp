@@ -67,7 +67,6 @@ int main() {
 		if (unhandled_found) {
 			switch (p_to_command->command.type) {
 				case Command_type::track: {
-
 					G_state::add_process_to_track(&p_to_command->command.data.track.path);
 				} break;
 				
