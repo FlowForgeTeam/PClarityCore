@@ -43,6 +43,11 @@ std::pair<int, Win32_error> win32_get_process_ram(DWORD process_id) {
     return std::pair<int, Win32_error>(0, Win32_error::win32_GetRam_failed);
 }
 
+// NOTE(andrew_rom): a simple override for ease of use
+std::pair<int, Win32_error> win32_get_process_ram(PROCESSENTRY32 process_id) {
+	return win32_get_process_ram(process_id.th32ProcessID);
+}
+
 std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
     HANDLE process_shapshot_handle;
     PROCESSENTRY32 pe32;
