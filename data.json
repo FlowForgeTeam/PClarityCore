@@ -1,7 +1,7 @@
 {
     "processes_to_track": [
         {
-            "is_active": false,
+            "is_active": true,
             "process_exe_name": "Telegram.exe",
             "sessions": [
                 {

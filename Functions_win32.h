@@ -17,6 +17,7 @@ enum class Win32_error {
     win32_EnumProcessModules_failed,
     win32_GetModuleFileNameExW_failed,
     win32_GetModuleFileNameExW_buffer_too_small,
+    win32_GetRam_failed,
 
     CreateToolhelp32Snapshot_failed,
     Process32First_failed,

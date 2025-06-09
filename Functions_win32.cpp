@@ -21,6 +21,28 @@ std::string wchar_to_utf8(const WCHAR* wstr) {
     return result;
 }
 
+// NOTE(andrew_rom): returns > 0 if the process is running and everything is fine, 0 otherwise.
+std::pair<int, Win32_error> win32_get_process_ram(DWORD process_id) {
+    HANDLE h_process;
+    PROCESS_MEMORY_COUNTERS pmc;
+
+    // Open the process with PROCESS_QUERY_INFORMATION | PROCESS_VM_READ access
+    h_process = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, process_id);
+
+    if (NULL == h_process) {
+        return std::pair<int, Win32_error>(0, Win32_error::win32_OpenProcess_failed); 
+    }
+
+    // Get memory info
+    if (GetProcessMemoryInfo(h_process, &pmc, sizeof(pmc))) {
+        CloseHandle(h_process);
+        return std::pair<int, Win32_error>(pmc.WorkingSetSize, Win32_error::ok); // Return working set size (RAM usage)
+    }
+
+    CloseHandle(h_process);
+    return std::pair<int, Win32_error>(0, Win32_error::win32_GetRam_failed);
+}
+
 std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
     HANDLE process_shapshot_handle;
     PROCESSENTRY32 pe32;
