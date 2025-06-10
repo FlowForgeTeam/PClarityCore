@@ -2,9 +2,13 @@
 #include <iostream>
 #include <Windows.h>
 #include <tlhelp32.h>
+#include <cassert>
 
 #include "Functions_win32.h"
 
+// TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
+//               but if they dont, we would be better of getting some public info for the process, 
+//               rather then getting none. (Just something to think about).
 
 // TODO: maybe have these weird win32 typedefs briefly documented somewhere here.
 
@@ -42,69 +46,130 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
     vector<Win32_process_data> process_data_vec;
 
     do {
-        Win32_process_data data;
+        // Opening a handle, all the data for the process is kept until all the handles are released.
+        HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
+                                            FALSE,
+                                            pe32.th32ProcessID);
+        if (process_handle == NULL) {
+            continue;
+        }
+
+        // 1. Snapshot data
+        // 2. Full process path
+        // 3. Priority
+        // 4. Process times
+        // 5. Addiniti masks
+        // 6. RAM
+
+        // 1.
+        Win32_process_data data = {0};
         data.pid             = pe32.th32ProcessID;
         data.ppid            = pe32.th32ParentProcessID;
-        data.modules         = vector<Win32_process_module>();
         data.exe_name        = wchar_to_utf8(pe32.szExeFile);
         data.base_priority   = pe32.pcPriClassBase;
         data.started_threads = pe32.cntThreads;
 
-        // TODO(damian): open handle to the process and get all other data possible for the process 
-        //               (ProcessLasso type shit))
+        // 2.
+        const size_t stack_buffer_len = 512;
+        WCHAR stack_buffer[stack_buffer_len];
+        tuple<WCHAR*, bool, DWORD, Win32_error> result = win32_get_path_for_process(process_handle, 
+                                                                                    stack_buffer, 
+                                                                                    stack_buffer_len);
+        WCHAR* buffer         = std::get<0>(result);
+        bool   is_buffer_heap = std::get<1>(result);
+        DWORD  buffer_len     = std::get<2>(result);
+        Win32_error err_code  = std::get<3>(result);
+        
+        if (err_code != Win32_error::ok) { continue; }
+
+        data.exe_path = wchar_to_utf8(buffer);
+        
+        if(is_buffer_heap) { free(buffer); }
 
         // TODO(damian): when having a process snapshot, 
         //               need to figure out how we can tell if the process has ended to the pid is invlid now.
         // NOTE(damian): using GetExitCodeProcess is the answer. 
 
+        // 3.
+        DWORD priority = GetPriorityClass(process_handle);
+        if (priority == 0) {
+            CloseHandle(process_handle); 
+            continue;
+        }
+        data.priority_class = priority;
 
-        HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, 
-                               FALSE, 
-                               pe32.th32ProcessID);
-        if (process_handle == NULL) {
+        // 4.
+        FILETIME process_creation_time;
+        FILETIME process_last_exit_time;
+        FILETIME process_kernel_time;
+        FILETIME process_user_time;
+        if (GetProcessTimes(process_handle, &process_creation_time, &process_last_exit_time, &process_kernel_time, &process_user_time) == 0) {
             CloseHandle(process_handle);
             continue;
         }
 
-        // Priority
-        DWORD priority = GetPriorityClass(process_handle);
-        if (priority == 0) {
-            // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
-            //               but if they dont, we would be better of getting some public info for the process, 
-            //               rather then getting none. (Just something to think about).
 
+        // NOTE(damian): dont know if we need to store the decoded vecrion.
+        // SYSTEMTIME creation_time;
+        // FileTimeToSystemTime(&process_creation_time, &creation_time);
+        // data.creation_time = creation_time;
+
+        // SYSTEMTIME exit_time;
+        // FileTimeToSystemTime(&process_last_exit_time, &exit_time);
+        // data.exit_time = exit_time;
+
+        ULARGE_INTEGER creation_time;
+        creation_time.LowPart  = process_creation_time.dwLowDateTime;
+        creation_time.HighPart = process_creation_time.dwHighDateTime;
+        data.creation_time = creation_time.QuadPart;
+
+        ULARGE_INTEGER exit_time;
+        exit_time.LowPart  = process_last_exit_time.dwLowDateTime;
+        exit_time.HighPart = process_last_exit_time.dwHighDateTime;
+        data.exit_time = exit_time.QuadPart;
+
+        ULARGE_INTEGER kernel_time;
+        kernel_time.LowPart  = process_kernel_time.dwLowDateTime;
+        kernel_time.HighPart = process_kernel_time.dwHighDateTime;
+        data.kernel_time = kernel_time.QuadPart;
+
+        ULARGE_INTEGER user_time;
+        user_time.LowPart  = process_user_time.dwLowDateTime;
+        user_time.HighPart = process_user_time.dwHighDateTime;
+        data.user_time = user_time.QuadPart;
+
+        // 5.
+        SIZE_T process_affinity_mask;
+        SIZE_T system_affinity_mask;
+        if(GetProcessAffinityMask(process_handle, &process_affinity_mask, &system_affinity_mask) == 0) {
             CloseHandle(process_handle); 
             continue;
         }
+        data.process_affinity = process_affinity_mask;
+        data.system_affinity  = system_affinity_mask;
 
-        // Affinities
-        // TODO(damian): finish these.
+        // 6.
+        PROCESS_MEMORY_COUNTERS pmc;
+        if (GetProcessMemoryInfo(process_handle, &pmc, sizeof(pmc)) == 0) {
+            CloseHandle(process_handle); 
+            continue;
+        }
+        data.ram_usage = pmc.WorkingSetSize;
 
-        // PDWORD_PTR process_affinity_mask = nullptr;
-        // PDWORD_PTR system_affinity_mask  = nullptr;
-        // if(GetProcessAffinityMask(process_handle, process_affinity_mask, system_affinity_mask) == 0) {
-        //     CloseHandle(process_handle); 
-        //     continue;
-        // }
-        
+
         // CPU time
-        // Threads
-        // Count of habndled for the process
-        // Access mask
+        // RAM
+        // GPU
+        // SOME OTHER STUFF (PREOCESS LASSO TYPE SHIT)
         
         // NOTE(damian): the name for the process might also be retrived via QueryFullProcessImageNameA.
         //               currently we get it from the first module inside the process modules vector.
         //               based on the docs, the first module retrived by the Module32First function 
         //               always contais data for the process whos modules are retrived.
 
-        vector<Win32_process_module> modules;
-        Win32_error modules_err = win32_get_process_modules(pe32.th32ProcessID, &modules);
-        if (modules_err != Win32_error::ok) {
-            CloseHandle(process_handle);
-            continue;
-        }
-    
         process_data_vec.push_back(data);
+
+        CloseHandle(process_handle);
 
     } while (Process32Next(process_shapshot_handle, &pe32));
 
@@ -113,35 +178,143 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
     return pair(process_data_vec, Win32_error::ok);
 }
 
-Win32_error win32_get_process_modules(DWORD pid, vector<Win32_process_module>* modules) {
-    HANDLE module_snapshot_handle;
-    MODULEENTRY32 me32;
+tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle, 
+                                                                   WCHAR* stack_buffer, 
+                                                                   size_t stack_buffer_len) 
+{
+    DWORD path_len;
+    path_len = GetProcessImageFileName(process_handle, stack_buffer, stack_buffer_len);
 
-    module_snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
-    if (module_snapshot_handle == INVALID_HANDLE_VALUE) {
-        return Win32_error::CreateToolhelp32Snapshot_failed;
+    // Stack buffer was long enought
+    if (path_len != 0) {
+        return tuple(stack_buffer, false, path_len, Win32_error::ok);
     }
 
-    // Set the size of the structure before using it.
-    me32.dwSize = sizeof(MODULEENTRY32);
+    // Need to use heap
+    size_t heap_buffer_len = stack_buffer_len * 2;
+    WCHAR* heap_buffer     = nullptr;
 
-    if (!Module32First(module_snapshot_handle, &me32)) {
-        CloseHandle(module_snapshot_handle);          
-        return Win32_error::Module32First_failed;
+    while(true) {
+        if (heap_buffer == nullptr) {
+            heap_buffer = (WCHAR*) malloc(sizeof(WCHAR) * heap_buffer_len);
+        }
+        else {
+            heap_buffer_len *= 2;
+            heap_buffer = (WCHAR*) realloc(heap_buffer, heap_buffer_len);
+        }
+
+        if (heap_buffer == NULL) {
+            assert(false);
+            // TODO(damian): handle better.
+        }
+
+        path_len = GetProcessImageFileName(process_handle, heap_buffer, heap_buffer_len);
+        
+        if (path_len != 0) { // Allocated succesfully
+            return tuple(heap_buffer, true, path_len, Win32_error::ok);
+        }
     }
 
-    do {
-        Win32_process_module module;
-        module.name     = wchar_to_utf8(me32.szModule);
-        module.exe_path = wchar_to_utf8(me32.szExePath);
-
-        modules->push_back(module);
-
-    } while (Module32Next(module_snapshot_handle, &me32));
-
-    CloseHandle(module_snapshot_handle);
-    return Win32_error::ok;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Win32_error win32_get_process_modules(DWORD pid, vector<Win32_process_module>* modules) {
+//     HANDLE module_snapshot_handle;
+//     MODULEENTRY32 me32;
+
+//     module_snapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE, pid);
+//     if (module_snapshot_handle == INVALID_HANDLE_VALUE) {
+//         return Win32_error::CreateToolhelp32Snapshot_failed;
+//     }
+
+//     // Set the size of the structure before using it.
+//     me32.dwSize = sizeof(MODULEENTRY32);
+
+//     if (!Module32First(module_snapshot_handle, &me32)) {
+//         CloseHandle(module_snapshot_handle);          
+//         return Win32_error::Module32First_failed;
+//     }
+
+//     do {
+//         Win32_process_module module;
+//         module.name     = wchar_to_utf8(me32.szModule);
+//         module.exe_path = wchar_to_utf8(me32.szExePath);
+
+//         modules->push_back(module);
+
+//     } while (Module32Next(module_snapshot_handle, &me32));
+
+//     CloseHandle(module_snapshot_handle);
+//     return Win32_error::ok;
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

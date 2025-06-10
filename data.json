@@ -1,14 +1,3 @@
 {
-    "processes_to_track": [
-        {
-            "is_active": false,
-            "process_exe_name": "Telegram.exe",
-            "sessions": [
-                {
-                    "end_time": 537601860849600,
-                    "start_time": 537573044424500
-                }
-            ]
-        }
-    ]
+    "processes_to_track": []
 }

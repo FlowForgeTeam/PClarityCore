@@ -52,11 +52,17 @@ void Process_data::update_inactive() {
 
 
 bool Process_data::operator==(const Process_data& other) {
-    return this->data.exe_name == other.data.exe_name;
+    return (
+           this->data.exe_path      == other.data.exe_path 
+        && this->data.creation_time == other.data.creation_time
+    );
 }
 
 bool Process_data::operator==(const Win32_process_data& win32_data) {
-    return this->data.exe_name == win32_data.exe_name;
+    return (
+           this->data.exe_path      == win32_data.exe_path 
+        && this->data.creation_time == win32_data.creation_time
+    );
 }
 
 
@@ -71,66 +77,68 @@ Process_data::Session::~Session() {}
 
 // == Just some functions ===================================================================
 
-int convert_from_json(const json* data, Process_data* process_data) {
-    if (   data->contains("process_exe_name")
-        && data->contains("sessions")
-    ) {
-        process_data->data          = { 0 };
-        process_data->data.exe_name = (*data)["process_exe_name"];
-        process_data->is_active     = false;
 
-        // TODO(damian): i fate this, this is error prone. There should be something like an optional type that we use for values like start_time, before the process was even initialised for tracking.
-        process_data->start      = std::chrono::steady_clock::now(); 
-                    
-        vector<json> sessions = (*data)["sessions"];
-        for (json& j_session : sessions) {
-            if (   j_session.contains("start_time")
-                && j_session.contains("end_time")
-            ) {
-                using time_point = std::chrono::steady_clock::time_point;//<std::chrono::system_clock, std::chrono::seconds>; 
-                using duration   = std::chrono::steady_clock::duration;
+// NOTE(damian): these were claude generated. ))
+void convert_to_json(json* j, const Process_data* process_data) {
+    *j = json{
+        {"start", std::chrono::duration_cast<std::chrono::nanoseconds>(process_data->start.time_since_epoch()).count()},
+        {"is_active", process_data->is_active},
+        {"is_tracked", process_data->is_tracked},
+        {"was_updated", process_data->was_updated},
+        {"sessions", json::array()}
+    };
 
-                // NOTE(damian): these are nanoseconds.
-                // TODO(damian): do seconds instead of nanoseconds.
+    // Serialize sessions
+    for (const auto& session : process_data->sessions) {
+        j->at("sessions").push_back({
+            {"start_time", std::chrono::duration_cast<std::chrono::nanoseconds>(session.start_time.time_since_epoch()).count()},
+            {"end_time", std::chrono::duration_cast<std::chrono::nanoseconds>(session.end_time.time_since_epoch()).count()}
+            });
+    }
 
-                long long start_as_int64 = j_session["start_time"];
-                long long end_as_int64   = j_session["end_time"];
-                
-                duration start_as_duration = duration(start_as_int64);
-                duration end_as_duration  = duration(end_as_int64);     
+    // Serialize Win32_process_data
+    (*j)["data"] = {
+        {"pid", process_data->data.pid},
+        {"started_threads", process_data->data.started_threads},
+        {"ppid", process_data->data.ppid},
+        {"base_priority", process_data->data.base_priority},
+        {"exe_name", process_data->data.exe_name},
+        {"exe_path", process_data->data.exe_path},
+        {"priority_class", process_data->data.priority_class},
+    };
+}
 
-                time_point start_as_time_point = time_point(start_as_duration);
-                time_point end_as_time_point   = time_point(end_as_duration); 
+int convert_from_json(const json* j, Process_data* process_data) {
+    try {
+        process_data->start = std::chrono::steady_clock::time_point(std::chrono::nanoseconds(j->at("start").get<uint64_t>()));
+        process_data->is_active = j->at("is_active").get<bool>();
+        process_data->is_tracked = j->at("is_tracked").get<bool>();
+        process_data->was_updated = j->at("was_updated").get<bool>();
 
-                Process_data::Session session(start_as_time_point, end_as_time_point);
-                process_data->sessions.push_back(session);
-            }
-
+        // Sessions
+        process_data->sessions.clear();
+        for (const auto& s : j->at("sessions")) {
+            auto start_ns = s.at("start_time").get<uint64_t>();
+            auto end_ns = s.at("end_time").get<uint64_t>();
+            process_data->sessions.emplace_back(
+                std::chrono::steady_clock::time_point(std::chrono::nanoseconds(start_ns)),
+                std::chrono::steady_clock::time_point(std::chrono::nanoseconds(end_ns))
+            );
         }
-        return 0;
+
+        // Win32_process_data
+        const json& d = j->at("data");
+        process_data->data.pid = d.at("pid").get<DWORD>();
+        process_data->data.started_threads = d.at("started_threads").get<DWORD>();
+        process_data->data.ppid = d.at("ppid").get<DWORD>();
+        process_data->data.base_priority = d.at("base_priority").get<LONG>();
+        process_data->data.exe_name = d.at("exe_name").get<string>();
+        process_data->data.exe_path = d.at("exe_path").get<string>();
+        process_data->data.priority_class = d.at("priority_class").get<DWORD>();
+
+        return 0; // Success
     }
-    else {
-        return 1;
+    catch (const std::exception& e) {
+        return -1; // Parsing error
     }
 }
-
-#include <iostream>
-
-void convert_to_json(json* data, const Process_data* process_data) {
-    (*data)["process_exe_name"] = process_data->data.exe_name;
-    (*data)["is_active"]        = process_data->is_active;
-
-    vector<json> sessions_as_jsons;
-    for (auto& session : process_data->sessions) {
-        json j_session;
-        j_session["start_time"] = session.start_time.time_since_epoch().count();
-        j_session["end_time"]   = session.end_time.time_since_epoch().count();
-
-        sessions_as_jsons.push_back(j_session);
-    }
-
-    (*data)["sessions"] = sessions_as_jsons;
-
-}
-
-

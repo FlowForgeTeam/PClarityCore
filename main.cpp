@@ -14,7 +14,7 @@
 #include <thread>
 #include <list>
 
-// NOTE(damian): bool represent wheather the command has alredy been 
+// NOTE(damian): bool represent wheather the command has alredy been handled.
 struct Command_status {
 	bool    handled;
 	Command command;
@@ -107,6 +107,9 @@ void client_thread() {
 			else
 				++it;
 		}
+
+		// TODO(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
+		//				 assert to make sure there is not mix up in the middle.
 
 		// NOTE: dont forget to maybe extend it if needed, or error if the message is to long or something.
 		// NOTE(damian): recv doesnt null terminate the string buffer, 

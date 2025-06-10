@@ -1,0 +1,2661 @@
+{
+    "currently_active": [
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "nvcontainer.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\NVIDIA Corporation\\NvContainer\\nvcontainer.exe",
+                "pid": 35008,
+                "ppid": 19364,
+                "priority_class": 32,
+                "started_threads": 56
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180553300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "sihost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\sihost.exe",
+                "pid": 10660,
+                "ppid": 2584,
+                "priority_class": 32,
+                "started_threads": 11
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180562300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "svchost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+                "pid": 25588,
+                "ppid": 1188,
+                "priority_class": 32,
+                "started_threads": 12
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180567700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "svchost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+                "pid": 30396,
+                "ppid": 1188,
+                "priority_class": 32,
+                "started_threads": 4
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180573900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "taskhostw.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\taskhostw.exe",
+                "pid": 27304,
+                "ppid": 2248,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180580600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "explorer.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\explorer.exe",
+                "pid": 22756,
+                "ppid": 29748,
+                "priority_class": 32,
+                "started_threads": 235
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180588300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 6,
+                "exe_name": "bitsumsessionagent.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Process Lasso\\bitsumsessionagent.exe",
+                "pid": 19540,
+                "ppid": 2248,
+                "priority_class": 16384,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180592400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "svchost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+                "pid": 30672,
+                "ppid": 1188,
+                "priority_class": 32,
+                "started_threads": 14
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180602600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "taskhostw.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\taskhostw.exe",
+                "pid": 26340,
+                "ppid": 2248,
+                "priority_class": 32,
+                "started_threads": 5
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180606200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 4416,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 11
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180610200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "StartMenuExperienceHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\SystemApps\\Microsoft.Windows.StartMenuExperienceHost_cw5n1h2txyewy\\StartMenuExperienceHost.exe",
+                "pid": 1804,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180623000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ReflectUI.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Macrium\\Common\\ReflectUI.exe",
+                "pid": 14788,
+                "ppid": 22756,
+                "priority_class": 32,
+                "started_threads": 6
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180627000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 31100,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180631200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "SearchApp.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\SystemApps\\Microsoft.Windows.Search_cw5n1h2txyewy\\SearchApp.exe",
+                "pid": 13040,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 78
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180635200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.exe",
+                "pid": 27848,
+                "ppid": 2248,
+                "priority_class": 32,
+                "started_threads": 12
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180651800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.AdvancedPaste.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\WinUI3Apps\\PowerToys.AdvancedPaste.exe",
+                "pid": 10628,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 28
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180656000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.AlwaysOnTop.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.AlwaysOnTop.exe",
+                "pid": 26460,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180660400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.Awake.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.Awake.exe",
+                "pid": 2344,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 14
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180664800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.CropAndLock.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.CropAndLock.exe",
+                "pid": 18556,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180669200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.FancyZones.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.FancyZones.exe",
+                "pid": 17196,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 31
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180673700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.Peek.UI.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\WinUI3Apps\\PowerToys.Peek.UI.exe",
+                "pid": 32276,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 26
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180696400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.PowerLauncher.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.PowerLauncher.exe",
+                "pid": 2416,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 23
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180701000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PowerToys.PowerOCR.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.PowerOCR.exe",
+                "pid": 32828,
+                "ppid": 27848,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180705500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ReflectMonitor.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Macrium\\Common\\ReflectMonitor.exe",
+                "pid": 1652,
+                "ppid": 22756,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180710100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "LockApp.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\SystemApps\\Microsoft.LockApp_cw5n1h2txyewy\\LockApp.exe",
+                "pid": 11532,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 24
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180714200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 6052,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180718700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 6020,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180723400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PhoneExperienceHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\WindowsApps\\Microsoft.YourPhone_1.25021.67.0_x64__8wekyb3d8bbwe\\PhoneExperienceHost.exe",
+                "pid": 1132,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 24
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180728100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "TextInputHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\TextInputHost.exe",
+                "pid": 14056,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 22
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180732800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "SystemSettings.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\ImmersiveControlPanel\\SystemSettings.exe",
+                "pid": 14956,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 35
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180764000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ApplicationFrameHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\ApplicationFrameHost.exe",
+                "pid": 27996,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180768800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "CompPkgSrv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\CompPkgSrv.exe",
+                "pid": 6308,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 1
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180773400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "svchost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+                "pid": 23596,
+                "ppid": 1188,
+                "priority_class": 32,
+                "started_threads": 11
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180777700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 6,
+                "exe_name": "MusNotifyIcon.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\MusNotifyIcon.exe",
+                "pid": 20828,
+                "ppid": 31776,
+                "priority_class": 16384,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180782300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "svchost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\svchost.exe",
+                "pid": 18524,
+                "ppid": 1188,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180786900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "dllhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\dllhost.exe",
+                "pid": 22016,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 5
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180791300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 23040,
+                "ppid": 22756,
+                "priority_class": 32,
+                "started_threads": 49
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180795700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 14600,
+                "ppid": 23040,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180800200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 10,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 33088,
+                "ppid": 23040,
+                "priority_class": 32768,
+                "started_threads": 56
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180804800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 28220,
+                "ppid": 23040,
+                "priority_class": 32,
+                "started_threads": 18
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180809300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 9124,
+                "ppid": 23040,
+                "priority_class": 64,
+                "started_threads": 38
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180813900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 23204,
+                "ppid": 23040,
+                "priority_class": 32,
+                "started_threads": 21
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180818400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 13872,
+                "ppid": 23040,
+                "priority_class": 32,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180823000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 33748,
+                "ppid": 23040,
+                "priority_class": 32,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180865700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 34220,
+                "ppid": 23040,
+                "priority_class": 32,
+                "started_threads": 25
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180870400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 20648,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 5
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180875100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "cpptools.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\.vscode\\extensions\\ms-vscode.cpptools-1.25.3-win32-x64\\bin\\cpptools.exe",
+                "pid": 23728,
+                "ppid": 23204,
+                "priority_class": 32,
+                "started_threads": 32
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180879800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 17632,
+                "ppid": 23728,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180884500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 24172,
+                "ppid": 23204,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180889300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "cpptools.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\.vscode\\extensions\\ms-vscode.cpptools-1.25.3-win32-x64\\bin\\cpptools.exe",
+                "pid": 17832,
+                "ppid": 23728,
+                "priority_class": 32,
+                "started_threads": 1
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180893900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 22396,
+                "ppid": 23204,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180898700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "cpptools-srv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\.vscode\\extensions\\ms-vscode.cpptools-1.25.3-win32-x64\\bin\\cpptools-srv.exe",
+                "pid": 22544,
+                "ppid": 17832,
+                "priority_class": 32,
+                "started_threads": 30
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180903800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 15576,
+                "ppid": 22544,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180908900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "devenv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
+                "pid": 7488,
+                "ppid": 22756,
+                "priority_class": 32,
+                "started_threads": 121
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180913600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PerfWatson2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\PerfWatson2.exe",
+                "pid": 15984,
+                "ppid": 8808,
+                "priority_class": 32,
+                "started_threads": 27
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180918300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Microsoft.ServiceHub.Controller.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Controller\\Microsoft.ServiceHub.Controller.exe",
+                "pid": 22720,
+                "ppid": 7488,
+                "priority_class": 32,
+                "started_threads": 12
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180923900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.VSDetouredHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.VSDetouredHost.exe",
+                "pid": 24240,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 13
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180930100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.IdentityHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.IdentityHost.exe",
+                "pid": 16252,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 24
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180935900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.ThreadedWaitDialog.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.ThreadedWaitDialog.exe",
+                "pid": 24860,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 16
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180942000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.IntellicodeModelService.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.netfx.x64\\ServiceHub.IntellicodeModelService.exe",
+                "pid": 5896,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180947700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vshost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\vshost.exe",
+                "pid": 26360,
+                "ppid": 7488,
+                "priority_class": 32,
+                "started_threads": 1
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180953000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 6,
+                "exe_name": "ServiceHub.IndexingService.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.IndexingService.exe",
+                "pid": 8720,
+                "ppid": 22720,
+                "priority_class": 16384,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180959600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.Host.dotnet.x64.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.Host.dotnet.x64.exe",
+                "pid": 29108,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 11
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180965400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.TestWindowStoreHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.TestWindowStoreHost.exe",
+                "pid": 25200,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 11
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228180971200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ServiceHub.DataWarehouseHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\ServiceHub\\Hosts\\ServiceHub.Host.dotnet.x64\\ServiceHub.DataWarehouseHost.exe",
+                "pid": 23528,
+                "ppid": 22720,
+                "priority_class": 32,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181040900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 9040,
+                "ppid": 22756,
+                "priority_class": 32,
+                "started_threads": 42
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181046700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 27916,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181051900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 10,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 18592,
+                "ppid": 9040,
+                "priority_class": 32768,
+                "started_threads": 57
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181057200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 19868,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181062500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 22384,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 10
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181067800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 17736,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 13
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181073100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 32920,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 5
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181078500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "powershell.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "pid": 4168,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181083800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "python.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Python\\Python311\\python.exe",
+                "pid": 29064,
+                "ppid": 23204,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181089200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 21856,
+                "ppid": 29064,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181094700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Code.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
+                "pid": 17892,
+                "ppid": 23204,
+                "priority_class": 32,
+                "started_threads": 17
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181100300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 26056,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181105800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "dllhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\dllhost.exe",
+                "pid": 11960,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181115500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ms-teams.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\WindowsApps\\MSTeams_25122.1415.3698.6812_x64__8wekyb3d8bbwe\\ms-teams.exe",
+                "pid": 13132,
+                "ppid": 27044,
+                "priority_class": 32,
+                "started_threads": 105
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181121200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 24512,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181127400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 1456,
+                "ppid": 13132,
+                "priority_class": 32,
+                "started_threads": 48
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181133700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 10944,
+                "ppid": 1456,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181140100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 10,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 12556,
+                "ppid": 1456,
+                "priority_class": 32768,
+                "started_threads": 58
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181146500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 28932,
+                "ppid": 1456,
+                "priority_class": 32,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181153300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 9688,
+                "ppid": 1456,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181159900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 20788,
+                "ppid": 1456,
+                "priority_class": 32,
+                "started_threads": 37
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181166500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ms-teams.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\WindowsApps\\MSTeams_25122.1415.3698.6812_x64__8wekyb3d8bbwe\\ms-teams.exe",
+                "pid": 22536,
+                "ppid": 13132,
+                "priority_class": 32,
+                "started_threads": 140
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181172800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 3316,
+                "ppid": 1456,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181179200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "cpptools-srv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\.vscode\\extensions\\ms-vscode.cpptools-1.25.3-win32-x64\\bin\\cpptools-srv.exe",
+                "pid": 25440,
+                "ppid": 17832,
+                "priority_class": 32,
+                "started_threads": 30
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181185600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 3336,
+                "ppid": 25440,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181191800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Telegram.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+                "pid": 4148,
+                "ppid": 17268,
+                "priority_class": 32,
+                "started_threads": 156
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181197900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "notepad++.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Notepad++\\notepad++.exe",
+                "pid": 28272,
+                "ppid": 22756,
+                "priority_class": 32,
+                "started_threads": 16
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181203800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 36664,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 23
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181209900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "ShellExperienceHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\SystemApps\\ShellExperienceHost_cw5n1h2txyewy\\ShellExperienceHost.exe",
+                "pid": 24188,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 26
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181216400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\ProgramData\\Admin\\Discord\\app-1.0.9194\\Discord.exe",
+                "pid": 21904,
+                "ppid": 17600,
+                "priority_class": 32,
+                "started_threads": 53
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181222900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\ProgramData\\Admin\\Discord\\app-1.0.9194\\Discord.exe",
+                "pid": 26596,
+                "ppid": 21904,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181319100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 10,
+                "exe_name": "Discord.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\ProgramData\\Admin\\Discord\\app-1.0.9194\\Discord.exe",
+                "pid": 33004,
+                "ppid": 21904,
+                "priority_class": 32768,
+                "started_threads": 57
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181325400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\ProgramData\\Admin\\Discord\\app-1.0.9194\\Discord.exe",
+                "pid": 16748,
+                "ppid": 21904,
+                "priority_class": 32,
+                "started_threads": 17
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181331600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 13,
+                "exe_name": "Discord.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\ProgramData\\Admin\\Discord\\app-1.0.9194\\Discord.exe",
+                "pid": 25264,
+                "ppid": 21904,
+                "priority_class": 128,
+                "started_threads": 64
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181337800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\ProgramData\\Admin\\Discord\\app-1.0.9194\\Discord.exe",
+                "pid": 33060,
+                "ppid": 21904,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181344000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 28508,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 5
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181350600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "powershell.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "pid": 24748,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181356700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 28436,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 5
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181363100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "powershell.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
+                "pid": 18772,
+                "ppid": 34220,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181369300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 4512,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181376000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 26656,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 31
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181382600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "VsDebugConsole.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Platform\\Debugger\\VsDebugConsole.exe",
+                "pid": 30516,
+                "ppid": 7488,
+                "priority_class": 32,
+                "started_threads": 1
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181389600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 36220,
+                "ppid": 30516,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181396400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 22976,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 30
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181439600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 23112,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 30
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181446600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 10492,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 31
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181453400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 32760,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181460200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 35340,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 25
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181467100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 11608,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 32
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181487900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 18316,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181494900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 22416,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181501800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 36068,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 17
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181508800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 23372,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181515700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 10568,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181522800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 27764,
+                "ppid": 9040,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181529900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 24180,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181537000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 14920,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181544100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 23328,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181551300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 4272,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181558500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 19048,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 16
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181565800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 12540,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181573100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 7980,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181580400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 10928,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 18
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181587800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 11508,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181595300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 5660,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181602700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 29896,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181610200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 19408,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181617800,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 11672,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181625400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 21656,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181633000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 8512,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181641000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 17164,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 14
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181787600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 24400,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181795600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 28700,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181803700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 31908,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 20
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181811700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 27976,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181819700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 34176,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 16
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181827700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 13144,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181835700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "cpptools-srv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Users\\Admin\\.vscode\\extensions\\ms-vscode.cpptools-1.25.3-win32-x64\\bin\\cpptools-srv.exe",
+                "pid": 1952,
+                "ppid": 17832,
+                "priority_class": 32,
+                "started_threads": 30
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181844400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 20852,
+                "ppid": 1952,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181852400,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 11768,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 32
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181860500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 20084,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 29
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181868600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+                "pid": 1360,
+                "ppid": 26360,
+                "priority_class": 32,
+                "started_threads": 9
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181876500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vctip.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\vctip.exe",
+                "pid": 12632,
+                "ppid": 26060,
+                "priority_class": 32,
+                "started_threads": 19
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181884600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+                "pid": 29428,
+                "ppid": 9040,
+                "priority_class": 64,
+                "started_threads": 12
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181893100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "MSBuild.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\MSBuild\\Current\\Bin\\amd64\\MSBuild.exe",
+                "pid": 17464,
+                "ppid": 7488,
+                "priority_class": 32,
+                "started_threads": 22
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181901000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\conhost.exe",
+                "pid": 16196,
+                "ppid": 17464,
+                "priority_class": 32,
+                "started_threads": 2
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181909200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+                "pid": 20876,
+                "ppid": 26360,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181926000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+                "pid": 15792,
+                "ppid": 26360,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181934000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+                "pid": 11072,
+                "ppid": 26360,
+                "priority_class": 32,
+                "started_threads": 8
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181942000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+                "pid": 31604,
+                "ppid": 26360,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181958900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "PClarity.exe",
+                "exe_path": "\\Device\\HarddiskVolume6\\Admin\\Desktop\\College_Dropout_No_Regrets\\Projects\\PClarity\\PClarity\\x64\\Debug\\PClarity.exe",
+                "pid": 10808,
+                "ppid": 30516,
+                "priority_class": 32,
+                "started_threads": 3
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181975300,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msvsmon.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\Remote Debugger\\x64\\msvsmon.exe",
+                "pid": 11572,
+                "ppid": 7488,
+                "priority_class": 32,
+                "started_threads": 11
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598228181983500,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 8024,
+                "ppid": 7488,
+                "priority_class": 32,
+                "started_threads": 60
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197313100,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 17404,
+                "ppid": 8024,
+                "priority_class": 32,
+                "started_threads": 10
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197328900,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 10,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 27280,
+                "ppid": 8024,
+                "priority_class": 32768,
+                "started_threads": 50
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197342000,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 35708,
+                "ppid": 8024,
+                "priority_class": 32,
+                "started_threads": 24
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197355200,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 20176,
+                "ppid": 8024,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197368700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 5676,
+                "ppid": 8024,
+                "priority_class": 32,
+                "started_threads": 15
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197381600,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.68\\msedgewebview2.exe",
+                "pid": 26836,
+                "ppid": 8024,
+                "priority_class": 32,
+                "started_threads": 14
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598231197394700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "backgroundTaskHost.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\backgroundTaskHost.exe",
+                "pid": 14748,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598318563776700,
+            "was_updated": false
+        },
+        {
+            "data": {
+                "base_priority": 8,
+                "exe_name": "RuntimeBroker.exe",
+                "exe_path": "\\Device\\HarddiskVolume4\\Windows\\System32\\RuntimeBroker.exe",
+                "pid": 25176,
+                "ppid": 1320,
+                "priority_class": 32,
+                "started_threads": 7
+            },
+            "is_active": true,
+            "is_tracked": false,
+            "sessions": [],
+            "start": 598318563790900,
+            "was_updated": false
+        }
+    ],
+    "tracked": []
+}

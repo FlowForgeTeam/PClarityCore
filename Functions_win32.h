@@ -9,6 +9,7 @@
 using std::pair, std::tuple;
 using std::string, std::vector;
 
+// TODO(damian): remove win32 from the enum names.
 enum class Win32_error {
     ok,
     win32_EnumProcess_buffer_too_small,
@@ -22,14 +23,16 @@ enum class Win32_error {
     Process32First_failed,
     Module32First_failed,
 
+    win32_GetRam_failed,
+
 };
 
 // TODO(damian): deal with const wchar* overflow.
-struct Win32_process_module {
-    DWORD  owner_pid;
-    string name;
-    string exe_path;
-};
+// struct Win32_process_module {
+//     DWORD  owner_pid;
+//     string name;
+//     string exe_path;
+// };
 
 // TODO(damian): deal with const wchar* overflow.
 struct Win32_process_data {
@@ -39,20 +42,36 @@ struct Win32_process_data {
     LONG       base_priority;
     string     exe_name;
 
-    vector<Win32_process_module> modules;
+    string exe_path;
+
+    DWORD priority_class;
+
+    ULONGLONG creation_time;  
+    ULONGLONG exit_time;          
+    ULONGLONG kernel_time;    
+    ULONGLONG user_time;     
+
+    SIZE_T process_affinity;
+    SIZE_T system_affinity;
+
+    SIZE_T ram_usage;
+
+    // vector<Win32_process_module> modules;
 };
 
 string wchar_to_utf8(const WCHAR* wchar_array);
 
 pair<vector<Win32_process_data>, Win32_error> win32_get_process_data();
-Win32_error win32_get_process_modules(DWORD pid, vector<Win32_process_module>* modules);
+
+tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle, 
+                                                                   WCHAR* stack_buffer, 
+                                                                   size_t stack_buffer_len);
 
 
 
 
 
-
-
+// Win32_error win32_get_process_modules(DWORD pid, vector<Win32_process_module>* modules);
 
 
 
