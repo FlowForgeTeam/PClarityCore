@@ -1,0 +1,30 @@
+name: Build
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Get code
+      uses: actions/checkout@v4
+    
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1.3
+    
+    - name: Build project
+      run: |
+        echo "Building..."
+        msbuild *.vcxproj /p:Configuration=Release /p:Platform=x64
+        echo "Done!"
+    
+    - name: Check result
+      run: |
+        if (Test-Path "x64/Release/*.exe") {
+          echo "✅ Build successful!"
+          Get-ChildItem "x64/Release/*.exe" | ForEach-Object { echo "Created: $($_.Name)" }
+        } else {
+          echo "❌ No exe files found"
+          exit 1
+        }
