@@ -7,24 +7,59 @@ jobs:
     runs-on: windows-latest
     
     steps:
-    - name: Get code
+    - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        submodules: recursive
     
     - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v1.3
-    
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'  # Latest stable
+        
+    - name: Install vcpkg dependencies
+      run: |
+        vcpkg install nlohmann-json:x64-windows
+        vcpkg integrate install
+        
+    - name: Setup Visual Studio environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+        
     - name: Build project
       run: |
-        echo "Building..."
-        msbuild *.vcxproj /p:Configuration=Release /p:Platform=x64
-        echo "Done!"
-    
-    - name: Check result
+        echo "Building PClarity..."
+        msbuild PClarity.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnabled=true
+        echo "Build completed!"
+        
+    - name: Check build result
       run: |
-        if (Test-Path "x64/Release/*.exe") {
+        if (Test-Path "x64/Release/PClarity.exe") {
           echo "✅ Build successful!"
-          Get-ChildItem "x64/Release/*.exe" | ForEach-Object { echo "Created: $($_.Name)" }
+          Get-ChildItem "x64/Release/" -Filter "*.exe" | ForEach-Object { 
+            echo "Created: $($_.Name) ($([math]::Round($_.Length/1MB, 2)) MB)"
+          }
         } else {
-          echo "❌ No exe files found"
+          echo "❌ Build failed - executable not found"
+          echo "Contents of x64/Release/:"
+          if (Test-Path "x64/Release/") {
+            Get-ChildItem "x64/Release/" | ForEach-Object { echo $_.Name }
+          } else {
+            echo "x64/Release/ directory does not exist"
+          }
           exit 1
         }
+        
+    - name: Upload build artifacts
+      if: success()
+      uses: actions/upload-artifact@v3
+      with:
+        name: PClarity-Release-x64
+        path: |
+          x64/Release/PClarity.exe
+          x64/Release/*.dll
+        retention-days: 30
