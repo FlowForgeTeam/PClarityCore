@@ -48,12 +48,12 @@ bool Process_data::operator==(const Process_data& other) {
     );
 }
 
-bool Process_data::operator==(const Win32_process_data& win32_data) {
-    return (
-           this->data.exe_path      == win32_data.exe_path 
-        && this->data.creation_time == win32_data.creation_time
-    );
-}
+//bool Process_data::operator==(const Win32_process_data& win32_data) {
+//    return (
+//           this->data.exe_path      == win32_data.exe_path 
+//        && this->data.creation_time == win32_data.creation_time
+//    );
+//}
 
 
 // == Process_data::Session =================================================================

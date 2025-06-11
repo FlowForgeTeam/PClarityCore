@@ -150,7 +150,7 @@ namespace G_state {
         
         bool already_tracking = false;
         for (Process_data& process : G_state::tracked_processes) {
-            if (process == new_process)
+            if (process.operator==(new_process))
                 already_tracking = true;
         }
 
