@@ -56,6 +56,8 @@ struct Win32_process_data {
 
     SIZE_T ram_usage;
 
+    bool is_visible_app;
+
     // vector<Win32_process_module> modules;
 };
 
@@ -66,7 +68,7 @@ pair<vector<Win32_process_data>, Win32_error> win32_get_process_data();
 tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle, 
                                                                    WCHAR* stack_buffer, 
                                                                    size_t stack_buffer_len);
-
+bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data);
 
 
 

@@ -144,7 +144,7 @@ namespace G_state {
         Win32_process_data win32_data = { 0 };
 
         // TODO(damian): this is temporaty.
-        win32_data.exe_name = *path;
+        win32_data.exe_path = *path;
 
         Process_data new_process(win32_data);
         
@@ -194,20 +194,13 @@ namespace G_state {
     }
 
     G_state::Error remove_process_from_track(string* path) {
-        Win32_process_data win32_data = { 0 };
-
-        // TODO(damian): this is temporaty.
-        win32_data.exe_name = *path;
-
-        Process_data new_process(win32_data);
-
         bool is_tracked   = false;
         auto p_to_tracked = G_state::tracked_processes.begin(); 
         for (;
             p_to_tracked != G_state::tracked_processes.end();
             ++p_to_tracked) 
         {
-            if (*p_to_tracked == new_process) {
+            if (p_to_tracked->data.exe_path == *path) {
                 is_tracked = true;
                 break;
             }

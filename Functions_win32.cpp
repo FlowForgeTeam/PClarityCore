@@ -58,7 +58,7 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         // 2. Full process path
         // 3. Priority
         // 4. Process times
-        // 5. Addiniti masks
+        // 5. Affinity masks
         // 6. RAM
 
         // 1.
@@ -107,7 +107,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
             CloseHandle(process_handle);
             continue;
         }
-
 
         // NOTE(damian): dont know if we need to store the decoded vecrion.
         // SYSTEMTIME creation_time;
@@ -158,14 +157,15 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
 
 
         // CPU time
-        // RAM
         // GPU
-        // SOME OTHER STUFF (PREOCESS LASSO TYPE SHIT)
+        // SOME OTHER STUFF (PROCESS LASSO TYPE SHIT)
         
         // NOTE(damian): the name for the process might also be retrived via QueryFullProcessImageNameA.
         //               currently we get it from the first module inside the process modules vector.
         //               based on the docs, the first module retrived by the Module32First function 
         //               always contais data for the process whos modules are retrived.
+
+        data.is_visible_app = win32_is_process_an_app(process_handle, &data);
 
         process_data_vec.push_back(data);
 
@@ -218,9 +218,44 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
 }
 
 
+static bool is_visible_app = false; 
+static BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam);
+bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data) {
+    if (data->exe_name == "Telegram.exe") {
+        int x = 2;
+    }
 
+    BOOL err_code = EnumWindows(win32_is_process_an_app_callback, data->pid);
 
+    if (is_visible_app) {
+        is_visible_app = false;
+        return true;
+    }
 
+    return false;
+}
+
+BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam) {
+    // Check if there is an active widnow, if yes, return FALSE and set LPARAM to represent it.
+
+    DWORD window_creator_pid;
+    if (GetWindowThreadProcessId(window_handle, &window_creator_pid) == 0) {
+        return TRUE; // Just skipping it
+        // TODO(damian): dont know why this might fails, since we only get widnow handles by the win32 enum function.
+    }
+    
+    // GetWindow failed, so keep enumerating by returning TRUE
+    if (window_creator_pid == 0) return TRUE; 
+
+    // GetWindow didnt fail, its creator process is the passed in pid (lParam) and it is visible --> 
+    //      --> set the flag to true, return FALSE to stop iterating over windows
+    if (window_creator_pid == (DWORD) lParam && IsWindowVisible(window_handle)) {
+        is_visible_app = true;
+        return FALSE;
+    } 
+
+    return TRUE;
+}
 
 
 

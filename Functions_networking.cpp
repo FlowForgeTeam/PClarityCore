@@ -1,6 +1,6 @@
 #include "Functions_networking.h"
 
-// TODO: dont knwo how to handle different types of errors here, there are too many of them shits.
+// TODO: dont know how to handle different types of errors here, there are too many of them shits.
 
 pair<SOCKET, G_state::Error> initialise_tcp_connection_with_client() {
 	// Getting data about windows socket implementation
@@ -44,3 +44,5 @@ pair<SOCKET, G_state::Error> initialise_tcp_connection_with_client() {
 
 	return pair(client_socket, G_state::Error::ok);
 }
+
+

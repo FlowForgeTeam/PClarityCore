@@ -47,7 +47,5 @@ namespace G_state {
 
 	extern G_state::Error add_process_to_track     (string* path);
 	extern G_state::Error remove_process_from_track(string* path);
-	
-	// TODO(damian): see if maybe passing a pointer or just string for name and path is better
 }
 

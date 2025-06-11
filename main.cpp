@@ -115,11 +115,16 @@ void client_thread() {
 		// NOTE(damian): recv doesnt null terminate the string buffer, 
 		//	             so terminating it myself, to then be able to use strcmp.
 
-		char receive_buffer[512];
-		int  receive_buffer_len = 512;
+		const size_t receive_buffer_size = 512;
+		char receive_buffer[receive_buffer_size];
 
-		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_len, NULL); // TODO(damian): add a timeout here.
+		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
 		receive_buffer[n_bytes_returned] = '\0';
+
+		// Overflow
+		if (n_bytes_returned == receive_buffer_size) {
+			// TODO: Send a respomce singaling that client has to send the same data again
+		}
 
 		std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
 		std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
