@@ -22,7 +22,7 @@ jobs:
         
     - name: Install vcpkg dependencies
       run: |
-        vcpkg install nlohmann-json:x64-windows
+        vcpkg install
         vcpkg integrate install
         
     - name: Setup Visual Studio environment
