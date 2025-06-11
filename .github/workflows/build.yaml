@@ -33,7 +33,7 @@ jobs:
     - name: Build project
       run: |
         echo "Building PClarity..."
-        msbuild PClarity.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnabled=true
+        msbuild PClarity.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnableManifest=true /p:VcpkgEnabled=true 
         echo "Build completed!"
         
     - name: Check build result
