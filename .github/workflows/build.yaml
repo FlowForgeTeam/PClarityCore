@@ -9,47 +9,72 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        submodules: recursive
-    
+      
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
       
-    - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'  # Latest stable
-        
     - name: Setup Visual Studio environment
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: x64
         
-    - name: Install vcpkg dependencies
+    - name: Install nlohmann-json 3.12.0 (header-only)
       run: |
-        vcpkg install
-        vcpkg integrate install
+        # Create the directory structure exactly as expected by includes
+        New-Item -ItemType Directory -Force -Path "nlohmann"
         
-    - name: Build project
+        # Download the latest nlohmann-json header (3.12.0) 
+        $url = "https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp"
+        Invoke-WebRequest -Uri $url -OutFile "nlohmann/json.hpp"
+        
+        echo "✅ Downloaded nlohmann-json 3.12.0 header"
+        $fileInfo = Get-Item "nlohmann/json.hpp"
+        echo "File path: $($fileInfo.FullName)"
+        echo "File size: $([math]::Round($fileInfo.Length/1KB, 2)) KB"
+        
+        # Verify the file structure
+        echo "Directory structure:"
+        Get-ChildItem -Recurse nlohmann | ForEach-Object { echo "  $($_.FullName)" }
+        
+    - name: Build project with explicit include path
       run: |
-        echo "Building PClarity..."
-        msbuild PClarity.vcxproj /p:Configuration=Release /p:Platform=x64 /p:VcpkgEnableManifest=true /p:VcpkgEnabled=true 
-        echo "Build completed!"
+        echo "Building PClarity with C++20 and nlohmann-json 3.12.0..."
+        
+        # Use CL environment variable to add include directory
+        $currentDir = (Get-Location).Path
+        $env:CL = "/I`"$currentDir`" $env:CL"
+        echo "Set CL environment variable to: $env:CL"
+        
+        # Build the project
+        msbuild PClarity.vcxproj `
+          /p:Configuration=Release `
+          /p:Platform=x64 `
+          /p:VcpkgEnabled=false `
+          /verbosity:normal
+        
+        if ($LASTEXITCODE -eq 0) {
+          echo "✅ Build completed successfully!"
+        } else {
+          echo "❌ Build failed with exit code $LASTEXITCODE"
+          exit $LASTEXITCODE
+        }
         
     - name: Check build result
       run: |
         if (Test-Path "x64/Release/PClarity.exe") {
           echo "✅ Build successful!"
-          Get-ChildItem "x64/Release/" -Filter "*.exe" | ForEach-Object { 
-            echo "Created: $($_.Name) ($([math]::Round($_.Length/1MB, 2)) MB)"
-          }
+          $exe = Get-Item "x64/Release/PClarity.exe"
+          echo "Created: $($exe.Name) ($([math]::Round($exe.Length/1MB, 2)) MB)"
+          echo "Build date: $($exe.LastWriteTime)"
         } else {
           echo "❌ Build failed - executable not found"
-          echo "Contents of x64/Release/:"
-          if (Test-Path "x64/Release/") {
-            Get-ChildItem "x64/Release/" | ForEach-Object { echo $_.Name }
+          echo "Available build outputs:"
+          if (Test-Path "x64") {
+            Get-ChildItem "x64" -Recurse | ForEach-Object { 
+              echo "  $($_.FullName)" 
+            }
           } else {
-            echo "x64/Release/ directory does not exist"
+            echo "  No x64 directory found"
           }
           exit 1
         }
@@ -59,7 +84,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: PClarity-Release-x64
-        path: |
-          x64/Release/PClarity.exe
-          x64/Release/*.dll
+        path: x64/Release/PClarity.exe
         retention-days: 30
