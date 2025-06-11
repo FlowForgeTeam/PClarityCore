@@ -1,5 +1,5 @@
 # PClarity  
-> Desktop productivity analytics.
+> Desktop productivity analytics that respects your privacy  
 
 [🚀 Jump to Development Setup](#development-environment-setup)
 
