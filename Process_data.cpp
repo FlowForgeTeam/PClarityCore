@@ -41,14 +41,16 @@ void Process_data::update_inactive() {
 }
 
 
-bool Process_data::operator==(const Process_data& other) {
+bool Process_data::operator==(const Process_data &other) const
+{
     return (
            this->data.exe_path      == other.data.exe_path 
         && this->data.creation_time == other.data.creation_time
     );
 }
 
-bool Process_data::operator==(const Win32_process_data& win32_data) {
+bool Process_data::operator==(const Win32_process_data &win32_data) const
+{
     return (
            this->data.exe_path      == win32_data.exe_path 
         && this->data.creation_time == win32_data.creation_time

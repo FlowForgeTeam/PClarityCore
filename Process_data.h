@@ -36,8 +36,8 @@ class Process_data {
     Process_data(Win32_process_data win32_data);
 
     bool operator<=>(const Process_data &) const = delete;
-    bool operator==(const Process_data&       other);
-    bool operator==(const Win32_process_data& win32_data);
+    bool operator==(const Process_data&       other) const;
+    bool operator==(const Win32_process_data &win32_data) const;
 
     class Session {
         using time_point = std::chrono::steady_clock::time_point; 
