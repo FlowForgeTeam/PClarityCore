@@ -1,0 +1,294 @@
+{
+  "test_scenarios": {
+    "basic_process": {
+      "data": {
+        "pid": 1234,
+        "started_threads": 3,
+        "ppid": 1000,
+        "base_priority": 8,
+        "exe_name": "test_app.exe",
+        "exe_path": "C:\\Test\\test_app.exe",
+        "priority_class": 32,
+        "creation_time": 132845678901234567,
+        "ram_usage": 1048576
+      },
+      "is_active": false,
+      "is_tracked": true,
+      "was_updated": false,
+      "sessions": [],
+      "start": 1000000000
+    },
+    
+    "active_process_with_sessions": {
+      "data": {
+        "pid": 5678,
+        "started_threads": 8,
+        "ppid": 2000,
+        "base_priority": 9,
+        "exe_name": "active_app.exe", 
+        "exe_path": "C:\\Programs\\active_app.exe",
+        "priority_class": 64,
+        "creation_time": 132845678905555555,
+        "ram_usage": 2097152
+      },
+      "is_active": true,
+      "is_tracked": true,
+      "was_updated": true,
+      "sessions": [
+        {
+          "start_time": 1000000000,
+          "end_time": 1000003600
+        },
+        {
+          "start_time": 1000007200,
+          "end_time": 1000010800
+        }
+      ],
+      "start": 1000000000
+    },
+    
+    "system_process": {
+      "data": {
+        "pid": 4,
+        "started_threads": 120,
+        "ppid": 0,
+        "base_priority": 8,
+        "exe_name": "System",
+        "exe_path": "",
+        "priority_class": 24,
+        "creation_time": 132845678900000000,
+        "ram_usage": 4194304
+      },
+      "is_active": false,
+      "is_tracked": false,
+      "was_updated": false,
+      "sessions": [],
+      "start": 999999999
+    },
+    
+    "long_running_process": {
+      "data": {
+        "pid": 9999,
+        "started_threads": 15,
+        "ppid": 1500,
+        "base_priority": 8,
+        "exe_name": "long_runner.exe",
+        "exe_path": "C:\\Services\\long_runner.exe",
+        "priority_class": 32,
+        "creation_time": 132845678900111111,
+        "ram_usage": 8388608
+      },
+      "is_active": true,
+      "is_tracked": true,
+      "was_updated": true,
+      "sessions": [
+        {
+          "start_time": 1000000000,
+          "end_time": 1000014400
+        },
+        {
+          "start_time": 1000018000,
+          "end_time": 1000032400
+        },
+        {
+          "start_time": 1000036000,
+          "end_time": 1000050400
+        },
+        {
+          "start_time": 1000054000,
+          "end_time": 1000068400
+        }
+      ],
+      "start": 1000000000
+    },
+    
+    "high_priority_process": {
+      "data": {
+        "pid": 8888,
+        "started_threads": 2,
+        "ppid": 800,
+        "base_priority": 13,
+        "exe_name": "critical.exe",
+        "exe_path": "C:\\Critical\\critical.exe",
+        "priority_class": 128,
+        "creation_time": 132845678902222222,
+        "ram_usage": 524288
+      },
+      "is_active": false,
+      "is_tracked": true,
+      "was_updated": false,
+      "sessions": [
+        {
+          "start_time": 1000000000,
+          "end_time": 1000000300
+        }
+      ],
+      "start": 1000000000
+    }
+  },
+  
+  "edge_cases": {
+    "zero_pid": {
+      "data": {
+        "pid": 0,
+        "started_threads": 0,
+        "ppid": 0,
+        "base_priority": 0,
+        "exe_name": "",
+        "exe_path": "",
+        "priority_class": 0,
+        "creation_time": 0,
+        "ram_usage": 0
+      },
+      "is_active": false,
+      "is_tracked": false,
+      "was_updated": false,
+      "sessions": [],
+      "start": 0
+    },
+    
+    "unicode_process_name": {
+      "data": {
+        "pid": 7777,
+        "started_threads": 4,
+        "ppid": 1200,
+        "base_priority": 8,
+        "exe_name": "тест_україна.exe",
+        "exe_path": "C:\\Тест\\тест_україна.exe",
+        "priority_class": 32,
+        "creation_time": 132845678903333333,
+        "ram_usage": 1572864
+      },
+      "is_active": false,
+      "is_tracked": true,
+      "was_updated": false,
+      "sessions": [],
+      "start": 1000000000
+    },
+    
+    "very_long_path": {
+      "data": {
+        "pid": 6666,
+        "started_threads": 1,
+        "ppid": 900,
+        "base_priority": 8,
+        "exe_name": "app_with_very_long_name_that_exceeds_normal_limits.exe",
+        "exe_path": "C:\\Program Files\\Very Long Directory Name\\Subdirectory With Spaces\\Another Level\\Yet Another Level\\Final Directory\\app_with_very_long_name_that_exceeds_normal_limits.exe",
+        "priority_class": 32,
+        "creation_time": 132845678904444444,
+        "ram_usage": 3145728
+      },
+      "is_active": true,
+      "is_tracked": true,
+      "was_updated": true,
+      "sessions": [],
+      "start": 1000000000
+    },
+    
+    "many_sessions": {
+      "data": {
+        "pid": 5555,
+        "started_threads": 6,
+        "ppid": 1100,
+        "base_priority": 8,
+        "exe_name": "session_heavy.exe",
+        "exe_path": "C:\\Apps\\session_heavy.exe",
+        "priority_class": 32,
+        "creation_time": 132845678905555555,
+        "ram_usage": 2621440
+      },
+      "is_active": false,
+      "is_tracked": true,
+      "was_updated": false,
+      "sessions": [
+        {"start_time": 1000000000, "end_time": 1000000300},
+        {"start_time": 1000000600, "end_time": 1000000900},
+        {"start_time": 1000001200, "end_time": 1000001500},
+        {"start_time": 1000001800, "end_time": 1000002100},
+        {"start_time": 1000002400, "end_time": 1000002700},
+        {"start_time": 1000003000, "end_time": 1000003300},
+        {"start_time": 1000003600, "end_time": 1000003900},
+        {"start_time": 1000004200, "end_time": 1000004500},
+        {"start_time": 1000004800, "end_time": 1000005100},
+        {"start_time": 1000005400, "end_time": 1000005700}
+      ],
+      "start": 1000000000
+    }
+  },
+  
+  "performance_test_data": {
+    "large_dataset": {
+      "process_count": 100,
+      "description": "Dataset with 100 processes for performance testing",
+      "sample_process": {
+        "data": {
+          "pid": "{DYNAMIC_PID}",
+          "started_threads": "{RANDOM_1_TO_20}",
+          "ppid": "{RANDOM_100_TO_2000}",
+          "base_priority": 8,
+          "exe_name": "perf_test_{INDEX}.exe",
+          "exe_path": "C:\\PerfTest\\perf_test_{INDEX}.exe",
+          "priority_class": 32,
+          "creation_time": "{DYNAMIC_TIME}",
+          "ram_usage": "{RANDOM_1MB_TO_100MB}"
+        },
+        "is_active": "{RANDOM_BOOL}",
+        "is_tracked": true,
+        "was_updated": "{RANDOM_BOOL}",
+        "sessions": [],
+        "start": "{DYNAMIC_TIME}"
+      }
+    }
+  },
+  
+  "validation_data": {
+    "valid_process_fields": [
+      "pid",
+      "started_threads", 
+      "ppid",
+      "base_priority",
+      "exe_name",
+      "exe_path",
+      "priority_class",
+      "creation_time",
+      "ram_usage"
+    ],
+    
+    "valid_process_state_fields": [
+      "is_active",
+      "is_tracked", 
+      "was_updated",
+      "sessions",
+      "start"
+    ],
+    
+    "valid_session_fields": [
+      "start_time",
+      "end_time"
+    ],
+    
+    "priority_classes": {
+      "IDLE_PRIORITY_CLASS": 64,
+      "BELOW_NORMAL_PRIORITY_CLASS": 16384,
+      "NORMAL_PRIORITY_CLASS": 32,
+      "ABOVE_NORMAL_PRIORITY_CLASS": 32768,
+      "HIGH_PRIORITY_CLASS": 128,
+      "REALTIME_PRIORITY_CLASS": 256
+    },
+    
+    "typical_base_priorities": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15],
+    
+    "common_exe_names": [
+      "notepad.exe",
+      "explorer.exe", 
+      "chrome.exe",
+      "firefox.exe",
+      "code.exe",
+      "devenv.exe",
+      "cmd.exe",
+      "powershell.exe",
+      "svchost.exe",
+      "dwm.exe"
+    ]
+  }
+}

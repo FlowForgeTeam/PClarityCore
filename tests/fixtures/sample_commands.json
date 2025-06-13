@@ -1,0 +1,9 @@
+{
+    "test_commands": [
+        {"command_id": 0, "extra": {}},
+        {"command_id": 1, "extra": {}},
+        {"command_id": 2, "extra": {}},
+        {"command_id": 3, "extra": {"path": "C:\\Windows\\notepad.exe"}},
+        {"command_id": 4, "extra": {"path": "C:\\Windows\\notepad.exe"}}
+    ]
+}
