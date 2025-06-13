@@ -32,20 +32,16 @@ jobs:
         echo "File path: $($fileInfo.FullName)"
         echo "File size: $([math]::Round($fileInfo.Length/1KB, 2)) KB"
         
-        # Verify the file structure
-        echo "Directory structure:"
-        Get-ChildItem -Recurse nlohmann | ForEach-Object { echo "  $($_.FullName)" }
-        
-    - name: Create FileList.txt to exclude tests.cpp
+    - name: Temporarily rename tests.cpp
       run: |
-        # Get all .cpp files except tests.cpp
-        Get-ChildItem -Path . -Filter "*.cpp" -Recurse | 
-          Where-Object { $_.Name -ne "tests.cpp" } | 
-          ForEach-Object { $_.FullName } | 
-          Out-File -FilePath FileList.txt
-        
-        echo "Created FileList.txt with these source files:"
-        Get-Content FileList.txt | ForEach-Object { echo "  $_" }
+        # Check if tests.cpp exists
+        if (Test-Path "tests.cpp") {
+          # Rename it to prevent compilation
+          Move-Item -Path "tests.cpp" -Destination "tests.cpp.bak"
+          echo "✅ Renamed tests.cpp to tests.cpp.bak to exclude it from build"
+        } else {
+          echo "ℹ️ No tests.cpp file found"
+        }
         
     - name: Build project with explicit include path
       run: |
@@ -56,12 +52,11 @@ jobs:
         $env:CL = "/I`"$currentDir`" $env:CL"
         echo "Set CL environment variable to: $env:CL"
         
-        # Build the project using the file list to exclude tests.cpp
+        # Build the project
         msbuild PClarity.vcxproj `
           /p:Configuration=Release `
           /p:Platform=x64 `
           /p:VcpkgEnabled=false `
-          /p:SourceFileList="FileList.txt" `
           /verbosity:normal
         
         if ($LASTEXITCODE -eq 0) {
@@ -69,6 +64,14 @@ jobs:
         } else {
           echo "❌ Build failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
+        }
+        
+    - name: Restore tests.cpp
+      run: |
+        # Restore the original tests.cpp file
+        if (Test-Path "tests.cpp.bak") {
+          Move-Item -Path "tests.cpp.bak" -Destination "tests.cpp"
+          echo "✅ Restored tests.cpp"
         }
         
     - name: Check build result
