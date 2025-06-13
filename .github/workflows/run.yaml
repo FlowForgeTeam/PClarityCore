@@ -21,13 +21,10 @@ jobs:
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
-        # Let's use the latest vcpkg commit
-        vcpkgGitCommitId: '5b1214315250939257ef5d62ecdcbca18cf4fb1c'
+        # Use the latest commit ID
+        vcpkgGitCommitId: 'ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0'
         
-        # We want to run vcpkg install directly here
-        runVcpkgInstall: true
-        
-    - name: Install dependencies with vcpkg
+    - name: Create vcpkg.json manifest
       run: |
         # Create vcpkg.json manifest file
         @'
@@ -41,11 +38,20 @@ jobs:
         }
         '@ | Out-File -FilePath vcpkg.json -Encoding utf8
         
-        # Install dependencies
+        echo "✅ Created vcpkg.json manifest file"
+        
+    - name: Install dependencies with vcpkg
+      run: |
+        # Set default triplet
         $env:VCPKG_DEFAULT_TRIPLET = "x64-windows"
-        vcpkg install
+        
+        # Install dependencies
+        $vcpkgPath = "$env:VCPKG_ROOT\vcpkg.exe"
+        & $vcpkgPath install --triplet x64-windows
         
         echo "✅ Installed dependencies with vcpkg"
+        echo "Installed packages:"
+        & $vcpkgPath list
         
     - name: Modify project file to exclude main.cpp and include tests.cpp
       run: |
@@ -76,12 +82,35 @@ jobs:
           $content = $content -replace $pattern, $replacement
         }
         
+        # Add vcpkg toolchain file to the project
+        $vcpkgToolchain = "$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
+        $pattern = "(<PropertyGroup Label=`"Globals`">.*?</PropertyGroup>)"
+        $replacement = "`$1`n  <PropertyGroup>`n    <VcpkgEnabled>true</VcpkgEnabled>`n    <VcpkgTriplet>x64-windows</VcpkgTriplet>`n    <VcpkgRoot>$env:VCPKG_ROOT</VcpkgRoot>`n  </PropertyGroup>"
+        $content = $content -replace $pattern, $replacement
+        
+        # Add include directories
+        $vcpkgIncludePath = "$env:VCPKG_ROOT\installed\x64-windows\include"
+        $pattern = "(<ItemDefinitionGroup.*?<ClCompile>.*?)(<AdditionalIncludeDirectories>|</ClCompile>)"
+        $replacement = "`$1<AdditionalIncludeDirectories>$vcpkgIncludePath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>`$2"
+        $content = $content -replace $pattern, $replacement
+        
+        # Add library directories
+        $vcpkgLibPath = "$env:VCPKG_ROOT\installed\x64-windows\lib"
+        $pattern = "(<ItemDefinitionGroup.*?<Link>.*?)(<AdditionalLibraryDirectories>|</Link>)"
+        $replacement = "`$1<AdditionalLibraryDirectories>$vcpkgLibPath;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>`$2"
+        $content = $content -replace $pattern, $replacement
+        
+        # Add library dependencies
+        $pattern = "(<ItemDefinitionGroup.*?<Link>.*?)(<AdditionalDependencies>|</Link>)"
+        $replacement = "`$1<AdditionalDependencies>gtest.lib;gtest_main.lib;%(AdditionalDependencies)</AdditionalDependencies>`$2"
+        $content = $content -replace $pattern, $replacement
+        
         # Write the modified content back
         Set-Content -Path "PClarity.vcxproj" -Value $content
         
         # Display modified project file for verification
         echo "Modified project file content:"
-        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp|AdditionalIncludeDirectories|AdditionalLibraryDirectories|AdditionalDependencies"
         
         echo "✅ Modified project file to exclude main.cpp and include tests.cpp"
         
@@ -89,14 +118,10 @@ jobs:
       run: |
         echo "Building PClarity tests with Google Test..."
         
-        # Build the project with vcpkg integration
+        # Build the project
         msbuild PClarity.vcxproj `
           /p:Configuration=Release `
-          /p:Platform=x64 `
-          /p:VcpkgEnabled=true `
-          /p:VcpkgEnableManifest=true `
-          /p:VcpkgAutoLink=true `
-          /p:VcpkgTriplet=x64-windows
+          /p:Platform=x64
         
         if ($LASTEXITCODE -eq 0) {
           echo "✅ Test build completed successfully!"
