@@ -158,28 +158,6 @@ jobs:
           }
         }
         
-        Write-Host "🔧 Applying Unicode fixes to source code..." -ForegroundColor Cyan
-        
-        # Fix Functions_win32.cpp Unicode issues
-        $functionsWin32 = "Functions_win32.cpp"
-        if (Test-Path $functionsWin32) {
-          $content = Get-Content $functionsWin32 -Raw
-          
-          # Simple fixes for common Unicode issues
-          # These are basic text replacements to handle CHAR/WCHAR mismatches
-          $content = $content.Replace('K32GetProcessImageFileNameA(process_handle, exe_path, sizeof(exe_path))', 'K32GetProcessImageFileNameA(process_handle, (LPSTR)exe_path, sizeof(exe_path))')
-          
-          # Add simple cast for szExeFile if needed
-          if ($content -match 'wchar_to_utf8\(process_entry\.szExeFile\)' -and $content -notmatch '#ifdef UNICODE') {
-            $content = $content.Replace('wchar_to_utf8(process_entry.szExeFile)', 'wchar_to_utf8((LPCWSTR)process_entry.szExeFile)')
-          }
-          
-          Set-Content $functionsWin32 -Value $content -Encoding UTF8
-          Write-Host "✅ Applied basic Unicode fixes to Functions_win32.cpp" -ForegroundColor Green
-        } else {
-          Write-Host "⚠️ Functions_win32.cpp not found, skipping fixes" -ForegroundColor Yellow
-        }
-        
         # Set vcpkg paths
         $vcpkgRoot = "C:\vcpkg-unit-tests"
         $vcpkgInclude = "$vcpkgRoot\installed\x64-windows\include"
@@ -227,6 +205,28 @@ jobs:
         # List contents of vcpkg include directory
         Write-Host "📁 vcpkg include contents:" -ForegroundColor Blue
         Get-ChildItem $vcpkgInclude | ForEach-Object { Write-Host "   $($_.Name)" }
+        
+        # Check what library files are actually available
+        Write-Host "📚 vcpkg lib contents:" -ForegroundColor Blue
+        if (Test-Path $vcpkgLib) {
+          $libFiles = Get-ChildItem $vcpkgLib -Filter "*.lib" | Sort-Object Name
+          foreach ($lib in $libFiles) {
+            Write-Host "   $($lib.Name)" -ForegroundColor Gray
+          }
+          
+          # Look specifically for gtest libraries
+          $gtestLibs = $libFiles | Where-Object { $_.Name -like "*gtest*" }
+          if ($gtestLibs.Count -gt 0) {
+            Write-Host "🧪 Found gtest libraries:" -ForegroundColor Green
+            foreach ($lib in $gtestLibs) {
+              Write-Host "   ✅ $($lib.Name)" -ForegroundColor Green
+            }
+          } else {
+            Write-Host "❌ No gtest libraries found!" -ForegroundColor Red
+          }
+        } else {
+          Write-Host "❌ vcpkg lib directory not found!" -ForegroundColor Red
+        }
         
         # Find all source files except main.cpp
         $sourceFiles = Get-ChildItem -Path . -Name "*.cpp" | Where-Object { 
@@ -288,6 +288,12 @@ jobs:
         Write-Host "🔨 Compiling..." -ForegroundColor Yellow
         Write-Host "📝 Build command preview:" -ForegroundColor Blue
         Write-Host "cl.exe $($compilerFlags -join ' ') [source files] /link $($linkerFlags -join ' ') /OUT:unit_tests.exe" -ForegroundColor Gray
+        Write-Host "📚 Linker will search for these libraries:" -ForegroundColor Blue
+        foreach ($flag in $linkerFlags) {
+          if ($flag.EndsWith('.lib')) {
+            Write-Host "   📖 $flag" -ForegroundColor Cyan
+          }
+        }
         
         try {
           & cl.exe $buildArgs 2>&1 | Tee-Object -Variable buildOutput
@@ -312,21 +318,86 @@ jobs:
           Write-Host "📝 Build output:" -ForegroundColor Yellow
           $buildOutput | ForEach-Object { Write-Host "   $_" -ForegroundColor Gray }
           
-          Write-Host "🔄 Attempting minimal test build..." -ForegroundColor Yellow
+          Write-Host "🔄 Attempting CMake build as fallback..." -ForegroundColor Yellow
           
-          # Try building just test files with minimal setup
-          $minimalFiles = @("tests\test_main.cpp", "tests\unit\test_commands.cpp")
-          $minimalArgs = $compilerFlags + $minimalFiles + "/link" + $linkerFlags + "/OUT:minimal_tests.exe"
+          # Create a simple CMakeLists.txt for fallback
+          $cmakeContent = @"
+cmake_minimum_required(VERSION 3.16)
+project(unit_tests)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_TOOLCHAIN_FILE "$vcpkgRoot/scripts/buildsystems/vcpkg.cmake")
+
+find_package(GTest CONFIG REQUIRED)
+find_package(nlohmann_json CONFIG REQUIRED)
+
+# Add source files
+add_executable(unit_tests
+    Commands.cpp
+    Functions_file_system.cpp  
+    Functions_networking.cpp
+    Functions_win32.cpp
+    Global_state.cpp
+    Process_data.cpp
+    tests/test_main.cpp
+    tests/unit/test_commands.cpp
+    tests/unit/test_process_data.cpp
+    tests/unit/test_utility_functions.cpp
+    tests/unit/test_json_operations.cpp
+)
+
+target_link_libraries(unit_tests 
+    PRIVATE 
+    GTest::gtest 
+    GTest::gtest_main
+    nlohmann_json::nlohmann_json
+)
+
+target_compile_definitions(unit_tests PRIVATE
+    WIN32
+    _WINDOWS
+    UNICODE
+    _UNICODE
+    NOMINMAX
+    GTEST_HAS_PTHREAD=0
+    GTEST_OS_WINDOWS=1
+)
+"@
           
-          Write-Host "🧪 Building minimal tests..." -ForegroundColor Blue
-          & cl.exe $minimalArgs 2>&1 | Out-String | Write-Host -ForegroundColor Gray
+          Set-Content -Path "CMakeLists.txt" -Value $cmakeContent -Encoding UTF8
+          Write-Host "📝 Created CMakeLists.txt" -ForegroundColor Blue
           
-          if ($LASTEXITCODE -eq 0 -and (Test-Path "minimal_tests.exe")) {
-            Write-Host "✅ Minimal tests built successfully!" -ForegroundColor Green
-            # Use minimal tests instead
-            Move-Item "minimal_tests.exe" "unit_tests.exe" -Force
+          # Try CMake build
+          Write-Host "🔨 Running CMake configure..." -ForegroundColor Blue
+          cmake -B build -S . -DCMAKE_TOOLCHAIN_FILE="$vcpkgRoot/scripts/buildsystems/vcpkg.cmake" 2>&1 | Out-String | Write-Host -ForegroundColor Gray
+          
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "🔨 Running CMake build..." -ForegroundColor Blue
+            cmake --build build --config Release 2>&1 | Out-String | Write-Host -ForegroundColor Gray
+            
+            if ($LASTEXITCODE -eq 0) {
+              # Copy the built executable
+              $cmakeExe = "build\Release\unit_tests.exe"
+              if (Test-Path $cmakeExe) {
+                Copy-Item $cmakeExe "unit_tests.exe" -Force
+                Write-Host "✅ CMake build successful!" -ForegroundColor Green
+              } else {
+                # Try Debug build location
+                $cmakeExeDebug = "build\Debug\unit_tests.exe"
+                if (Test-Path $cmakeExeDebug) {
+                  Copy-Item $cmakeExeDebug "unit_tests.exe" -Force
+                  Write-Host "✅ CMake build successful (Debug)!" -ForegroundColor Green
+                } else {
+                  Write-Host "❌ CMake executable not found" -ForegroundColor Red
+                  exit 1
+                }
+              }
+            } else {
+              Write-Host "❌ CMake build failed" -ForegroundColor Red
+              exit 1
+            }
           } else {
-            Write-Host "❌ Even minimal tests failed to build" -ForegroundColor Red
+            Write-Host "❌ CMake configure failed" -ForegroundColor Red
             exit 1
           }
         }
@@ -474,11 +545,11 @@ jobs:
         } else {
           Write-Host "❌ Status: NO RESULTS FOUND" -ForegroundColor Red
         }
-        
+
         Write-Host "🎯 Summary of Unit Tests" -ForegroundColor Cyan
         Write-Host "=============================" -ForegroundColor Cyan
         Write-Host "Total Tests: $($testsuites.tests)" -ForegroundColor White
         Write-Host "Passed: $($testsuites.tests - $testsuites.failures - $testsuites.errors)" -ForegroundColor Green
         Write-Host "Failed: $($testsuites.failures)" -ForegroundColor Red
-        Write-Host "Errors: $($testsuites.errors)" -ForegroundColor Red
+        Write-Host "Errors: $($testsuites.errors)" -ForegroundColor Yellow
         Write-Host "Duration: $($testsuites.time)s" -ForegroundColor White
