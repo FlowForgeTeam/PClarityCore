@@ -29,7 +29,7 @@ TEST(WCharToUtf8Test, HandlesMixedCharacters) {
 
 // Test with special characters
 TEST(WCharToUtf8Test, HandlesSpecialCharacters) {
-    std::string result = wchar_to_utf8(L"€£¥$");
+    std::string result = wchar_to_utf8(L"€£¥$¢");
     // UTF-8 representation of "€£¥$¢"
     const char expected[] = "\xe2\x82\xac\xc2\xa3\xc2\xa5$\xc2\xa2";
     EXPECT_EQ(expected, result);
