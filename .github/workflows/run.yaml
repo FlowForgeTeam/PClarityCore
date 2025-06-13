@@ -39,24 +39,6 @@ jobs:
         
         cd ..
         
-    - name: Create vcpkg response file
-      run: |
-        # Create a response file for MSBuild to find vcpkg
-        $vcpkgRoot = "$(Get-Location)\vcpkg"
-        $vcpkgToolchain = "$vcpkgRoot\scripts\buildsystems\vcpkg.cmake"
-        
-        @"
-        /p:VcpkgEnabled=true
-        /p:VcpkgEnableManifest=false
-        /p:VcpkgManifestInstall=false
-        /p:VcpkgRoot=$vcpkgRoot
-        /p:VcpkgAutoLink=true
-        /p:VcpkgTriplet=x64-windows
-        "@ | Out-File -FilePath vcpkg.rsp -Encoding ascii
-        
-        echo "Created vcpkg response file:"
-        Get-Content vcpkg.rsp
-        
     - name: Modify project file to exclude main.cpp and include tests.cpp
       run: |
         # Display original project file for debugging
@@ -111,11 +93,19 @@ jobs:
       run: |
         echo "Building PClarity tests with Google Test..."
         
+        # Set vcpkg parameters directly
+        $vcpkgRoot = "$(Get-Location)\vcpkg"
+        
         # Build the project with vcpkg integration
         msbuild PClarity.vcxproj `
           /p:Configuration=Release `
           /p:Platform=x64 `
-          @vcpkg.rsp
+          /p:VcpkgEnabled=true `
+          /p:VcpkgEnableManifest=false `
+          /p:VcpkgManifestInstall=false `
+          /p:VcpkgRoot="$vcpkgRoot" `
+          /p:VcpkgAutoLink=true `
+          /p:VcpkgTriplet=x64-windows
         
         if ($LASTEXITCODE -eq 0) {
           echo "✅ Test build completed successfully!"
