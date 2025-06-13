@@ -1,4 +1,4 @@
-name: Run Tests
+name: CMake Tests
 
 on: [push, pull_request]
 
@@ -10,25 +10,67 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
       
-    - name: Setup Visual Studio environment
-      uses: ilammy/msvc-dev-cmd@v1
-      with:
-        arch: x64
-        
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
         vcpkgGitCommitId: 'ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0'
+        
+    - name: Create CMakeLists.txt
+      run: |
+        # Create a CMakeLists.txt file for the project
+        @'
+        cmake_minimum_required(VERSION 3.16)
+        project(PClarity CXX)
+
+        set(CMAKE_CXX_STANDARD 20)
+        set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+        # Find packages
+        find_package(GTest REQUIRED)
+        find_package(nlohmann_json CONFIG REQUIRED)
+
+        # Source files (excluding main.cpp and tests.cpp)
+        set(SOURCES
+            Commands.cpp
+            Functions_file_system.cpp
+            Functions_win32.cpp
+            Global_state.cpp
+            Functions_networking.cpp
+            Process_data.cpp
+        )
+
+        # Create library from common sources
+        add_library(PClarity_lib STATIC ${SOURCES})
+        target_link_libraries(PClarity_lib PRIVATE nlohmann_json::nlohmann_json)
+
+        # Main executable
+        add_executable(PClarity main.cpp)
+        target_link_libraries(PClarity PRIVATE PClarity_lib)
+
+        # Test executable
+        add_executable(PClarity_tests tests.cpp)
+        target_link_libraries(PClarity_tests PRIVATE 
+            PClarity_lib
+            GTest::GTest 
+            GTest::Main
+        )
+
+        # Enable testing
+        enable_testing()
+        add_test(NAME PClarity_tests COMMAND PClarity_tests)
+        '@ | Out-File -FilePath CMakeLists.txt -Encoding utf8
+        
+        echo "✅ Created CMakeLists.txt"
         
     - name: Create vcpkg.json manifest
       run: |
         # Create vcpkg.json manifest file
         @'
         {
-          "name": "pclarity-tests",
+          "name": "pclarity",
           "version": "0.1.0",
           "dependencies": [
             "gtest",
@@ -39,135 +81,46 @@ jobs:
         
         echo "✅ Created vcpkg.json manifest file"
         
-    - name: Install dependencies with vcpkg
+    - name: Configure CMake
       run: |
-        # Set default triplet
-        $env:VCPKG_DEFAULT_TRIPLET = "x64-windows"
+        # Create build directory
+        mkdir build
+        cd build
         
-        # Install dependencies
-        $vcpkgPath = "$env:VCPKG_ROOT\vcpkg.exe"
-        & $vcpkgPath install --triplet x64-windows
+        # Configure CMake with vcpkg toolchain
+        cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
         
-        echo "✅ Installed dependencies with vcpkg"
-        echo "Installed packages:"
-        & $vcpkgPath list
-        
-    - name: Install nlohmann-json directly
+    - name: Build project
       run: |
-        # Create the directory structure exactly as expected by includes
-        New-Item -ItemType Directory -Force -Path "nlohmann"
-        
-        # Download the latest nlohmann-json header (3.12.0) 
-        $url = "https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp"
-        Invoke-WebRequest -Uri $url -OutFile "nlohmann/json.hpp"
-        
-        echo "✅ Downloaded nlohmann-json 3.12.0 header"
-        $fileInfo = Get-Item "nlohmann/json.hpp"
-        echo "File path: $($fileInfo.FullName)"
-        echo "File size: $([math]::Round($fileInfo.Length/1KB, 2)) KB"
-        
-    - name: Modify project file to exclude main.cpp and include tests.cpp
-      run: |
-        # Display original project file for debugging
-        echo "Original project file content:"
-        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
-        
-        # Create a backup of the project file
-        Copy-Item -Path "PClarity.vcxproj" -Destination "PClarity.vcxproj.bak"
-        
-        # Modify the project file to exclude main.cpp and include tests.cpp
-        $content = Get-Content -Path "PClarity.vcxproj" -Raw
-        
-        # Add ExcludedFromBuild property to main.cpp
-        $pattern = "<ClCompile Include=`"main.cpp`" */?>"
-        $replacement = "<ClCompile Include=`"main.cpp`"><ExcludedFromBuild>true</ExcludedFromBuild></ClCompile>"
-        $content = $content -replace $pattern, $replacement
-        
-        # Make sure tests.cpp is included without ExcludedFromBuild
-        $pattern = "<ClCompile Include=`"tests.cpp`".*?>(.*?)</ClCompile>"
-        $replacement = "<ClCompile Include=`"tests.cpp`"></ClCompile>"
-        $content = $content -replace $pattern, $replacement
-        
-        # If tests.cpp is not in the project, add it
-        if ($content -notmatch "<ClCompile Include=`"tests.cpp`"") {
-          $pattern = "(<ItemGroup>.*?<ClCompile Include=.*?/>)"
-          $replacement = "`$1`n    <ClCompile Include=`"tests.cpp`" />"
-          $content = $content -replace $pattern, $replacement
-        }
-        
-        # Write the modified content back
-        Set-Content -Path "PClarity.vcxproj" -Value $content
-        
-        # Display modified project file for verification
-        echo "Modified project file content:"
-        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
-        
-        echo "✅ Modified project file to exclude main.cpp and include tests.cpp"
-        
-    - name: Build test project
-      run: |
-        echo "Building PClarity tests with Google Test..."
-        
-        # Set include paths directly via CL environment variable
-        $currentDir = (Get-Location).Path
-        $vcpkgIncludePath = "$env:VCPKG_ROOT\installed\x64-windows\include"
-        $env:CL = "/I`"$currentDir`" /I`"$vcpkgIncludePath`" $env:CL"
-        
-        # Set library paths directly via LINK environment variable
-        $vcpkgLibPath = "$env:VCPKG_ROOT\installed\x64-windows\lib"
-        $env:LINK = "/LIBPATH:`"$vcpkgLibPath`" gtest.lib gtest_main.lib $env:LINK"
-        
-        echo "Include paths: $env:CL"
-        echo "Library paths: $env:LINK"
-        
-        # Build the project
-        msbuild PClarity.vcxproj `
-          /p:Configuration=Release `
-          /p:Platform=x64
+        cd build
+        cmake --build . --config Release
         
         if ($LASTEXITCODE -eq 0) {
-          echo "✅ Test build completed successfully!"
+          echo "✅ Build completed successfully!"
         } else {
-          echo "❌ Test build failed with exit code $LASTEXITCODE"
+          echo "❌ Build failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
         }
         
     - name: Run tests
       run: |
-        # Copy required DLLs to the executable directory
-        Copy-Item -Path "$env:VCPKG_ROOT\installed\x64-windows\bin\*.dll" -Destination "x64\Release\" -ErrorAction SilentlyContinue
+        cd build
+        ctest -C Release --output-on-failure
+        $testResult = $LASTEXITCODE
         
-        if (Test-Path "x64/Release/PClarity.exe") {
-          echo "Running tests..."
-          
-          # Run the tests and capture the output
-          cd x64/Release
-          ./PClarity.exe
-          $testResult = $LASTEXITCODE
-          
-          if ($testResult -eq 0) {
-            echo "✅ All tests passed!"
-          } else {
-            echo "❌ Tests failed with exit code $testResult"
-            exit $testResult
-          }
+        if ($testResult -eq 0) {
+          echo "✅ All tests passed!"
         } else {
-          echo "❌ Test executable not found"
-          echo "Available build outputs:"
-          if (Test-Path "x64") {
-            Get-ChildItem "x64" -Recurse | ForEach-Object { 
-              echo "  $($_.FullName)" 
-            }
-          } else {
-            echo "  No x64 directory found"
-          }
-          exit 1
+          echo "❌ Tests failed with exit code $testResult"
+          exit $testResult
         }
         
-    - name: Upload test results
+    - name: Upload test artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: x64/Release/PClarity.exe
+        path: |
+          build/Release/PClarity_tests.exe
+          build/Testing/Temporary/LastTest.log
         retention-days: 7
