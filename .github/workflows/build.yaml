@@ -36,6 +36,17 @@ jobs:
         echo "Directory structure:"
         Get-ChildItem -Recurse nlohmann | ForEach-Object { echo "  $($_.FullName)" }
         
+    - name: Create FileList.txt to exclude tests.cpp
+      run: |
+        # Get all .cpp files except tests.cpp
+        Get-ChildItem -Path . -Filter "*.cpp" -Recurse | 
+          Where-Object { $_.Name -ne "tests.cpp" } | 
+          ForEach-Object { $_.FullName } | 
+          Out-File -FilePath FileList.txt
+        
+        echo "Created FileList.txt with these source files:"
+        Get-Content FileList.txt | ForEach-Object { echo "  $_" }
+        
     - name: Build project with explicit include path
       run: |
         echo "Building PClarity with C++20 and nlohmann-json 3.12.0..."
@@ -45,11 +56,12 @@ jobs:
         $env:CL = "/I`"$currentDir`" $env:CL"
         echo "Set CL environment variable to: $env:CL"
         
-        # Build the project
+        # Build the project using the file list to exclude tests.cpp
         msbuild PClarity.vcxproj `
           /p:Configuration=Release `
           /p:Platform=x64 `
           /p:VcpkgEnabled=false `
+          /p:SourceFileList="FileList.txt" `
           /verbosity:normal
         
         if ($LASTEXITCODE -eq 0) {
