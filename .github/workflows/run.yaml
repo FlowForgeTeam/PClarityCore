@@ -19,25 +19,33 @@ jobs:
         arch: x64
         
     - name: Setup vcpkg
-      run: |
-        # Clone vcpkg
-        git clone https://github.com/microsoft/vcpkg.git
-        cd vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        # Let's use the latest vcpkg commit
+        vcpkgGitCommitId: '5b1214315250939257ef5d62ecdcbca18cf4fb1c'
         
-        # Bootstrap vcpkg
-        .\bootstrap-vcpkg.bat -disableMetrics
+        # We want to run vcpkg install directly here
+        runVcpkgInstall: true
+        
+    - name: Install dependencies with vcpkg
+      run: |
+        # Create vcpkg.json manifest file
+        @'
+        {
+          "name": "pclarity-tests",
+          "version": "0.1.0",
+          "dependencies": [
+            "gtest",
+            "nlohmann-json"
+          ]
+        }
+        '@ | Out-File -FilePath vcpkg.json -Encoding utf8
         
         # Install dependencies
-        .\vcpkg.exe install gtest:x64-windows nlohmann-json:x64-windows
+        $env:VCPKG_DEFAULT_TRIPLET = "x64-windows"
+        vcpkg install
         
-        # Integrate with Visual Studio
-        .\vcpkg.exe integrate install
-        
-        # Show installed packages
-        echo "Installed packages:"
-        .\vcpkg.exe list
-        
-        cd ..
+        echo "✅ Installed dependencies with vcpkg"
         
     - name: Modify project file to exclude main.cpp and include tests.cpp
       run: |
@@ -68,24 +76,12 @@ jobs:
           $content = $content -replace $pattern, $replacement
         }
         
-        # Add vcpkg include path to project
-        $vcpkgIncludePath = "$(Get-Location)\vcpkg\installed\x64-windows\include"
-        $pattern = "(<ItemDefinitionGroup.*?<ClCompile>.*?)(<AdditionalIncludeDirectories>|</ClCompile>)"
-        $replacement = "`$1<AdditionalIncludeDirectories>$vcpkgIncludePath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>`$2"
-        $content = $content -replace $pattern, $replacement
-        
-        # Add vcpkg lib path to project
-        $vcpkgLibPath = "$(Get-Location)\vcpkg\installed\x64-windows\lib"
-        $pattern = "(<ItemDefinitionGroup.*?<Link>.*?)(<AdditionalLibraryDirectories>|</Link>)"
-        $replacement = "`$1<AdditionalLibraryDirectories>$vcpkgLibPath;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>`$2"
-        $content = $content -replace $pattern, $replacement
-        
         # Write the modified content back
         Set-Content -Path "PClarity.vcxproj" -Value $content
         
         # Display modified project file for verification
         echo "Modified project file content:"
-        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp|AdditionalIncludeDirectories|AdditionalLibraryDirectories"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
         
         echo "✅ Modified project file to exclude main.cpp and include tests.cpp"
         
@@ -93,17 +89,12 @@ jobs:
       run: |
         echo "Building PClarity tests with Google Test..."
         
-        # Set vcpkg parameters directly
-        $vcpkgRoot = "$(Get-Location)\vcpkg"
-        
         # Build the project with vcpkg integration
         msbuild PClarity.vcxproj `
           /p:Configuration=Release `
           /p:Platform=x64 `
           /p:VcpkgEnabled=true `
-          /p:VcpkgEnableManifest=false `
-          /p:VcpkgManifestInstall=false `
-          /p:VcpkgRoot="$vcpkgRoot" `
+          /p:VcpkgEnableManifest=true `
           /p:VcpkgAutoLink=true `
           /p:VcpkgTriplet=x64-windows
         
@@ -117,7 +108,7 @@ jobs:
     - name: Run tests
       run: |
         # Copy required DLLs to the executable directory
-        Copy-Item -Path "vcpkg\installed\x64-windows\bin\*.dll" -Destination "x64\Release\" -ErrorAction SilentlyContinue
+        Copy-Item -Path "$env:VCPKG_ROOT\installed\x64-windows\bin\*.dll" -Destination "x64\Release\" -ErrorAction SilentlyContinue
         
         if (Test-Path "x64/Release/PClarity.exe") {
           echo "Running tests..."
