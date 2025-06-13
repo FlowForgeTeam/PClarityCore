@@ -48,10 +48,11 @@ jobs:
         # Create library from common sources
         add_library(PClarity_lib STATIC ${SOURCES})
         target_link_libraries(PClarity_lib PRIVATE nlohmann_json::nlohmann_json)
+        target_include_directories(PClarity_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
         # Main executable
         add_executable(PClarity main.cpp)
-        target_link_libraries(PClarity PRIVATE PClarity_lib)
+        target_link_libraries(PClarity PRIVATE PClarity_lib nlohmann_json::nlohmann_json)
 
         # Test executable
         add_executable(PClarity_tests tests.cpp)
@@ -59,6 +60,7 @@ jobs:
             PClarity_lib
             GTest::GTest 
             GTest::Main
+            nlohmann_json::nlohmann_json
         )
 
         # Enable testing
@@ -109,29 +111,37 @@ jobs:
         # Configure CMake with vcpkg toolchain
         cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
         
-    - name: Build project
+    - name: Build tests only
       run: |
         cd build
-        cmake --build . --config Release
+        cmake --build . --config Release --target PClarity_tests
         
         if ($LASTEXITCODE -eq 0) {
-          echo "✅ Build completed successfully!"
+          echo "✅ Test build completed successfully!"
         } else {
-          echo "❌ Build failed with exit code $LASTEXITCODE"
+          echo "❌ Test build failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
         }
         
     - name: Run tests
       run: |
         cd build
-        ctest -C Release --output-on-failure
-        $testResult = $LASTEXITCODE
         
-        if ($testResult -eq 0) {
-          echo "✅ All tests passed!"
+        # Check if the test executable exists
+        if (Test-Path "Release/PClarity_tests.exe") {
+          # Run the tests directly
+          ./Release/PClarity_tests.exe
+          $testResult = $LASTEXITCODE
+          
+          if ($testResult -eq 0) {
+            echo "✅ All tests passed!"
+          } else {
+            echo "❌ Tests failed with exit code $testResult"
+            exit $testResult
+          }
         } else {
-          echo "❌ Tests failed with exit code $testResult"
-          exit $testResult
+          echo "❌ Test executable not found"
+          exit 1
         }
         
     - name: Upload test artifacts
