@@ -320,49 +320,51 @@ jobs:
           
           Write-Host "🔄 Attempting CMake build as fallback..." -ForegroundColor Yellow
           
-          # Create a simple CMakeLists.txt for fallback
-          $cmakeContent = @"
-cmake_minimum_required(VERSION 3.16)
-project(unit_tests)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_TOOLCHAIN_FILE "$vcpkgRoot/scripts/buildsystems/vcpkg.cmake")
-
-find_package(GTest CONFIG REQUIRED)
-find_package(nlohmann_json CONFIG REQUIRED)
-
-# Add source files
-add_executable(unit_tests
-    Commands.cpp
-    Functions_file_system.cpp  
-    Functions_networking.cpp
-    Functions_win32.cpp
-    Global_state.cpp
-    Process_data.cpp
-    tests/test_main.cpp
-    tests/unit/test_commands.cpp
-    tests/unit/test_process_data.cpp
-    tests/unit/test_utility_functions.cpp
-    tests/unit/test_json_operations.cpp
-)
-
-target_link_libraries(unit_tests 
-    PRIVATE 
-    GTest::gtest 
-    GTest::gtest_main
-    nlohmann_json::nlohmann_json
-)
-
-target_compile_definitions(unit_tests PRIVATE
-    WIN32
-    _WINDOWS
-    UNICODE
-    _UNICODE
-    NOMINMAX
-    GTEST_HAS_PTHREAD=0
-    GTEST_OS_WINDOWS=1
-)
-"@
+          # Create a simple CMakeLists.txt for fallback using array approach
+          $cmakeLines = @(
+            "cmake_minimum_required(VERSION 3.16)",
+            "project(unit_tests)",
+            "",
+            "set(CMAKE_CXX_STANDARD 20)",
+            "set(CMAKE_TOOLCHAIN_FILE `"$vcpkgRoot/scripts/buildsystems/vcpkg.cmake`")",
+            "",
+            "find_package(GTest CONFIG REQUIRED)",
+            "find_package(nlohmann_json CONFIG REQUIRED)",
+            "",
+            "# Add source files",
+            "add_executable(unit_tests",
+            "    Commands.cpp",
+            "    Functions_file_system.cpp",
+            "    Functions_networking.cpp", 
+            "    Functions_win32.cpp",
+            "    Global_state.cpp",
+            "    Process_data.cpp",
+            "    tests/test_main.cpp",
+            "    tests/unit/test_commands.cpp",
+            "    tests/unit/test_process_data.cpp",
+            "    tests/unit/test_utility_functions.cpp",
+            "    tests/unit/test_json_operations.cpp",
+            ")",
+            "",
+            "target_link_libraries(unit_tests",
+            "    PRIVATE",
+            "    GTest::gtest",
+            "    GTest::gtest_main",
+            "    nlohmann_json::nlohmann_json",
+            ")",
+            "",
+            "target_compile_definitions(unit_tests PRIVATE",
+            "    WIN32",
+            "    _WINDOWS", 
+            "    UNICODE",
+            "    _UNICODE",
+            "    NOMINMAX",
+            "    GTEST_HAS_PTHREAD=0",
+            "    GTEST_OS_WINDOWS=1",
+            ")"
+          )
+          
+          $cmakeContent = $cmakeLines -join "`n"
           
           Set-Content -Path "CMakeLists.txt" -Value $cmakeContent -Encoding UTF8
           Write-Host "📝 Created CMakeLists.txt" -ForegroundColor Blue
@@ -539,17 +541,16 @@ target_compile_definitions(unit_tests PRIVATE
             
             Write-Host "📊 Results: $($testsuites.tests - $testsuites.failures - $testsuites.errors)/$($testsuites.tests) passed" -ForegroundColor White
             Write-Host "⏱️ Duration: $($testsuites.time)s" -ForegroundColor White
+            Write-Host "🎯 Summary of Unit Tests" -ForegroundColor Cyan
+            Write-Host "=============================" -ForegroundColor Cyan
+            Write-Host "Total Tests: $($testsuites.tests)" -ForegroundColor White
+            Write-Host "Passed: $($testsuites.tests - $testsuites.failures - $testsuites.errors)" -ForegroundColor Green
+            Write-Host "Failed: $($testsuites.failures)" -ForegroundColor Red
+            Write-Host "Errors: $($testsuites.errors)" -ForegroundColor Yellow
+            Write-Host "Duration: $($testsuites.time)s" -ForegroundColor White
           } catch {
             Write-Host "⚠️ Status: RESULTS UNCLEAR" -ForegroundColor Yellow
           }
         } else {
           Write-Host "❌ Status: NO RESULTS FOUND" -ForegroundColor Red
         }
-
-        Write-Host "🎯 Summary of Unit Tests" -ForegroundColor Cyan
-        Write-Host "=============================" -ForegroundColor Cyan
-        Write-Host "Total Tests: $($testsuites.tests)" -ForegroundColor White
-        Write-Host "Passed: $($testsuites.tests - $testsuites.failures - $testsuites.errors)" -ForegroundColor Green
-        Write-Host "Failed: $($testsuites.failures)" -ForegroundColor Red
-        Write-Host "Errors: $($testsuites.errors)" -ForegroundColor Yellow
-        Write-Host "Duration: $($testsuites.time)s" -ForegroundColor White
