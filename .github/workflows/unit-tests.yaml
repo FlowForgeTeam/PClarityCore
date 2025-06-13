@@ -111,13 +111,13 @@ jobs:
           # Create minimal test files if missing
           foreach ($file in $missingFiles) {
             $content = @"
-              #include <gtest/gtest.h>
+            #include <gtest/gtest.h>
 
-              // Placeholder test for $file
-              TEST(PlaceholderTest, AlwaysPasses) {
-                  EXPECT_TRUE(true);
-              }
-              "@
+            // Placeholder test for $file
+            TEST(PlaceholderTest, AlwaysPasses) {
+                EXPECT_TRUE(true);
+            }
+            "@
             New-Item -ItemType File -Path $file -Force
             Set-Content -Path $file -Value $content
             Write-Host "📝 Created placeholder: $file" -ForegroundColor Yellow
