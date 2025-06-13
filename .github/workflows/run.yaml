@@ -1,0 +1,124 @@
+name: Run Tests
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      
+    - name: Setup Visual Studio environment
+      uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
+        
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'  # Latest stable
+        
+    - name: Install dependencies
+      run: |
+        # Install Google Test and nlohmann-json
+        vcpkg install gtest:x64-windows nlohmann-json:x64-windows
+        vcpkg integrate install
+        
+        echo "✅ Installed Google Test and nlohmann-json"
+        
+    - name: Modify project file to exclude main.cpp and include tests.cpp
+      run: |
+        # Display original project file for debugging
+        echo "Original project file content:"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
+        
+        # Create a backup of the project file
+        Copy-Item -Path "PClarity.vcxproj" -Destination "PClarity.vcxproj.bak"
+        
+        # Modify the project file to exclude main.cpp and include tests.cpp
+        $content = Get-Content -Path "PClarity.vcxproj" -Raw
+        
+        # Add ExcludedFromBuild property to main.cpp
+        $pattern = "<ClCompile Include=`"main.cpp`" */?>"
+        $replacement = "<ClCompile Include=`"main.cpp`"><ExcludedFromBuild>true</ExcludedFromBuild></ClCompile>"
+        $content = $content -replace $pattern, $replacement
+        
+        # Make sure tests.cpp is included without ExcludedFromBuild
+        $pattern = "<ClCompile Include=`"tests.cpp`".*?>(.*?)</ClCompile>"
+        $replacement = "<ClCompile Include=`"tests.cpp`"></ClCompile>"
+        $content = $content -replace $pattern, $replacement
+        
+        # If tests.cpp is not in the project, add it
+        if ($content -notmatch "<ClCompile Include=`"tests.cpp`"") {
+          $pattern = "(<ItemGroup>.*?<ClCompile Include=.*?/>)"
+          $replacement = "`$1`n    <ClCompile Include=`"tests.cpp`" />"
+          $content = $content -replace $pattern, $replacement
+        }
+        
+        # Write the modified content back
+        Set-Content -Path "PClarity.vcxproj" -Value $content
+        
+        # Display modified project file for verification
+        echo "Modified project file content:"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
+        
+        echo "✅ Modified project file to exclude main.cpp and include tests.cpp"
+        
+    - name: Build test project
+      run: |
+        echo "Building PClarity tests with Google Test..."
+        
+        # Build the project with vcpkg integration
+        msbuild PClarity.vcxproj `
+          /p:Configuration=Release `
+          /p:Platform=x64 `
+          /p:VcpkgEnabled=true `
+          /verbosity:normal
+        
+        if ($LASTEXITCODE -eq 0) {
+          echo "✅ Test build completed successfully!"
+        } else {
+          echo "❌ Test build failed with exit code $LASTEXITCODE"
+          exit $LASTEXITCODE
+        }
+        
+    - name: Run tests
+      run: |
+        if (Test-Path "x64/Release/PClarity.exe") {
+          echo "Running tests..."
+          
+          # Run the tests and capture the output
+          & "./x64/Release/PClarity.exe"
+          $testResult = $LASTEXITCODE
+          
+          if ($testResult -eq 0) {
+            echo "✅ All tests passed!"
+          } else {
+            echo "❌ Tests failed with exit code $testResult"
+            exit $testResult
+          }
+        } else {
+          echo "❌ Test executable not found"
+          echo "Available build outputs:"
+          if (Test-Path "x64") {
+            Get-ChildItem "x64" -Recurse | ForEach-Object { 
+              echo "  $($_.FullName)" 
+            }
+          } else {
+            echo "  No x64 directory found"
+          }
+          exit 1
+        }
+        
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: x64/Release/PClarity.exe
+        retention-days: 7
