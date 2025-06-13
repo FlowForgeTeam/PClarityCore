@@ -21,7 +21,6 @@ jobs:
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
-        # Use the latest commit ID
         vcpkgGitCommitId: 'ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0'
         
     - name: Create vcpkg.json manifest
@@ -53,6 +52,20 @@ jobs:
         echo "Installed packages:"
         & $vcpkgPath list
         
+    - name: Install nlohmann-json directly
+      run: |
+        # Create the directory structure exactly as expected by includes
+        New-Item -ItemType Directory -Force -Path "nlohmann"
+        
+        # Download the latest nlohmann-json header (3.12.0) 
+        $url = "https://github.com/nlohmann/json/releases/download/v3.12.0/json.hpp"
+        Invoke-WebRequest -Uri $url -OutFile "nlohmann/json.hpp"
+        
+        echo "✅ Downloaded nlohmann-json 3.12.0 header"
+        $fileInfo = Get-Item "nlohmann/json.hpp"
+        echo "File path: $($fileInfo.FullName)"
+        echo "File size: $([math]::Round($fileInfo.Length/1KB, 2)) KB"
+        
     - name: Modify project file to exclude main.cpp and include tests.cpp
       run: |
         # Display original project file for debugging
@@ -82,41 +95,30 @@ jobs:
           $content = $content -replace $pattern, $replacement
         }
         
-        # Add vcpkg toolchain file to the project
-        $vcpkgToolchain = "$env:VCPKG_ROOT\scripts\buildsystems\vcpkg.cmake"
-        $pattern = "(<PropertyGroup Label=`"Globals`">.*?</PropertyGroup>)"
-        $replacement = "`$1`n  <PropertyGroup>`n    <VcpkgEnabled>true</VcpkgEnabled>`n    <VcpkgTriplet>x64-windows</VcpkgTriplet>`n    <VcpkgRoot>$env:VCPKG_ROOT</VcpkgRoot>`n  </PropertyGroup>"
-        $content = $content -replace $pattern, $replacement
-        
-        # Add include directories
-        $vcpkgIncludePath = "$env:VCPKG_ROOT\installed\x64-windows\include"
-        $pattern = "(<ItemDefinitionGroup.*?<ClCompile>.*?)(<AdditionalIncludeDirectories>|</ClCompile>)"
-        $replacement = "`$1<AdditionalIncludeDirectories>$vcpkgIncludePath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>`$2"
-        $content = $content -replace $pattern, $replacement
-        
-        # Add library directories
-        $vcpkgLibPath = "$env:VCPKG_ROOT\installed\x64-windows\lib"
-        $pattern = "(<ItemDefinitionGroup.*?<Link>.*?)(<AdditionalLibraryDirectories>|</Link>)"
-        $replacement = "`$1<AdditionalLibraryDirectories>$vcpkgLibPath;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>`$2"
-        $content = $content -replace $pattern, $replacement
-        
-        # Add library dependencies
-        $pattern = "(<ItemDefinitionGroup.*?<Link>.*?)(<AdditionalDependencies>|</Link>)"
-        $replacement = "`$1<AdditionalDependencies>gtest.lib;gtest_main.lib;%(AdditionalDependencies)</AdditionalDependencies>`$2"
-        $content = $content -replace $pattern, $replacement
-        
         # Write the modified content back
         Set-Content -Path "PClarity.vcxproj" -Value $content
         
         # Display modified project file for verification
         echo "Modified project file content:"
-        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp|AdditionalIncludeDirectories|AdditionalLibraryDirectories|AdditionalDependencies"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
         
         echo "✅ Modified project file to exclude main.cpp and include tests.cpp"
         
     - name: Build test project
       run: |
         echo "Building PClarity tests with Google Test..."
+        
+        # Set include paths directly via CL environment variable
+        $currentDir = (Get-Location).Path
+        $vcpkgIncludePath = "$env:VCPKG_ROOT\installed\x64-windows\include"
+        $env:CL = "/I`"$currentDir`" /I`"$vcpkgIncludePath`" $env:CL"
+        
+        # Set library paths directly via LINK environment variable
+        $vcpkgLibPath = "$env:VCPKG_ROOT\installed\x64-windows\lib"
+        $env:LINK = "/LIBPATH:`"$vcpkgLibPath`" gtest.lib gtest_main.lib $env:LINK"
+        
+        echo "Include paths: $env:CL"
+        echo "Library paths: $env:LINK"
         
         # Build the project
         msbuild PClarity.vcxproj `
