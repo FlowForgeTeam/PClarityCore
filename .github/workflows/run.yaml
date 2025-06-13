@@ -28,6 +28,9 @@ jobs:
         set(CMAKE_CXX_STANDARD 20)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+        # Define UNICODE and _UNICODE for Windows API
+        add_definitions(-DUNICODE -D_UNICODE)
+
         # Find packages
         find_package(GTest REQUIRED)
         find_package(nlohmann_json CONFIG REQUIRED)
@@ -80,6 +83,22 @@ jobs:
         '@ | Out-File -FilePath vcpkg.json -Encoding utf8
         
         echo "✅ Created vcpkg.json manifest file"
+        
+    - name: Fix Unicode/ASCII issues in Functions_win32.cpp
+      run: |
+        # Read the file
+        $content = Get-Content -Path "Functions_win32.cpp" -Raw
+        
+        # Fix the wchar_to_utf8 call on line 68
+        $content = $content -replace 'wchar_to_utf8\(szPath\)', '(char*)szPath'
+        
+        # Fix K32GetProcessImageFileNameA calls
+        $content = $content -replace 'K32GetProcessImageFileNameA\(hProcess, szImagePath', 'K32GetProcessImageFileNameW(hProcess, szImagePath'
+        
+        # Write the modified content back
+        Set-Content -Path "Functions_win32.cpp" -Value $content
+        
+        echo "✅ Fixed Unicode/ASCII issues in Functions_win32.cpp"
         
     - name: Configure CMake
       run: |
