@@ -32,15 +32,41 @@ jobs:
         echo "File path: $($fileInfo.FullName)"
         echo "File size: $([math]::Round($fileInfo.Length/1KB, 2)) KB"
         
-    - name: Temporarily rename tests.cpp
+    - name: Modify project file to exclude tests.cpp
       run: |
-        # Check if tests.cpp exists
-        if (Test-Path "tests.cpp") {
-          # Rename it to prevent compilation
-          Move-Item -Path "tests.cpp" -Destination "tests.cpp.bak"
-          echo "✅ Renamed tests.cpp to tests.cpp.bak to exclude it from build"
-        } else {
-          echo "ℹ️ No tests.cpp file found"
+        # Display original project file for debugging
+        echo "Original project file content:"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "tests.cpp"
+        
+        # Create a backup of the project file
+        Copy-Item -Path "PClarity.vcxproj" -Destination "PClarity.vcxproj.bak"
+        
+        # Method 1: Remove tests.cpp from ItemGroup
+        $content = Get-Content -Path "PClarity.vcxproj" -Raw
+        $pattern = "<ClCompile Include=`"tests.cpp`" */?>"
+        $newContent = $content -replace $pattern, ""
+        Set-Content -Path "PClarity.vcxproj" -Value $newContent
+        
+        # Method 2: If that doesn't work, add ExcludedFromBuild property
+        $content = Get-Content -Path "PClarity.vcxproj" -Raw
+        $pattern = "<ClCompile Include=`"tests.cpp`" */?>"
+        $replacement = "<ClCompile Include=`"tests.cpp`"><ExcludedFromBuild>true</ExcludedFromBuild></ClCompile>"
+        $newContent = $content -replace $pattern, $replacement
+        Set-Content -Path "PClarity.vcxproj" -Value $newContent
+        
+        # Display modified project file for verification
+        echo "Modified project file content:"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "tests.cpp"
+        
+        echo "✅ Modified project file to exclude tests.cpp from build"
+        
+    - name: Create empty tests.cpp if it doesn't exist
+      run: |
+        # Create an empty tests.cpp file if it doesn't exist
+        # This prevents the "cannot find file" error
+        if (-not (Test-Path "tests.cpp")) {
+          echo "// Placeholder file - not used in build" | Out-File -FilePath "tests.cpp"
+          echo "✅ Created empty tests.cpp placeholder"
         }
         
     - name: Build project with explicit include path
@@ -64,14 +90,6 @@ jobs:
         } else {
           echo "❌ Build failed with exit code $LASTEXITCODE"
           exit $LASTEXITCODE
-        }
-        
-    - name: Restore tests.cpp
-      run: |
-        # Restore the original tests.cpp file
-        if (Test-Path "tests.cpp.bak") {
-          Move-Item -Path "tests.cpp.bak" -Destination "tests.cpp"
-          echo "✅ Restored tests.cpp"
         }
         
     - name: Check build result
