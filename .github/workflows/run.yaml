@@ -1,4 +1,4 @@
-name: Run Tests
+name: CMake Tests
 
 on: [push, pull_request]
 
@@ -10,67 +10,43 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
       
-    - name: Setup MSBuild
-      uses: microsoft/setup-msbuild@v2
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
       
-    - name: Setup Visual Studio environment
-      uses: ilammy/msvc-dev-cmd@v1
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
       with:
-        arch: x64
-        
-    - name: Install dependencies with vcpkg
-      run: |
-        # Clone vcpkg
-        git clone https://github.com/microsoft/vcpkg.git
-        cd vcpkg
-        
-        # Bootstrap vcpkg
-        .\bootstrap-vcpkg.bat -disableMetrics
-        
-        # Install GTest and nlohmann-json
-        .\vcpkg.exe install gtest:x64-windows nlohmann-json:x64-windows
-        
-        # Integrate with Visual Studio
-        .\vcpkg.exe integrate install
-        
-        cd ..
-        
-    - name: Configure CMake
-      run: |
-        # Create build directory
-        mkdir build
-        cd build
-        
-        # Configure CMake with vcpkg toolchain
-        cmake .. -DCMAKE_TOOLCHAIN_FILE="$pwd\..\vcpkg\scripts\buildsystems\vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
+        vcpkgGitCommitId: 'ef7dbf94b9198bc58f45951adcf1f041fcbc5ea0'
         
     - name: Create CMakeLists.txt
       run: |
-        # Create a simple CMakeLists.txt file for the project
+        # Create a CMakeLists.txt file for the project
         @'
         cmake_minimum_required(VERSION 3.16)
         project(PClarity CXX)
-
         set(CMAKE_CXX_STANDARD 20)
         set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
         # Define UNICODE and _UNICODE for Windows API
         add_definitions(-DUNICODE -D_UNICODE)
-
         # Find packages
         find_package(GTest REQUIRED)
         find_package(nlohmann_json CONFIG REQUIRED)
-
-        # Source files (excluding main.cpp)
-        file(GLOB SOURCES "*.cpp")
-        list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp")
-        list(REMOVE_ITEM SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/tests.cpp")
-
+        # Source files (excluding main.cpp and tests.cpp)
+        set(SOURCES
+            Commands.cpp
+            Functions_file_system.cpp
+            Functions_win32.cpp
+            Global_state.cpp
+            Functions_networking.cpp
+            Process_data.cpp
+        )
         # Create library from common sources
         add_library(PClarity_lib STATIC ${SOURCES})
         target_link_libraries(PClarity_lib PRIVATE nlohmann_json::nlohmann_json)
         target_include_directories(PClarity_lib PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-
+        # Main executable
+        add_executable(PClarity main.cpp)
+        target_link_libraries(PClarity PRIVATE PClarity_lib nlohmann_json::nlohmann_json)
         # Test executable
         add_executable(PClarity_tests tests.cpp)
         target_link_libraries(PClarity_tests PRIVATE 
@@ -79,13 +55,28 @@ jobs:
             GTest::Main
             nlohmann_json::nlohmann_json
         )
-
         # Enable testing
         enable_testing()
         add_test(NAME PClarity_tests COMMAND PClarity_tests)
         '@ | Out-File -FilePath CMakeLists.txt -Encoding utf8
         
-        echo "✅ Created CMakeLists.txt for tests"
+        echo "✅ Created CMakeLists.txt"
+        
+    - name: Create vcpkg.json manifest
+      run: |
+        # Create vcpkg.json manifest file
+        @'
+        {
+          "name": "pclarity",
+          "version": "0.1.0",
+          "dependencies": [
+            "gtest",
+            "nlohmann-json"
+          ]
+        }
+        '@ | Out-File -FilePath vcpkg.json -Encoding utf8
+        
+        echo "✅ Created vcpkg.json manifest file"
         
     - name: Fix Unicode/ASCII issues in Functions_win32.cpp
       run: |
@@ -103,10 +94,19 @@ jobs:
         
         echo "✅ Fixed Unicode/ASCII issues in Functions_win32.cpp"
         
-    - name: Build tests
+    - name: Configure CMake
+      run: |
+        # Create build directory
+        mkdir build
+        cd build
+        
+        # Configure CMake with vcpkg toolchain
+        cmake .. -DCMAKE_TOOLCHAIN_FILE="$env:VCPKG_ROOT/scripts/buildsystems/vcpkg.cmake" -DCMAKE_BUILD_TYPE=Release
+        
+    - name: Build tests only
       run: |
         cd build
-        cmake --build . --config Release
+        cmake --build . --config Release --target PClarity_tests
         
         if ($LASTEXITCODE -eq 0) {
           echo "✅ Test build completed successfully!"
@@ -119,23 +119,21 @@ jobs:
       run: |
         cd build
         
-        # Run the tests
-        ctest -C Release -V
-        $testResult = $LASTEXITCODE
-        
-        if ($testResult -eq 0) {
-          echo "✅ All tests passed!"
-        } else {
-          echo "❌ Tests failed with exit code $testResult"
+        # Check if the test executable exists
+        if (Test-Path "Release/PClarity_tests.exe") {
+          # Run the tests directly
+          ./Release/PClarity_tests.exe
+          $testResult = $LASTEXITCODE
           
-          # Try running the test executable directly if CTest fails
-          if (Test-Path "Release/PClarity_tests.exe") {
-            echo "Running test executable directly..."
-            ./Release/PClarity_tests.exe
-            exit $LASTEXITCODE
+          if ($testResult -eq 0) {
+            echo "✅ All tests passed!"
           } else {
+            echo "❌ Tests failed with exit code $testResult"
             exit $testResult
           }
+        } else {
+          echo "❌ Test executable not found"
+          exit 1
         }
         
     - name: Upload test artifacts
@@ -143,5 +141,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: test-results
-        path: build/Release/PClarity_tests.exe
+        path: |
+          build/Release/PClarity_tests.exe
+          build/Testing/Temporary/LastTest.log
         retention-days: 7
