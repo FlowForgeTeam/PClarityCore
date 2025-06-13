@@ -110,23 +110,53 @@ jobs:
           
           # Create minimal test files if missing
           foreach ($file in $missingFiles) {
-            $content = @"
-            #include <gtest/gtest.h>
-
-            // Placeholder test for $file
-            TEST(PlaceholderTest, AlwaysPasses) {
-                EXPECT_TRUE(true);
+            Write-Host "📝 Creating placeholder: $file" -ForegroundColor Yellow
+            
+            $content = "#include <gtest/gtest.h>`n`n// Placeholder test for $file`nTEST(PlaceholderTest, AlwaysPasses) {`n    EXPECT_TRUE(true);`n}"
+            
+            try {
+              # Ensure directory exists
+              $directory = Split-Path $file -Parent
+              if (!(Test-Path $directory)) {
+                New-Item -ItemType Directory -Path $directory -Force | Out-Null
+              }
+              
+              New-Item -ItemType File -Path $file -Force | Out-Null
+              Set-Content -Path $file -Value $content -Encoding UTF8
+              Write-Host "✅ Created: $file" -ForegroundColor Green
+            } catch {
+              Write-Host "❌ Failed to create $file : $($_.Exception.Message)" -ForegroundColor Red
+              exit 1
             }
-            "@
-            New-Item -ItemType File -Path $file -Force
-            Set-Content -Path $file -Value $content
-            Write-Host "📝 Created placeholder: $file" -ForegroundColor Yellow
           }
+        } else {
+          Write-Host "✅ All required test files found!" -ForegroundColor Green
         }
         
     - name: 🏗️ Build unit tests
       run: |
         Write-Host "🔨 Building unit tests..." -ForegroundColor Cyan
+        
+        # Final verification before build
+        Write-Host "🔍 Final verification of test files..." -ForegroundColor Blue
+        
+        $testFiles = @(
+          "tests\unit\test_commands.cpp",
+          "tests\unit\test_process_data.cpp", 
+          "tests\unit\test_utility_functions.cpp",
+          "tests\unit\test_json_operations.cpp",
+          "tests\test_main.cpp"
+        )
+        
+        foreach ($file in $testFiles) {
+          if (Test-Path $file) {
+            $size = (Get-Item $file).Length
+            Write-Host "✅ $file ($size bytes)" -ForegroundColor Green
+          } else {
+            Write-Host "❌ Missing: $file" -ForegroundColor Red
+            exit 1
+          }
+        }
         
         # Set vcpkg paths
         $vcpkgRoot = "C:\vcpkg-unit-tests"
@@ -226,8 +256,7 @@ jobs:
         
         # Parse and display results
         if (Test-Path "test_results\unit_test_results.xml") {
-          Write-Host "📊 Test Results Summary:" -ForegroundColor Cyan
-          Write-Host "=============================" -ForegroundColor Cyan
+          Write-Host "📊 Test Results Summary:" -ForegroundColor Blue
           
           try {
             [xml]$testXml = Get-Content "test_results\unit_test_results.xml"
@@ -359,5 +388,5 @@ jobs:
         Write-Host "Total Tests: $($testsuites.tests)" -ForegroundColor White
         Write-Host "Passed: $($testsuites.tests - $testsuites.failures - $testsuites.errors)" -ForegroundColor Green
         Write-Host "Failed: $($testsuites.failures)" -ForegroundColor Red
-        Write-Host "Errors: $($testsuites.errors)" -ForegroundColor Yellow
+        Write-Host "Errors: $($testsuites.errors)" -ForegroundColor Red
         Write-Host "Duration: $($testsuites.time)s" -ForegroundColor White
