@@ -19,17 +19,43 @@ jobs:
         arch: x64
         
     - name: Setup vcpkg
-      uses: lukka/run-vcpkg@v11
-      with:
-        vcpkgGitCommitId: 'a42af01b72c28a8e1d7b48107b33e4f286a55ef6'  # Latest stable
-        
-    - name: Install dependencies
       run: |
-        # Install Google Test and nlohmann-json
-        vcpkg install gtest:x64-windows nlohmann-json:x64-windows
-        vcpkg integrate install
+        # Clone vcpkg
+        git clone https://github.com/microsoft/vcpkg.git
+        cd vcpkg
         
-        echo "✅ Installed Google Test and nlohmann-json"
+        # Bootstrap vcpkg
+        .\bootstrap-vcpkg.bat -disableMetrics
+        
+        # Install dependencies
+        .\vcpkg.exe install gtest:x64-windows nlohmann-json:x64-windows
+        
+        # Integrate with Visual Studio
+        .\vcpkg.exe integrate install
+        
+        # Show installed packages
+        echo "Installed packages:"
+        .\vcpkg.exe list
+        
+        cd ..
+        
+    - name: Create vcpkg response file
+      run: |
+        # Create a response file for MSBuild to find vcpkg
+        $vcpkgRoot = "$(Get-Location)\vcpkg"
+        $vcpkgToolchain = "$vcpkgRoot\scripts\buildsystems\vcpkg.cmake"
+        
+        @"
+        /p:VcpkgEnabled=true
+        /p:VcpkgEnableManifest=false
+        /p:VcpkgManifestInstall=false
+        /p:VcpkgRoot=$vcpkgRoot
+        /p:VcpkgAutoLink=true
+        /p:VcpkgTriplet=x64-windows
+        "@ | Out-File -FilePath vcpkg.rsp -Encoding ascii
+        
+        echo "Created vcpkg response file:"
+        Get-Content vcpkg.rsp
         
     - name: Modify project file to exclude main.cpp and include tests.cpp
       run: |
@@ -60,12 +86,24 @@ jobs:
           $content = $content -replace $pattern, $replacement
         }
         
+        # Add vcpkg include path to project
+        $vcpkgIncludePath = "$(Get-Location)\vcpkg\installed\x64-windows\include"
+        $pattern = "(<ItemDefinitionGroup.*?<ClCompile>.*?)(<AdditionalIncludeDirectories>|</ClCompile>)"
+        $replacement = "`$1<AdditionalIncludeDirectories>$vcpkgIncludePath;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>`$2"
+        $content = $content -replace $pattern, $replacement
+        
+        # Add vcpkg lib path to project
+        $vcpkgLibPath = "$(Get-Location)\vcpkg\installed\x64-windows\lib"
+        $pattern = "(<ItemDefinitionGroup.*?<Link>.*?)(<AdditionalLibraryDirectories>|</Link>)"
+        $replacement = "`$1<AdditionalLibraryDirectories>$vcpkgLibPath;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>`$2"
+        $content = $content -replace $pattern, $replacement
+        
         # Write the modified content back
         Set-Content -Path "PClarity.vcxproj" -Value $content
         
         # Display modified project file for verification
         echo "Modified project file content:"
-        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp"
+        Get-Content -Path "PClarity.vcxproj" | Select-String -Pattern "main.cpp|tests.cpp|AdditionalIncludeDirectories|AdditionalLibraryDirectories"
         
         echo "✅ Modified project file to exclude main.cpp and include tests.cpp"
         
@@ -77,8 +115,7 @@ jobs:
         msbuild PClarity.vcxproj `
           /p:Configuration=Release `
           /p:Platform=x64 `
-          /p:VcpkgEnabled=true `
-          /verbosity:normal
+          @vcpkg.rsp
         
         if ($LASTEXITCODE -eq 0) {
           echo "✅ Test build completed successfully!"
@@ -89,11 +126,15 @@ jobs:
         
     - name: Run tests
       run: |
+        # Copy required DLLs to the executable directory
+        Copy-Item -Path "vcpkg\installed\x64-windows\bin\*.dll" -Destination "x64\Release\" -ErrorAction SilentlyContinue
+        
         if (Test-Path "x64/Release/PClarity.exe") {
           echo "Running tests..."
           
           # Run the tests and capture the output
-          & "./x64/Release/PClarity.exe"
+          cd x64/Release
+          ./PClarity.exe
           $testResult = $LASTEXITCODE
           
           if ($testResult -eq 0) {
