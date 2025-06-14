@@ -172,7 +172,7 @@ void client_thread() {
 		vector<json> processes_as_jsons;
 		for (Process_data& process_data : G_state::tracked_processes) {
 			json temp;
-			convert_to_json(&temp, &process_data);
+			convert_to_json(&process_data, &temp);
 			processes_as_jsons.push_back(temp);
 		}
 		json j_overall_data;
@@ -201,14 +201,14 @@ void handle_report(Report_command* report) {
 	vector<json> j_tracked;
 	for (Process_data& data : G_state::tracked_processes) {
 		json temp;
-		convert_to_json(&temp, &data);
+		convert_to_json(&data, &temp);
 		j_tracked.push_back(temp);
 	}
 
 	vector<json> j_cur_active;
 	for (Process_data& data : G_state::currently_active_processes) {
 		json temp;
-		convert_to_json(&temp, &data);
+		convert_to_json(&data, &temp);
 		j_cur_active.push_back(temp);
 	}
 

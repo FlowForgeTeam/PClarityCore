@@ -2,9 +2,6 @@
 #include <fstream>
 #include "Functions_file_system.h"
 
-// TODO(damian): think about namespacing this bitch. May be beneficial, IDK. 
-//               Maybe its just some useless OOP people shit. 
-
 // NOTE(damian): std::wstring is used here insted a regular UTF-8 std::string, 
 //               since in c++ std::wstring is mosly used for compatability with legacy code, like WindowsOS.
 

@@ -5,8 +5,8 @@
 
 #include "Process_data.h"
 
-using std::vector, std::string;
 using nlohmann::json;
+using std::vector, std::string;
 
 namespace G_state {
 	enum class Error_type {
@@ -28,28 +28,28 @@ namespace G_state {
 
 		// Other
 		unhandled_error_caught,
+		error_reading_a_file,
 
-		// Temp placeholder
+		// TODO: Temp placeholder
 		other,
 	};
 
 	struct Error {
-		Error_type  type;
+		Error_type type;
 		std::string message;
 
 		Error(Error_type type);
-		Error(Error_type type, const char* message);
+		Error(Error_type type, const char *message);
 		~Error() = default;
 	};
 
-	extern const char* data_file_name;
+	extern const char* data_file_path;
 	extern vector<Process_data> currently_active_processes;
 	extern vector<Process_data> tracked_processes;
 
 	extern G_state::Error set_up_on_startup();
 	extern G_state::Error update_state();
 
-	extern G_state::Error add_process_to_track     (string* path);
-	extern G_state::Error remove_process_from_track(string* path);
+	extern G_state::Error add_process_to_track(string *path);
+	extern G_state::Error remove_process_from_track(string *path);
 }
-

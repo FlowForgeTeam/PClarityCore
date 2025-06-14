@@ -47,7 +47,7 @@ pair<SOCKET, G_state::Error> initialise_tcp_connection_with_client() {
 		return pair(SOCKET{0}, Error(Error_type::tcp_initialisation_failed, "Failed when accepting a client connection"));
 	}
 
-	// TODO: dont know why this is here
+	// Closing the server socket since we now have client socket. All the comunication will be done throught it
 	int close_err = closesocket(server_socket);
 	if (close_err == SOCKET_ERROR) {
 		WSACleanup();

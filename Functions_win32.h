@@ -5,35 +5,31 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <nlohmann/json.hpp>
 
 using std::pair, std::tuple;
 using std::string, std::vector;
+using json = nlohmann::json;
 
-// TODO(damian): remove win32 from the enum names.
+// TODO(damian): see is any of these are not used, if so, remove them.
 enum class Win32_error {
     ok,
-    win32_EnumProcess_buffer_too_small,
-    win32_EnumProcesses_failed,
-    win32_OpenProcess_failed,
-    win32_EnumProcessModules_failed,
-    win32_GetModuleFileNameExW_failed,
-    win32_GetModuleFileNameExW_buffer_too_small,
-    win32_QueryFullProcessImageNameW,
+
+    EnumProcess_buffer_too_small,
+    EnumProcesses_failed,
+    OpenProcess_failed,
+    EnumProcessModules_failed,
+    GetModuleFileNameExW_failed,
+    GetModuleFileNameExW_buffer_too_small,
+    QueryFullProcessImageNameW,
 
     CreateToolhelp32Snapshot_failed,
     Process32First_failed,
     Module32First_failed,
 
     win32_GetRam_failed,
-
 };
 
-// TODO(damian): deal with const wchar* overflow.
-// struct Win32_process_module {
-//     DWORD  owner_pid;
-//     string name;
-//     string exe_path;
-// };
 
 // TODO(damian): deal with const wchar* overflow.
 struct Win32_process_data {
@@ -58,33 +54,44 @@ struct Win32_process_data {
     SIZE_T ram_usage;
 
     bool is_visible_app;
-
-    // vector<Win32_process_module> modules;
 };
 
 string wchar_to_utf8(const WCHAR* wchar_array);
 
 pair<vector<Win32_process_data>, Win32_error> win32_get_process_data();
 
-tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle, 
-                                                                   WCHAR* stack_buffer, 
-                                                                   size_t stack_buffer_len);
+tuple<WCHAR*, bool, DWORD, Win32_error>win32_get_path_for_process(HANDLE process_handle, 
+                                                                  WCHAR* stack_buffer, 
+                                                                  size_t stack_buffer_len);
 bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data);
 
+// =============================================================================================
+
+void convert_to_json  (Win32_process_data* win32_data, json* j);
+bool convert_from_json(Win32_process_data* win32_data, json* j);
+
+
+// NOTE(damian): there is a macro inside nlohman for manual serialisation. 
+//               kinda works like Swift's Codable trait.
+//               not using it, since for types that doesnt implemenet it, i will have to implement it.
+//               easier to just json the shit out of it myself. 
+//               e.g.: 
+//                  NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(Win32_process_data,
+//                      pid, started_threads, ppid, base_priority, exe_name, exe_path,
+//                      priority_class, creation_time, exit_time, kernel_time, user_time,
+//                      process_affinity, system_affinity, ram_usage, is_visible_app
+//                  )
 
 
 
-// Win32_error win32_get_process_modules(DWORD pid, vector<Win32_process_module>* modules);
 
 
 
 
 
-// pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_t arr_len);
-// pair<int, Win32_error> get_process_path(DWORD process_id,  WCHAR* path_buffer, size_t path_buffer_len);
 
-// pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len);
-// tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len);
+
+
 
 
 

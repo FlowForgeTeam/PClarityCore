@@ -3,14 +3,13 @@
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <cassert>
+#include <nlohmann/json.hpp>
 
 #include "Functions_win32.h"
 
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
 //               rather then getting none. (Just something to think about).
-
-// TODO: maybe have these weird win32 typedefs briefly documented somewhere here.
 
 // NOTE(damian): this was claude generated, need to make sure its is correct. 
 std::string wchar_to_utf8(const WCHAR* wstr) {
@@ -192,7 +191,7 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
         return tuple(stack_buffer, false, path_len, Win32_error::ok);
     }
     else if (GetLastError() != 122) { // NOTE(damian): 122 is code for insufficient buffer size.
-        return tuple(stack_buffer, false, path_len, Win32_error::win32_QueryFullProcessImageNameW);
+        return tuple(stack_buffer, false, path_len, Win32_error::QueryFullProcessImageNameW);
     }
 
     // Need to use heap
@@ -221,7 +220,7 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
             return tuple(heap_buffer, true, path_len, Win32_error::ok);
         }
         else if (GetLastError() != 122) { // NOTE(damian): 122 is code for insufficient buffer size. Not it, so some other error.
-            return tuple(stack_buffer, false, path_len, Win32_error::win32_QueryFullProcessImageNameW);
+            return tuple(stack_buffer, false, path_len, Win32_error::QueryFullProcessImageNameW);
         }
 
     }
@@ -267,6 +266,59 @@ BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam
 
     return TRUE;
 }
+
+
+// =============================================================================================
+
+
+void convert_to_json(Win32_process_data* win32_data, json* j) {
+    (*j)["pid"]              = win32_data->pid;
+    (*j)["started_threads"]  = win32_data->started_threads;
+    (*j)["ppid"]             = win32_data->ppid;
+    (*j)["base_priority"]    = win32_data->base_priority;
+    (*j)["exe_name"]         = win32_data->exe_name;
+    (*j)["exe_path"]         = win32_data->exe_path;
+    (*j)["priority_class"]   = win32_data->priority_class;
+    (*j)["creation_time"]    = win32_data->creation_time;  
+    (*j)["exit_time"]        = win32_data->exit_time;          
+    (*j)["kernel_time"]      = win32_data->kernel_time;    
+    (*j)["user_time"]        = win32_data->user_time;     
+    (*j)["process_affinity"] = win32_data->process_affinity;
+    (*j)["system_affinity"]  = win32_data->system_affinity;
+    (*j)["ram_usage"]        = win32_data->ram_usage;
+    (*j)["is_visible_app"]   = win32_data->is_visible_app;
+}
+
+bool convert_from_json(Win32_process_data* win32_data, json* j) {
+    try {
+        win32_data->pid              = (*j)["pid"];
+        win32_data->started_threads  = (*j)["started_threads"];
+        win32_data->ppid             = (*j)["ppid"];
+        win32_data->base_priority    = (*j)["base_priority"];
+        win32_data->exe_name         = (*j)["exe_name"];
+        win32_data->exe_path         = (*j)["exe_path"];
+        win32_data->priority_class   = (*j)["priority_class"];
+        win32_data->creation_time    = (*j)["creation_time"];
+        win32_data->exit_time        = (*j)["exit_time"];
+        win32_data->kernel_time      = (*j)["kernel_time"];
+        win32_data->user_time        = (*j)["user_time"];
+        win32_data->process_affinity = (*j)["process_affinity"];
+        win32_data->system_affinity  = (*j)["system_affinity"];
+        win32_data->ram_usage        = (*j)["ram_usage"];
+        win32_data->is_visible_app   = (*j)["is_visible_app"];
+    }
+    catch (...) {
+        return false;
+    }
+    
+    return true;
+}
+
+
+
+
+
+
 
 
 

@@ -29,37 +29,35 @@ public:
     bool is_active;    // NOTE(damian): is a stored process currently active.
     bool is_tracked;   // NOTE(damian): this is used to determine, if a process has to have sessions created when declarated inactive.
     bool was_updated;  // NOTE(damian): used inside global state to simbolasi if the process was updates, if not --> it 
-    
+
     // TODO(damian): maybe remove these flags and just store data and time here and session will be stored inside G_state inside a tuple:
     //               tracked_processes --> (Process_data, vec<Session>)
     //               regular_processes --> (Process_dasta)
 
     void update_active();
     void update_inactive();
+    void update_data(Win32_process_data* new_win32_data);
 
     Process_data(Win32_process_data win32_data);
 
-    bool operator==(const Win32_process_data& win32_data);
     bool operator==(const Process_data& other);
 
-    class Session {
-        
-
-        public:
+    struct Session {
             steady_clock::time_point steady_start_time;
             steady_clock::time_point steady_end_time;
 
             system_clock::time_point system_start_time;
             system_clock::time_point system_end_time;
 
-            Session(system_clock::time_point system_start, system_clock::time_point system_endm,
+            Session(system_clock::time_point system_start, system_clock::time_point system_end,
                     steady_clock::time_point steady_start, steady_clock::time_point steady_end);
-            ~Session() = default;
     };
     
 };
 
+
+
 // NOTE(damian): there are built in functions that we can overload from json packet, but it might want to do it like this for now.
-int convert_from_json(const json* data, Process_data* process_data);
-void convert_to_json(json* data, const Process_data* process_data);
+bool convert_from_json(Process_data* process_data, json* j);
+void convert_to_json  (Process_data* process_data, json* j);
 
