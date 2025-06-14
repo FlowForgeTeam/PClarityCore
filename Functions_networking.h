@@ -9,9 +9,5 @@
 
 using std::pair;
 
-// enum class Network_error {
-    // ok,
-// };
-
 pair<SOCKET, G_state::Error> initialise_tcp_connection_with_client();
 

@@ -67,7 +67,6 @@ int main() {
 		if (unhandled_found) {
 			switch (p_to_command->command.type) {
 				case Command_type::track: {
-
 					G_state::add_process_to_track(&p_to_command->command.data.track.path);
 				} break;
 				
@@ -119,6 +118,7 @@ void client_thread() {
 		char receive_buffer[receive_buffer_size];
 
 		int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
+		if (n_bytes_returned > receive_buffer_size - 1) assert(false);
 		receive_buffer[n_bytes_returned] = '\0';
 
 		// Overflow
@@ -182,16 +182,15 @@ void client_thread() {
 		data_file.close();
 
 		std::cout << "Saved data to file. \n" << std::endl;
-
-
-
+	
+	
 	}
 }
 
 void wait_for_client_to_connect() {
 	std::cout << "Waiting for a new connection with a client." << std::endl;
 	pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
-	if (result.second == G_state::Error::ok) {
+	if (result.second.type == G_state::Error_type::ok) {
 		client_socket = result.first;
 	}
 	else assert(false);

@@ -42,10 +42,19 @@ void Process_data::update_inactive() {
 
 
 bool Process_data::operator==(const Process_data& other) {
-    return (
-           this->data.exe_path      == other.data.exe_path 
-        && this->data.creation_time == other.data.creation_time
-    );
+    if (other.data.exe_name == "Telegram.exe") {
+        int x = 2;
+    }
+
+    if (this->is_tracked) {
+        return this->data.exe_path == other.data.exe_path;
+    }
+    else {
+        return (
+               this->data.exe_path      == other.data.exe_path 
+            && this->data.creation_time == other.data.creation_time
+        );
+    }
 }
 
 //bool Process_data::operator==(const Win32_process_data& win32_data) {

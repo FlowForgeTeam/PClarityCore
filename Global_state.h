@@ -9,7 +9,7 @@ using std::vector, std::string;
 using nlohmann::json;
 
 namespace G_state {
-	enum class Error {
+	enum class Error_type {
 		ok,
 
 		// State
@@ -24,18 +24,22 @@ namespace G_state {
 		json_invalid_strcture,
 
 		// Network
-		WSASTARTUP_failed,
-		getaddrinfo_failed,
-		bind_failed,
-		listen_failed,
-		accept_failed,
-		closesocket_failed,
+		tcp_initialisation_failed,
 
 		// Other
 		unhandled_error_caught,
 
 		// Temp placeholder
 		other,
+	};
+
+	struct Error {
+		Error_type  type;
+		std::string message;
+
+		Error(Error_type type);
+		Error(Error_type type, const char* message);
+		~Error() = default;
 	};
 
 	extern const char* data_file_name;

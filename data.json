@@ -3,22 +3,6 @@
         {
             "data": {
                 "base_priority": 0,
-                "exe_name": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-                "exe_path": "",
-                "pid": 0,
-                "ppid": 0,
-                "priority_class": 0,
-                "started_threads": 0
-            },
-            "is_active": false,
-            "is_tracked": true,
-            "sessions": [],
-            "start": 615217621698000,
-            "was_updated": false
-        },
-        {
-            "data": {
-                "base_priority": 0,
                 "exe_name": "",
                 "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
                 "pid": 0,
@@ -26,10 +10,15 @@
                 "priority_class": 0,
                 "started_threads": 0
             },
-            "is_active": false,
+            "is_active": true,
             "is_tracked": true,
-            "sessions": [],
-            "start": 615371552053600,
+            "sessions": [
+                {
+                    "end_time": 943520623284500,
+                    "start_time": 943489701953400
+                }
+            ],
+            "start": 943666913815900,
             "was_updated": false
         }
     ]

@@ -7,6 +7,19 @@
 #include "Global_state.h"
 
 namespace G_state {
+    using G_state::Error_type;
+    using G_state::Error;
+
+    Error::Error(Error_type type) {
+        this->type    = type;
+        this->message = string("");
+    }
+
+    Error::Error(Error_type type, const char* message) {
+        this->type    = type;
+        this->message = string(message);
+    }
+
     const char* data_file_name = "data.json";
     vector<Process_data> currently_active_processes;
     vector<Process_data> tracked_processes;
@@ -27,7 +40,7 @@ namespace G_state {
                 data_as_json = json::parse(text);
             }
             catch(...) {
-                return G_state::Error::json_parsing_failed;
+                return Error(Error_type::json_parsing_failed, text.c_str());
             }
 
             if (data_as_json.contains("processes_to_track")) {
@@ -44,7 +57,7 @@ namespace G_state {
                 }
             }
             else {
-                return G_state::Error::json_invalid_strcture;
+                return Error(Error_type::json_invalid_strcture, text.c_str());
             }
         
         }
@@ -54,7 +67,7 @@ namespace G_state {
             new_file.close();
         }
 
-        return G_state::Error::ok;
+        return Error(Error_type::ok);
     }
 
     G_state::Error G_state::update_state() {
@@ -74,7 +87,8 @@ namespace G_state {
 
         // Updating the state
         for (Win32_process_data& win32_data : result.first) {
-            
+              
+
             // NOTE(damian): for manual hand testing )).
             if (win32_data.exe_name == "Telegram.exe") {
                 int x = 2;
@@ -137,7 +151,14 @@ namespace G_state {
             process_data.was_updated = false;
         }
 
-        return G_state::Error::ok;
+        /*std::cout << "\n\n" << std::endl;
+        for (Process_data& data : G_state::currently_active_processes) {
+            if (data.data.is_visible_app) {
+                std::cout << data.data.exe_name << std::endl;
+            }
+        }*/
+
+        return Error(Error_type::ok);
     }
 
     G_state::Error add_process_to_track(string* path) {
@@ -155,7 +176,7 @@ namespace G_state {
         }
 
         if (already_tracking)
-            return G_state::Error::trying_to_track_the_same_process_more_than_once;    
+            return Error(Error_type::trying_to_track_the_same_process_more_than_once);    
 
         // Checking if it is already being tracked inside the vector active once
         auto p_to_active  = G_state::currently_active_processes.begin();
@@ -185,12 +206,12 @@ namespace G_state {
         for (Process_data& tracked : G_state::tracked_processes) {
             for (Process_data& current : G_state::currently_active_processes) {
                 if (tracked == current) {
-                    return G_state::Error::tracked_and_current_process_vectors_share_data;
+                    return Error(Error_type::tracked_and_current_process_vectors_share_data);
                 }
             }
         }
 
-        return G_state::Error::ok;
+        return Error(Error_type::ok);
     }
 
     G_state::Error remove_process_from_track(string* path) {
@@ -206,11 +227,11 @@ namespace G_state {
             }
         }
 
-        if (!is_tracked) return G_state::Error::trying_to_untrack_a_non_tracked_process;
+        if (!is_tracked) return Error(Error_type::trying_to_untrack_a_non_tracked_process);
 
         G_state::tracked_processes.erase(p_to_tracked);
 
-        return G_state::Error::ok;
+        return Error(Error_type::ok);
     }
 
 }

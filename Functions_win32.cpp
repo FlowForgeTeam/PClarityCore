@@ -69,8 +69,13 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         data.base_priority   = pe32.pcPriClassBase;
         data.started_threads = pe32.cntThreads;
 
+        if (data.exe_name == "Telegram.exe") {
+            int x = 2;
+            std::cout << "-------" << std::endl;
+        }
+
         // 2.
-        const size_t stack_buffer_len = 512;
+        const size_t stack_buffer_len = 5;
         WCHAR stack_buffer[stack_buffer_len];
         tuple<WCHAR*, bool, DWORD, Win32_error> result = win32_get_path_for_process(process_handle, 
                                                                                     stack_buffer, 
@@ -178,16 +183,18 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
     return pair(process_data_vec, Win32_error::ok);
 }
 
-tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle, 
-                                                                   WCHAR* stack_buffer, 
-                                                                   size_t stack_buffer_len) 
+tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle,
+    WCHAR* stack_buffer,
+    size_t stack_buffer_len)
 {
-    DWORD path_len;
-    path_len = GetProcessImageFileName(process_handle, stack_buffer, stack_buffer_len);
+    DWORD path_len = stack_buffer_len;
+    BOOL  err      = QueryFullProcessImageNameW(process_handle, NULL, stack_buffer, &path_len); // Does null terminate.
 
-    // Stack buffer was long enought
-    if (path_len != 0) {
+    if (err != NULL) {
         return tuple(stack_buffer, false, path_len, Win32_error::ok);
+    }
+    else if (GetLastError() != 122) { // NOTE(damian): 122 is code for insufficient buffer size.
+        return tuple(stack_buffer, false, path_len, Win32_error::win32_QueryFullProcessImageNameW);
     }
 
     // Need to use heap
@@ -200,7 +207,7 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
         }
         else {
             heap_buffer_len *= 2;
-            heap_buffer = (WCHAR*) realloc(heap_buffer, heap_buffer_len);
+            heap_buffer = (WCHAR*) realloc(heap_buffer, sizeof(WCHAR) * heap_buffer_len);
         }
 
         if (heap_buffer == NULL) {
@@ -208,11 +215,17 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
             // TODO(damian): handle better.
         }
 
-        path_len = GetProcessImageFileName(process_handle, heap_buffer, heap_buffer_len);
+        DWORD path_len = heap_buffer_len;
+        BOOL  err      = QueryFullProcessImageNameW(process_handle, NULL, heap_buffer, &path_len);
         
-        if (path_len != 0) { // Allocated succesfully
+        if (err != NULL) {
+            //free(heap_buffer);
             return tuple(heap_buffer, true, path_len, Win32_error::ok);
         }
+        else if (GetLastError() != 122) { // NOTE(damian): 122 is code for insufficient buffer size. Not it, so some other error.
+            return tuple(stack_buffer, false, path_len, Win32_error::win32_QueryFullProcessImageNameW);
+        }
+
     }
 
 }

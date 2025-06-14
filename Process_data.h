@@ -14,10 +14,7 @@ using std::vector;
 
 class Process_data {
 
-    public:
-    // NOTE(damian): std::string just stores bytes. So any string can be stored, even UTF-8. 
-    //               the behaviour of reading and decoding is then handed to the developer.
-    
+public:
     class Session;
 
     Win32_process_data data;
@@ -26,9 +23,13 @@ class Process_data {
     vector<Process_data::Session> sessions;
 
     // These are to track the changes in states. 
-    bool is_active;
-    bool is_tracked;
-    bool was_updated;
+    bool is_active;    // NOTE(damian): is a stored process currently active.
+    bool is_tracked;   // NOTE(damian): this is used to determine, if a process has to have sessions created when declarated inactive.
+    bool was_updated;  // NOTE(damian): used inside global state to simbolasi if the process was updates, if not --> it 
+    
+    // TODO(damian): maybe remove these flags and just store data and time here and session will be stored inside G_state inside a tuple:
+    //               tracked_processes --> (Process_data, vec<Session>)
+    //               regular_processes --> (Process_dasta)
 
     void update_active();
     void update_inactive();
