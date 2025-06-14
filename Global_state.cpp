@@ -96,6 +96,9 @@ namespace G_state {
 
             bool is_tracked = false;
             for (Process_data& g_state_data : G_state::tracked_processes) {
+                if (g_state_data.data.exe_name == "Telegram.exe") {
+                    int x = 2;
+                }
                 if (g_state_data == win32_data) {
                     g_state_data.update_active();
                     is_tracked = true;

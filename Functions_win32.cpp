@@ -71,11 +71,10 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
 
         if (data.exe_name == "Telegram.exe") {
             int x = 2;
-            std::cout << "-------" << std::endl;
         }
 
         // 2.
-        const size_t stack_buffer_len = 5;
+        const size_t stack_buffer_len = 256; // NOTE(damian): tested this with size of 5, woked well. 
         WCHAR stack_buffer[stack_buffer_len];
         tuple<WCHAR*, bool, DWORD, Win32_error> result = win32_get_path_for_process(process_handle, 
                                                                                     stack_buffer, 
@@ -159,7 +158,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
             continue;
         }
         data.ram_usage = pmc.WorkingSetSize;
-
 
         // CPU time
         // GPU

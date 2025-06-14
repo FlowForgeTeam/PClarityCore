@@ -9,18 +9,21 @@
 #include "Functions_win32.h"
 
 using nlohmann::json;
-using std::string, std::wstring;
 using std::vector;
+using std::chrono::steady_clock; // NOTE(damian): steady clock is used for interval measures (it is more precise).
+using std::chrono::system_clock; // NOTE(damian): system clock is used for time/date storage, so i use it here to know when the date when the session started.
 
 class Process_data {
 
 public:
     class Session;
 
+    // NOTE(damian): these are used later for process creation when the process ends.
+    steady_clock::time_point steady_start; 
+    system_clock::time_point system_start; 
+    
+    vector<Session> sessions;
     Win32_process_data data;
-
-    std::chrono::steady_clock::time_point start;
-    vector<Process_data::Session> sessions;
 
     // These are to track the changes in states. 
     bool is_active;    // NOTE(damian): is a stored process currently active.
@@ -36,19 +39,22 @@ public:
 
     Process_data(Win32_process_data win32_data);
 
+    bool operator==(const Win32_process_data& win32_data);
     bool operator==(const Process_data& other);
-    //bool operator==(const Win32_process_data& win32_data);
 
     class Session {
-        using time_point = std::chrono::steady_clock::time_point; 
-        // TODO(damian): these are nanoseconds, do some else.
+        
 
         public:
-            time_point start_time;
-            time_point end_time;
+            steady_clock::time_point steady_start_time;
+            steady_clock::time_point steady_end_time;
 
-            Session(time_point start, time_point end);
-            ~Session();
+            system_clock::time_point system_start_time;
+            system_clock::time_point system_end_time;
+
+            Session(system_clock::time_point system_start, system_clock::time_point system_endm,
+                    steady_clock::time_point steady_start, steady_clock::time_point steady_end);
+            ~Session() = default;
     };
     
 };

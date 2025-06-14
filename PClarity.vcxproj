@@ -133,7 +133,6 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Functions_networking.cpp" />
     <ClCompile Include="Process_data.cpp" />
-    <ClCompile Include="Process_tree.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -147,7 +146,6 @@
     <ClInclude Include="Global_state.h" />
     <ClInclude Include="Functions_networking.h" />
     <ClInclude Include="Process_data.h" />
-    <ClInclude Include="Process_tree.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

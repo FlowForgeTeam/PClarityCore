@@ -3,22 +3,39 @@
         {
             "data": {
                 "base_priority": 0,
+                "creation_time": 0,
                 "exe_name": "",
                 "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+                "exit_time": 0,
+                "is_visible_app": false,
+                "kernel_time": 0,
                 "pid": 0,
                 "ppid": 0,
                 "priority_class": 0,
-                "started_threads": 0
+                "process_affinity": 0,
+                "ram_usage": 0,
+                "started_threads": 0,
+                "system_affinity": 0,
+                "user_time": 0
             },
-            "is_active": true,
+            "is_active": false,
             "is_tracked": true,
             "sessions": [
                 {
-                    "end_time": 943520623284500,
-                    "start_time": 943489701953400
+                    "steady_end_time": 947126959438600,
+                    "steady_start_time": 947078375879200,
+                    "system_end_time": 1749897100770045200,
+                    "system_start_time": 1749897052186485700
+                },
+                {
+                    "steady_end_time": 947142186620000,
+                    "steady_start_time": 947136088333700,
+                    "system_end_time": 1749897115997227100,
+                    "system_start_time": 1749897109898939700
                 }
             ],
-            "start": 943666913815900,
+            "steady_start": 947136088333700,
+            "system_start": 1749897109898939700,
             "was_updated": false
         }
     ]
