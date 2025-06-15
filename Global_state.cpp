@@ -2,24 +2,24 @@
 #include <iostream>
 #include <fstream>
 #include <tuple>
+#include <unordered_map>
+
 #include "Functions_win32.h"
 #include "Functions_file_system.h"
 #include "Global_state.h"
 
 using G_state::Error;
 using G_state::Error_type;
+using std::unordered_map;
 
-namespace G_state
-{
+namespace G_state {
     // == Error type inits ============================
-    Error::Error(Error_type type)
-    {
+    Error::Error(Error_type type) {
         this->type = type;
         this->message = string("");
     }
 
-    Error::Error(Error_type type, const char *message)
-    {
+    Error::Error(Error_type type, const char *message) {
         this->type = type;
         this->message = string(message);
     }
@@ -30,6 +30,8 @@ namespace G_state
     const char *data_file_path = "data.json";
     vector<Process_data> currently_active_processes;
     vector<Process_data> tracked_processes;
+
+    vector<Node*> roots_for_process_tree;
 
     // ================================================
 
@@ -147,8 +149,7 @@ namespace G_state
             if (!it->was_updated) {
                 it = G_state::currently_active_processes.erase(it);
             }
-            else
-            {
+            else {
                 ++it;
             }
         }
@@ -177,8 +178,7 @@ namespace G_state
         return Error(Error_type::ok);
     }
 
-    G_state::Error add_process_to_track(string *path)
-    {
+    G_state::Error add_process_to_track(string *path) {
         Win32_process_data win32_data = {0};
 
         // TODO(damian): this is temporaty.
@@ -250,5 +250,67 @@ namespace G_state
         return Error(Error_type::ok);
     }
     // ================================================
+
+    static void print_process_data(Process_data* process) {
+        std::cout << "(name: " << process->data.exe_name<< ", pid: " << process->data.pid << ", ppid: " << process->data.ppid << ")";
+    }
+
+    void create_tree() {
+        // Init a tree
+        unordered_map<DWORD, Node*> tree;
+
+        for (Process_data& process : G_state::currently_active_processes) {
+            Node* new_node = new Node; // TODO(damian): why does malloc then read access violate, but new doesnt?
+            
+            if (new_node == NULL) {
+                // TODO(damian): handle better.
+                assert(false);
+            }
+
+            new_node->process               = &process;
+            new_node->child_processes_nodes = vector<Node*>();
+
+            tree[process.data.pid] = new_node;
+        }
+        
+        // Fill the tree up with current data
+        for (Process_data& process : G_state::currently_active_processes) {
+            auto process_node = tree.find(process.data.pid);
+            if (process_node == tree.end()) {
+                // TODO(damian): handle better.
+                assert(false); // This cant happend.
+            };            
+
+            auto parent_node = tree.find(process.data.ppid);
+            if (parent_node == tree.end()) continue; // Its ok
+
+            parent_node->second->child_processes_nodes.push_back(process_node->second);
+        }
+
+        // Print the results
+        // ...
+
+        // Finding root processes
+        for (auto& pair : tree) {
+            Node* node = pair.second;
+            DWORD ppid = node->process->data.ppid;
+
+            auto it = tree.find(ppid);
+            if (it == tree.end()) {// Not found
+                G_state::roots_for_process_tree.push_back(node);
+            }
+        }
+
+        std::cout << std::endl;
+
+        // Printing roots
+        for (Node* root : G_state::roots_for_process_tree) {
+            std::cout << "Root: ";
+            print_process_data(root->process);
+            std::cout << "\n";
+        }
+
+    }
+
 
 }

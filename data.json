@@ -1,36 +1,3 @@
 {
-    "processes_to_track": [
-        {
-            "data": {
-                "base_priority": 8,
-                "creation_time": 133943866207603925,
-                "exe_name": "Telegram.exe",
-                "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-                "exit_time": 0,
-                "is_visible_app": true,
-                "kernel_time": 4531250,
-                "pid": 3860,
-                "ppid": 15336,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "ram_usage": 262209536,
-                "started_threads": 118,
-                "system_affinity": 1048575,
-                "user_time": 18750000
-            },
-            "is_active": false,
-            "is_tracked": true,
-            "sessions": [
-                {
-                    "steady_end_time": 963068,
-                    "steady_start_time": 963059,
-                    "system_end_time": 1749913042,
-                    "system_start_time": 1749913033
-                }
-            ],
-            "steady_start": 963059,
-            "system_start": 1749913033,
-            "was_updated": false
-        }
-    ]
+    "processes_to_track": []
 }

@@ -52,12 +52,13 @@ Command::~Command() {
 
 pair<Command_type, bool> command_type_from_int(int id) {
     switch (id) {
-        case 0:  return pair(Command_type::report,   true);
-        case 1:  return pair(Command_type::quit,     true);
-        case 2:  return pair(Command_type::shutdown, true);
-        case 3:  return pair(Command_type::track,    true);
-        case 4:  return pair(Command_type::untrack,  true);
-        default: return pair(Command_type::report,   false);
+        case 0:  return pair(Command_type::report,         true);
+        case 1:  return pair(Command_type::quit,           true);
+        case 2:  return pair(Command_type::shutdown,       true);
+        case 3:  return pair(Command_type::track,          true);
+        case 4:  return pair(Command_type::untrack,        true);
+        case 5:  return pair(Command_type::grouped_report, true);
+        default: return pair(Command_type::report,         false);
     }
 }
 
@@ -71,30 +72,31 @@ pair<Command, bool> command_from_json(const char* json_as_c_str) {
     if (!result.second) return pair(Command(), false);
 
     switch (result.first) {
-            case Command_type::report:   return report(&j);
-            case Command_type::quit:     return quit(&j);
-            case Command_type::shutdown: return shutdown(&j);
-            case Command_type::track:    return track(&j);
-            case Command_type::untrack:  return untrack(&j);
-            default:                     return pair(Command(), false);
+            case Command_type::report:         return report(&j);
+            case Command_type::quit:           return quit(&j);
+            case Command_type::shutdown:       return shutdown(&j);
+            case Command_type::track:          return track(&j);
+            case Command_type::untrack:        return untrack(&j);
+            case Command_type::grouped_report: return grouped_report(&j);
+            default:                           return pair(Command(), false);
     }
 }
 
-pair<Command, bool> report(json*) {
+pair<Command, bool> report(json* j) {
     Command cmd;
     cmd.type = Command_type::report;
     new(&cmd.data.report) Report_command();
     return pair(cmd, true);
 }
 
-pair<Command, bool> quit(json*) {
+pair<Command, bool> quit(json* j) {
     Command cmd;
     cmd.type = Command_type::quit;
     new(&cmd.data.quit) Quit_command();
     return pair(cmd, true);
 }
 
-pair<Command, bool> shutdown(json*) {
+pair<Command, bool> shutdown(json* j) {
     Command cmd;
     cmd.type = Command_type::shutdown;
     new(&cmd.data.shutdown) Shutdown_command();
@@ -122,3 +124,46 @@ pair<Command, bool> untrack(json* j) {
     new(&cmd.data.untrack) Untrack_command{ (*j)["extra"]["path"].get<string>() };
     return pair(cmd, true);
 }
+
+pair<Command, bool> grouped_report(json* j) {
+    Command cmd;
+    cmd.type = Command_type::grouped_report;
+    new(&cmd.data.report) Grouped_report_command();
+    return pair(cmd, true);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
