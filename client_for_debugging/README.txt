@@ -11,6 +11,7 @@
     -- shutdown   --> '{\"command_id\": 2, \"extra\": {}}'         
     -- track      --> '{\"command_id\": 3, \"extra\": {\"path\": \"<path>\"}}' 
     -- untrack    --> '{\"command_id\": 4, \"extra\": {\"path\": \"<path>\"}}' 
+    -- grouped_report --> '{\"command_id\": 5, \"extra\": {}}' 
 
 
 
