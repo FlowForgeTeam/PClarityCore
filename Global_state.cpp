@@ -184,8 +184,19 @@ namespace G_state {
                 std::filesystem::path csv_file_path;
                 csv_file_path.append(G_state::path_dir_sessions);
                 csv_file_path.append(process_path_copy);
+                csv_file_path.replace_extension(".csv"); // NOTE(damian): this is error prone. 
 
-                std::fstream csv_file;
+                std::error_code err_code_1;
+                bool exists = std::filesystem::exists(csv_file_path, err_code_1);
+                
+                if (err_code_1) {
+                    return Error(Error_type::filesystem_error, err_code_1.message().c_str());
+                }
+                if (!exists) {
+                    return Error(Error_type::no_csv_file_for_tracked_process);
+                }
+
+                std::fstream csv_file; // NOTE(damian): std::ios::app also create a file if it doesnt exist, that why i check for exists above.
                 csv_file.open(csv_file_path, std::ios::out | std::ios::app);
 
                 if (!csv_file.is_open()) {
@@ -279,6 +290,7 @@ namespace G_state {
         std::filesystem::path csv_file_path;
         csv_file_path.append(G_state::path_dir_sessions);
         csv_file_path.append(process_path_copy);
+        csv_file_path.replace_extension(".csv");
 
         std::error_code err_code_2;
         bool exists = std::filesystem::exists(csv_file_path, err_code_2);
@@ -289,7 +301,7 @@ namespace G_state {
 
         if (!exists) { 
             std::ofstream new_file(csv_file_path);
-            new_file << "";
+            new_file << "duration_in_seconds, start_time_in_seconds_since_unix_epoch, end_time_in_seconds_since_unix_epoch" << "\n";
             new_file.close();
         }
         

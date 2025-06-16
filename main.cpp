@@ -36,7 +36,7 @@ int main() {
 
 		G_state::Error err = G_state::update_state();
 		if (err.type != G_state::Error_type::ok) {
-			std::cout << "Update state error: " << err.message << std::endl;
+			std::cout << "Update state error: " << "'" << err.message << "'" << std::endl;
 			exit(1);
 		}
 

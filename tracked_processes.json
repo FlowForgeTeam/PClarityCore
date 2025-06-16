@@ -1,6 +1,7 @@
 {
     "process_paths_to_track": [
-        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe"
+        "C:\\Program Files (x86)\\Hearthstone\\Hearthstone.exe",
+        "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
     ]
 }
