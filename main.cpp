@@ -36,10 +36,6 @@ int main() {
 
 		G_state::update_state();
 
-		std::cout << "\n\n\n" << std::endl;
-		G_state::create_tree();
-		std::cout << "\n\n\n" << std::endl;
-
 		// Getting the first command has not yet been handled
 		auto p_to_command    = Main::command_queue.begin(); 
 		bool unhandled_found = false; 

@@ -31,8 +31,7 @@ namespace G_state {
     vector<Process_data> currently_active_processes;
     vector<Process_data> tracked_processes;
 
-    vector<Node*> roots_for_process_tree;
-
+	pair<bool, vector<Node*>> maybe_used_process_trees;
     // ================================================
 
     // == G_state functions ===========================
@@ -101,7 +100,7 @@ namespace G_state {
         }
 
         // Updating the state
-        for (Win32_process_data &win32_data : result.first) {
+        for (Win32_process_data& win32_data : result.first) {
 
             // NOTE(damian): for manual hand testing )).
             if (win32_data.exe_name == "Telegram.exe") {
@@ -109,7 +108,7 @@ namespace G_state {
             }
 
             bool is_tracked = false;
-            for (Process_data &g_state_data : G_state::tracked_processes) {
+            for (Process_data& g_state_data : G_state::tracked_processes) {
                 if (g_state_data.data.exe_name == "Telegram.exe") {
                     int x = 2;
                 }
@@ -124,7 +123,7 @@ namespace G_state {
 
             bool was_active_before = false;
             if (!is_tracked) {
-                for (Process_data &g_state_data : G_state::currently_active_processes) {
+                for (Process_data& g_state_data : G_state::currently_active_processes) {
                     if (g_state_data == win32_data) {
                         g_state_data.update_active();
                         g_state_data.update_data(&win32_data);
@@ -144,7 +143,7 @@ namespace G_state {
 
         // Removing the processes that are not tracked and stopped being active
         for (auto it = G_state::currently_active_processes.begin();
-             it != G_state::currently_active_processes.end();) 
+            it != G_state::currently_active_processes.end();)
         {
             if (!it->was_updated) {
                 it = G_state::currently_active_processes.erase(it);
@@ -155,25 +154,30 @@ namespace G_state {
         }
 
         // Updating inactive tracked processes
-        for (Process_data &process_data : G_state::tracked_processes) {
+        for (Process_data& process_data : G_state::tracked_processes) {
             if (!process_data.was_updated)
                 process_data.update_inactive();
         }
 
         // Reseting the was_updated bool for future updates.
-        for (Process_data &process_data : G_state::currently_active_processes) {
+        for (Process_data& process_data : G_state::currently_active_processes) {
             process_data.was_updated = false;
         }
-        for (Process_data &process_data : G_state::tracked_processes) {
+        for (Process_data& process_data : G_state::tracked_processes) {
             process_data.was_updated = false;
         }
 
-        /*std::cout << "\n\n" << std::endl;
-        for (Process_data& data : G_state::currently_active_processes) {
-            if (data.data.is_visible_app) {
-                std::cout << data.data.exe_name << std::endl;
-            }
-        }*/
+        // NOTE(damian): 
+        // Creating a tree to now have an invalid pointer error. 
+        // Since tree is constructed of pointer to processes, there might be a time when there is a pointer to an already invalid data (Process).
+        // It is not an issue if we create a tree right after updates every time in main. 
+        // But sine there is a client getting data from us in paralel, there might be a slight edje case that we cant really test for.
+        // I found it manually. 
+        // At first didnt really like putting it here, but creating a tree is just a couple of loops, so should be fine.
+        // If there is really an need to move it somewhere outtside of state_update, then just add some more boolean checks and ifs to guaranty pointer valisity.
+        // (Make sure tree updates with the state)!.
+
+        // G_state::create_tree();
 
         return Error(Error_type::ok);
     }
@@ -249,68 +253,57 @@ namespace G_state {
 
         return Error(Error_type::ok);
     }
+   
     // ================================================
 
     static void print_process_data(Process_data* process) {
         std::cout << "(name: " << process->data.exe_name<< ", pid: " << process->data.pid << ", ppid: " << process->data.ppid << ")";
     }
 
-    void create_tree() {
-        // Init a tree
-        unordered_map<DWORD, Node*> tree;
+    // void create_tree() {
+    //     // Init a tree
+    //     unordered_map<DWORD, Node*> tree;
 
-        for (Process_data& process : G_state::currently_active_processes) {
-            Node* new_node = new Node; // TODO(damian): why does malloc then read access violate, but new doesnt?
+    //     for (Process_data& process : G_state::currently_active_processes) {
+    //         Node* new_node = new Node; // TODO(damian): why does malloc then read access violate, but new doesnt?
             
-            if (new_node == NULL) {
-                // TODO(damian): handle better.
-                assert(false);
-            }
+    //         if (new_node == NULL) {
+    //             // TODO(damian): handle better.
+    //             assert(false);
+    //         }
 
-            new_node->process               = &process;
-            new_node->child_processes_nodes = vector<Node*>();
+    //         new_node->process               = &process;
+    //         new_node->child_processes_nodes = vector<Node*>();
 
-            tree[process.data.pid] = new_node;
-        }
+    //         tree[process.data.pid] = new_node;
+    //     }
         
-        // Fill the tree up with current data
-        for (Process_data& process : G_state::currently_active_processes) {
-            auto process_node = tree.find(process.data.pid);
-            if (process_node == tree.end()) {
-                // TODO(damian): handle better.
-                assert(false); // This cant happend.
-            };            
+    //     // Fill the tree up with current data
+    //     for (Process_data& process : G_state::currently_active_processes) {
+    //         auto process_node = tree.find(process.data.pid);
+    //         if (process_node == tree.end()) {
+    //             // TODO(damian): handle better.
+    //             assert(false); // This cant happend.
+    //         };            
 
-            auto parent_node = tree.find(process.data.ppid);
-            if (parent_node == tree.end()) continue; // Its ok
+    //         auto parent_node = tree.find(process.data.ppid);
+    //         if (parent_node == tree.end()) continue; // Its ok
 
-            parent_node->second->child_processes_nodes.push_back(process_node->second);
-        }
+    //         parent_node->second->child_processes_nodes.push_back(process_node->second);
+    //     }
+        
+    //     // Finding root processes
+    //     for (auto& pair : tree) {
+    //         Node* node = pair.second;
+    //         DWORD ppid = node->process->data.ppid;
 
-        // Print the results
-        // ...
+    //         auto it = tree.find(ppid);
+    //         if (it == tree.end()) {// Not found
+    //             G_state::roots_for_process_tree.push_back(node);
+    //         }
+    //     }
+        
+    // }
 
-        // Finding root processes
-        for (auto& pair : tree) {
-            Node* node = pair.second;
-            DWORD ppid = node->process->data.ppid;
-
-            auto it = tree.find(ppid);
-            if (it == tree.end()) {// Not found
-                G_state::roots_for_process_tree.push_back(node);
-            }
-        }
-
-        std::cout << std::endl;
-
-        // Printing roots
-        for (Node* root : G_state::roots_for_process_tree) {
-            std::cout << "Root: ";
-            print_process_data(root->process);
-            std::cout << "\n";
-        }
-
-    }
-
-
+    
 }

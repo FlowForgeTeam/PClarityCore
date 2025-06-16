@@ -35,7 +35,18 @@ namespace Main {
             char receive_buffer[receive_buffer_size];
 
             int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
-            if (n_bytes_returned > receive_buffer_size - 1) assert(false);
+            if (n_bytes_returned == SOCKET_ERROR) {
+                std::cout << "err_code: " << WSAGetLastError() << std::endl;
+                closesocket(Main::client_socket);
+                Main::need_new_client = true;
+                continue;
+            }
+            if (n_bytes_returned > receive_buffer_size - 1) { // TODO(damian): handle this.
+                std::cout << "bytes_returned: " << n_bytes_returned << std::endl;
+                std::cout << "receive_buffer_len: " << receive_buffer_size << std::endl;
+                std::cout << "flopper error" << std::endl;
+                assert(false);
+            }
             receive_buffer[n_bytes_returned] = '\0';
 
             // Overflow
@@ -43,8 +54,8 @@ namespace Main {
                 // TODO: Send a respomce singaling that client has to send the same data again
             }
 
-            std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
-            std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
+            //std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
+            //std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
             // Parsing the request.
             std::pair<Command, bool> result = command_from_json(receive_buffer);
@@ -78,7 +89,8 @@ namespace Main {
                     } break;
 
                     case Command_type::grouped_report: {
-                        Main::handle_grouped_report(&result.first.data.grouped_report);
+                        assert(false);
+                        //Main::handle_grouped_report(&result.first.data.grouped_report);
                     } break;
 
                     default: {
@@ -118,6 +130,8 @@ namespace Main {
     }
 
     void handle_report(Report_command* report) {
+        std::cout << "Started reporting" << std::endl;
+
         vector<json> j_tracked;
         for (Process_data& data : G_state::tracked_processes) {
             json temp;
@@ -132,6 +146,8 @@ namespace Main {
             j_cur_active.push_back(temp);
         }
 
+        std::cout << "Stopped reporting" << std::endl;
+
         json global_json;
         global_json["tracked"]          = j_tracked;
         global_json["currently_active"] = j_cur_active;
@@ -143,7 +159,7 @@ namespace Main {
             // TODO: handle
         }
 
-        std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
+        //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
     }
 
     void handle_quit(Quit_command* quit) {
@@ -216,34 +232,65 @@ namespace Main {
         }
     }
 
-    static json create_json_from_tree_node(G_state::Node* root);
-    void handle_grouped_report(Grouped_report_command* report) {
-        vector<json> j_roots;
-        for (G_state::Node* root : G_state::roots_for_process_tree) {
-            j_roots.push_back(create_json_from_tree_node(root));
-        }
+    //     #include <chrono>
+    //     static json create_json_from_tree_node(G_state::Node* root);
+    //     static json create_json_from_tree_node(G_state::Node_copy* root);
+    // void handle_grouped_report(Grouped_report_command* report) {
+    //     // vector<json> j_roots;
+    //     // for (G_state::Node* & root : G_state::roots_for_process_tree) { // These might be invalid pointers
+    //     //     auto test = root->process;
 
-        std::string message_as_str = json(j_roots).dump(4);
+    //     //     j_roots.push_back(create_json_from_tree_node(root));
+    //     // }
 
-        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
-        if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
-        }
+    //     // std::string message_as_str = json(j_roots).dump(4);
 
-        std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
-    }
+    //     // int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+    //     // if (send_err_code == SOCKET_ERROR) {
+    //     //     // TODO: handle
+    //     // }
+
+    //     auto start_time = std::chrono::steady_clock::now();
+    //     G_state::create_copy_tree();
+    //     auto end_time = std::chrono::steady_clock::now();
+
+    //     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    //     std::cout << "Time it took to create a copy_node tree: " << duration.count() << std::endl;
+
+    //     start_time = std::chrono::steady_clock::now();
+    //     vector<json> j_roots;
+    //     for (G_state::Node_copy* root : G_state::copy_roots__for_process_tree) { // These might be invalid pointers
+    //         j_roots.push_back(create_json_from_tree_node(root));
+    //     }
+
+    //     std::string message_as_str = json(j_roots).dump(4);
+
+    //     int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+    //     if (send_err_code == SOCKET_ERROR) {
+    //         // TODO: handle
+    //     }
+    //     end_time = std::chrono::steady_clock::now();
+
+    //     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
+    //     std::cout << "Time it took to create json for the copy_node tree: " << duration.count() << std::endl;
+
+    //     //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
+    // }
 
 
     // == Helpers ========================================================
 
     static json create_json_from_tree_node(G_state::Node* root) {
+        json j_process; 
+        convert_to_json(root->process, &j_process);
+
         json j_node;
-        j_node["name"] = root->process->data.exe_name;
+        j_node["process"] = j_process;
 
         vector<json> j_children;
         for (G_state::Node* child_node : root->child_processes_nodes) {
             json j_child;
-            j_child["children"] = create_json_from_tree_node(child_node);
+            j_child["child"] = create_json_from_tree_node(child_node);
 
             j_children.push_back(j_child);
         }

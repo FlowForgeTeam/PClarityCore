@@ -2,11 +2,14 @@
 #include <nlohmann/json.hpp>
 #include <vector>
 #include <string>
+#include <atomic>
 
 #include "Process_data.h"
 
 using nlohmann::json;
 using std::vector, std::string;
+
+using std::list;
 
 namespace G_state {
 	enum class Error_type {
@@ -45,14 +48,15 @@ namespace G_state {
 
 	// TODO(damian): change the name.
 	struct Node { 
-		Process_data* process;
+		Process_data*  process;
 		vector<Node*> child_processes_nodes; 
 	};
 
 	extern const char* data_file_path;
 	extern vector<Process_data> currently_active_processes;
 	extern vector<Process_data> tracked_processes;
-	extern vector<Node*> roots_for_process_tree;
+
+	// extern vector<Node*> tree;
 
 	extern G_state::Error set_up_on_startup();
 	extern G_state::Error update_state();
@@ -60,5 +64,6 @@ namespace G_state {
 	extern G_state::Error add_process_to_track(string *path);
 	extern G_state::Error remove_process_from_track(string *path);
 	extern void create_tree(); // TODO(damian): change the name.
+	extern void create_copy_tree();
 
 }
