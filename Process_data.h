@@ -53,13 +53,13 @@ using std::chrono::seconds;
 
 struct Session {
         seconds duration_sec;
-        system_clock::time_point system_start_time; // These are nanoseconds by default
-        system_clock::time_point system_end_time;   // These are nanoseconds by default
+        seconds system_start_time_in_seconds;
+        seconds system_end_time_in_seconds;   
 
         Session() = default;
         Session(seconds duration_sec, 
-                system_clock::time_point system_start, 
-                system_clock::time_point system_end);
+                seconds system_start, 
+                seconds system_end);
 };
 
 // NOTE(damian): there are built in functions that we can overload from json packet, but it might want to do it like this for now.

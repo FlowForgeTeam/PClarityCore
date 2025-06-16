@@ -36,7 +36,10 @@ std::pair<bool, Session> Process_data::update_inactive() {
             std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - this->steady_start;
             auto duration_sec                 = std::chrono::duration_cast<std::chrono::seconds>(duration);
 
-            Session session(duration_sec, this->system_start, std::chrono::system_clock::now());
+            auto start_time_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(this->system_start.time_since_epoch());
+            auto end_time_in_seconds   = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
+
+            Session session(duration_sec, start_time_in_seconds, end_time_in_seconds);
 
             return std::pair(true, session);
         }
@@ -52,22 +55,6 @@ std::pair<bool, Session> Process_data::update_inactive() {
 void Process_data::update_data(Win32_process_data* new_win32_data) {
     this->data = *new_win32_data;
 }
-
-// bool Process_data::operator==(const Process_data& other) {
-//     if (other.data.exe_name == "Telegram.exe") {
-//         int x = 2;
-//     }
-
-//     if (this->is_tracked) {
-//         return this->data.exe_path == other.data.exe_path;
-//     }
-//     else {
-//         return (
-//                this->data.exe_path      == other.data.exe_path 
-//             && this->data.creation_time == other.data.creation_time
-//         );
-//     }
-// }
 
 bool Process_data::compare(Process_data other) {
     return (   this->data.exe_path      == other.data.exe_path 
@@ -91,12 +78,12 @@ bool Process_data::compare_as_tracked(Process_data other) {
 // == Process_data::Session =================================================================
 
 Session::Session(seconds duration_sec, 
-                system_clock::time_point system_start, 
-                system_clock::time_point system_end
+                 seconds system_start_in_seconds, 
+                 seconds system_end_in_seconds
 ) {
-    this->duration_sec      = duration_sec;
-    this->system_start_time = system_start;
-    this->system_end_time   = system_end;
+    this->duration_sec                 = duration_sec;
+    this->system_start_time_in_seconds = system_start_in_seconds;
+    this->system_end_time_in_seconds   = system_end_in_seconds;
 }
 
 // == Just some functions ===================================================================

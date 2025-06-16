@@ -13,10 +13,9 @@ using std::vector, std::string;
 
 using std::unordered_map;
 
-namespace G_state
-{
-	enum class Error_type
-	{
+namespace G_state {
+	
+	enum class Error_type {
 		ok,
 
 		// State
@@ -45,8 +44,7 @@ namespace G_state
 		other,
 	};
 
-	struct Error
-	{
+	struct Error {
 		Error_type type;
 		std::string message;
 
@@ -61,8 +59,8 @@ namespace G_state
 	// 	vector<Node*> child_processes_nodes;
 	// };
 
-	extern const char* file_path_with_tracked_processes;
-	extern const char* sessions_dir_path;
+	extern const char* path_file_tracked_processes;
+	extern const char* path_dir_sessions;
 	extern vector<Process_data> currently_active_processes;
 	extern vector<Process_data> tracked_processes;
 
@@ -73,6 +71,7 @@ namespace G_state
 
 	extern G_state::Error add_process_to_track(string *path);
 	extern G_state::Error remove_process_from_track(string *path);
+	
 	// extern void create_tree(); // TODO(damian): change the name.
 	// extern void create_copy_tree();
 
