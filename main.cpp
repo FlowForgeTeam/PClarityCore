@@ -34,7 +34,11 @@ int main() {
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;
 
-		G_state::update_state();
+		G_state::Error err = G_state::update_state();
+		if (err.type != G_state::Error_type::ok) {
+			std::cout << "Update state error: " << err.message << std::endl;
+			exit(1);
+		}
 
 		// Getting the first command has not yet been handled
 		auto p_to_command    = Main::command_queue.begin(); 

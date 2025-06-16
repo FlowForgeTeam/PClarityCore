@@ -99,22 +99,24 @@ namespace Main {
                 }
             }
 
-            // Preserve the new state
-            std::ofstream data_file("data.json");
+            // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
 
-            vector<json> processes_as_jsons;
-            for (Process_data& process_data : G_state::tracked_processes) {
-                json temp;
-                convert_to_json(&process_data, &temp);
-                processes_as_jsons.push_back(temp);
-            }
-            json j_overall_data;
-            j_overall_data["processes_to_track"] = processes_as_jsons;
+            // // Preserve the new state
+            // std::ofstream data_file(G_state::file_path_with_tracked_processes);
 
-            data_file << j_overall_data.dump(4) << std::endl;
-            data_file.close();
+            // vector<json> processes_as_jsons;
+            // for (Process_data& process_data : G_state::tracked_processes) {
+            //     json temp;
+            //     convert_to_json(&process_data, &temp);
+            //     processes_as_jsons.push_back(temp);
+            // }
+            // json j_overall_data;
+            // j_overall_data["processes_to_track"] = processes_as_jsons;
 
-            std::cout << "Saved data to file. \n" << std::endl;
+            // data_file << j_overall_data.dump(4) << std::endl;
+            // data_file.close();
+
+            // std::cout << "Saved data to file. \n" << std::endl;
         
         }
     }
@@ -280,7 +282,7 @@ namespace Main {
 
     // == Helpers ========================================================
 
-    static json create_json_from_tree_node(G_state::Node* root) {
+    /*static json create_json_from_tree_node(G_state::Node* root) {
         json j_process; 
         convert_to_json(root->process, &j_process);
 
@@ -304,7 +306,7 @@ namespace Main {
         for (G_state::Node* child_node : root->child_processes_nodes) {
             traverse_tree(child_node, depth + 1);
         }
-    }
+    }*/
 
 
 }

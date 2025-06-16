@@ -10,19 +10,17 @@
 
 using nlohmann::json;
 using std::vector;
-using std::chrono::steady_clock; // NOTE(damian): steady clock is used for interval measures (it is more precise).
-using std::chrono::system_clock; // NOTE(damian): system clock is used for time/date storage, so i use it here to know when the date when the session started.
+
+struct Session;
 
 class Process_data {
 
 public:
-    class Session;
 
     // NOTE(damian): these are used later for process creation when the process ends.
-    steady_clock::time_point steady_start; 
-    system_clock::time_point system_start; 
+    std::chrono::steady_clock::time_point steady_start; 
+    std::chrono::system_clock::time_point system_start;
     
-    vector<Session> sessions;
     Win32_process_data data;
 
     // These are to track the changes in states. 
@@ -35,27 +33,34 @@ public:
     //               regular_processes --> (Process_dasta)
 
     void update_active();
-    void update_inactive();
+    std::pair<bool, Session> update_inactive();
     void update_data(Win32_process_data* new_win32_data);
 
     Process_data(Win32_process_data win32_data);
 
-    bool operator==(const Process_data& other);
+    // bool operator==(const Process_data& other);
 
-    struct Session {
-            steady_clock::time_point steady_start_time;
-            steady_clock::time_point steady_end_time;
+    bool compare           (Process_data other);
+    bool compare_as_tracked(Process_data other);
 
-            system_clock::time_point system_start_time;
-            system_clock::time_point system_end_time;
-
-            Session(system_clock::time_point system_start, system_clock::time_point system_end,
-                    steady_clock::time_point steady_start, steady_clock::time_point steady_end);
-    };
-    
 };
 
 
+using std::chrono::steady_clock; // NOTE(damian): steady clock is used for interval measures (it is more precise).
+using std::chrono::system_clock; // NOTE(damian): system clock is used for time/date storage, so i use it here to know when the date when the session started.
+using std::chrono::duration;
+using std::chrono::seconds;
+
+struct Session {
+        seconds duration_sec;
+        system_clock::time_point system_start_time; // These are nanoseconds by default
+        system_clock::time_point system_end_time;   // These are nanoseconds by default
+
+        Session() = default;
+        Session(seconds duration_sec, 
+                system_clock::time_point system_start, 
+                system_clock::time_point system_end);
+};
 
 // NOTE(damian): there are built in functions that we can overload from json packet, but it might want to do it like this for now.
 bool convert_from_json(Process_data* process_data, json* j);
