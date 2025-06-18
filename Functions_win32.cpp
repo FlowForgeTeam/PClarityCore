@@ -276,7 +276,13 @@ void convert_to_json(Win32_process_data* win32_data, json* j) {
     (*j)["started_threads"]  = win32_data->started_threads;
     (*j)["ppid"]             = win32_data->ppid;
     (*j)["base_priority"]    = win32_data->base_priority;
-    (*j)["exe_name"]         = win32_data->exe_name;
+    try {
+        (*j)["exe_name"]         = win32_data->exe_name;
+
+    }
+    catch (...) {
+        int x = 2;
+    }
     (*j)["exe_path"]         = win32_data->exe_path;
     (*j)["priority_class"]   = win32_data->priority_class;
     (*j)["creation_time"]    = win32_data->creation_time;  

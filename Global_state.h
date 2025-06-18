@@ -54,17 +54,27 @@ namespace G_state {
 	};
 
 	// TODO(damian): change the name.
-	// struct Node {
-	// 	Process_data*  process;
-	// 	vector<Node*> child_processes_nodes;
-	// };
+	struct Node {
+		Process_data*  process;
+		vector<Node*> child_processes_nodes;
+	};
+	
+	// == Data copies for client =================================
+	extern bool need_processes_for_report;
+	extern bool need_complete_process_tree;
+	
+	extern vector<Node*> roots_for_process_trees;
+
+	extern vector<Process_data> copy_currently_active_processes;
+	extern vector<Process_data> copy_tracked_processes;
+	// ===========================================================
+
 
 	extern const char* path_file_tracked_processes;
 	extern const char* path_dir_sessions;
 	extern vector<Process_data> currently_active_processes;
 	extern vector<Process_data> tracked_processes;
 
-	// extern vector<Node*> tree;
 
 	extern G_state::Error set_up_on_startup();
 	extern G_state::Error update_state();
@@ -72,7 +82,6 @@ namespace G_state {
 	extern G_state::Error add_process_to_track(string *path);
 	extern G_state::Error remove_process_from_track(string *path);
 	
-	// extern void create_tree(); // TODO(damian): change the name.
-	// extern void create_copy_tree();
-
+	extern void create_tree(); // TODO(damian): change the name.
+	extern void clear_tree();
 }

@@ -45,6 +45,10 @@ namespace Main {
                 std::cout << "bytes_returned: " << n_bytes_returned << std::endl;
                 std::cout << "receive_buffer_len: " << receive_buffer_size << std::endl;
                 std::cout << "flopper error" << std::endl;
+
+                receive_buffer[receive_buffer_size - 1] = '\0';
+                std::cout << "Buffer: " << receive_buffer << std::endl;
+
                 assert(false);
             }
             receive_buffer[n_bytes_returned] = '\0';
@@ -54,14 +58,14 @@ namespace Main {
                 // TODO: Send a respomce singaling that client has to send the same data again
             }
 
-            //std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
-            //std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
+            std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
+            std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
             // Parsing the request.
             std::pair<Command, bool> result = command_from_json(receive_buffer);
             if (!result.second) {
                 const char* message = "Invalid command";
-                int send_err_code = send(client_socket, message, strlen(message), NULL);
+                int send_err_code   = send(client_socket, message, strlen(message), NULL);
                 if (send_err_code == SOCKET_ERROR) {
                     // TODO: handle
                 }
@@ -89,8 +93,7 @@ namespace Main {
                     } break;
 
                     case Command_type::grouped_report: {
-                        assert(false);
-                        //Main::handle_grouped_report(&result.first.data.grouped_report);
+                        Main::handle_grouped_report(&result.first.data.grouped_report);
                     } break;
 
                     default: {
@@ -132,7 +135,14 @@ namespace Main {
     }
 
     void handle_report(Report_command* report) {
-        std::cout << "Started reporting" << std::endl;
+        if (G_state::need_processes_for_report) {
+            std::cout << "Threading issue when reporting." << std::endl;
+            assert(false);            
+        } 
+
+        // Telling the data thread to produce a copy of thread safe data for us to use 
+        G_state::need_processes_for_report = true;
+        while(G_state::need_processes_for_report);         
 
         vector<json> j_tracked;
         for (Process_data& data : G_state::tracked_processes) {
@@ -142,13 +152,11 @@ namespace Main {
         }
 
         vector<json> j_cur_active;
-        for (Process_data& data : G_state::currently_active_processes) {
+        for (Process_data& data : G_state::copy_currently_active_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_cur_active.push_back(temp);
         }
-
-        std::cout << "Stopped reporting" << std::endl;
 
         json global_json;
         global_json["tracked"]          = j_tracked;
@@ -161,7 +169,6 @@ namespace Main {
             // TODO: handle
         }
 
-        //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
     }
 
     void handle_quit(Quit_command* quit) {
@@ -234,55 +241,52 @@ namespace Main {
         }
     }
 
-    //     #include <chrono>
-    //     static json create_json_from_tree_node(G_state::Node* root);
-    //     static json create_json_from_tree_node(G_state::Node_copy* root);
-    // void handle_grouped_report(Grouped_report_command* report) {
-    //     // vector<json> j_roots;
-    //     // for (G_state::Node* & root : G_state::roots_for_process_tree) { // These might be invalid pointers
-    //     //     auto test = root->process;
+        static json create_json_from_tree_node(G_state::Node* root);
+    void handle_grouped_report(Grouped_report_command* report) {
+        if (G_state::need_complete_process_tree) {
+            assert(false);            
+        } 
 
-    //     //     j_roots.push_back(create_json_from_tree_node(root));
-    //     // }
+        G_state::need_complete_process_tree = true;
 
-    //     // std::string message_as_str = json(j_roots).dump(4);
+        while(G_state::need_complete_process_tree);    
+        
+        vector<json> j_tracked;
+        for (Process_data& data : G_state::copy_tracked_processes) {
+            json j_data;
+            convert_to_json(&data, &j_data);
+            j_tracked.push_back(j_data);
+        }
 
-    //     // int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
-    //     // if (send_err_code == SOCKET_ERROR) {
-    //     //     // TODO: handle
-    //     // }
+        vector<json> j_roots;
+        for (G_state::Node* root : G_state::roots_for_process_trees) { 
+            j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
+        }
 
-    //     auto start_time = std::chrono::steady_clock::now();
-    //     G_state::create_copy_tree();
-    //     auto end_time = std::chrono::steady_clock::now();
+        json j_result;
+        j_result["tracked"] = j_tracked;
+        j_result["active"]  = j_roots;
 
-    //     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-    //     std::cout << "Time it took to create a copy_node tree: " << duration.count() << std::endl;
+        std::string message_as_str = json(j_result).dump(4);
 
-    //     start_time = std::chrono::steady_clock::now();
-    //     vector<json> j_roots;
-    //     for (G_state::Node_copy* root : G_state::copy_roots__for_process_tree) { // These might be invalid pointers
-    //         j_roots.push_back(create_json_from_tree_node(root));
-    //     }
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            // TODO: handle
+        }
 
-    //     std::string message_as_str = json(j_roots).dump(4);
+        G_state::clear_tree();
 
-    //     int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
-    //     if (send_err_code == SOCKET_ERROR) {
-    //         // TODO: handle
-    //     }
-    //     end_time = std::chrono::steady_clock::now();
-
-    //     duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
-    //     std::cout << "Time it took to create json for the copy_node tree: " << duration.count() << std::endl;
-
-    //     //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
-    // }
+        //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
+    }
 
 
     // == Helpers ========================================================
 
-    /*static json create_json_from_tree_node(G_state::Node* root) {
+    static json create_json_from_tree_node(G_state::Node* root) {
+        if (root == nullptr) {
+            assert(false);
+        }
+
         json j_process; 
         convert_to_json(root->process, &j_process);
 
@@ -291,8 +295,7 @@ namespace Main {
 
         vector<json> j_children;
         for (G_state::Node* child_node : root->child_processes_nodes) {
-            json j_child;
-            j_child["child"] = create_json_from_tree_node(child_node);
+            json j_child = create_json_from_tree_node(child_node);
 
             j_children.push_back(j_child);
         }
@@ -300,14 +303,6 @@ namespace Main {
 
         return j_node;
     }
-
-    static void traverse_tree(G_state::Node* root, int depth = 1) {
-        std::cout << "Node: " << root->process->data.exe_name << ", depth: " << depth << std::endl;
-        for (G_state::Node* child_node : root->child_processes_nodes) {
-            traverse_tree(child_node, depth + 1);
-        }
-    }*/
-
 
 }
 

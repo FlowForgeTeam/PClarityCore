@@ -18,8 +18,6 @@
 // NOTE(damian): bool represent wheather the command has alredy been handled.
 // TOOD(damian): maybe add this to the global state.
 
-
-
 int main() {
 	G_state::set_up_on_startup();
 	G_state::update_state();
@@ -29,7 +27,7 @@ int main() {
 
 	int n = 1;
 	while (Main::running) {
-		std::chrono::duration<int> sleep_length(3);
+		std::chrono::duration<int> sleep_length(1);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;

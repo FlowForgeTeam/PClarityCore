@@ -22,7 +22,6 @@ void Process_data::update_active() {
     else {
         // Nothing here
     }
-
     
     this->was_updated = true;
 }
@@ -65,15 +64,6 @@ bool Process_data::compare(Process_data other) {
 bool Process_data::compare_as_tracked(Process_data other) {
     return this->data.exe_path == other.data.exe_path;
 }
-
-
-//bool Process_data::operator==(const Win32_process_data& win32_data) {
-//    return (
-//           this->data.exe_path      == win32_data.exe_path 
-//        && this->data.creation_time == win32_data.creation_time
-//    );
-//}
-
 
 // == Process_data::Session =================================================================
 
@@ -126,5 +116,4 @@ void convert_to_json(Process_data* process_data, json* j) {
     (*j)["is_active"]   = process_data->is_active;
     (*j)["is_tracked"]  = process_data->is_tracked;
     (*j)["was_updated"] = process_data->was_updated;
-
 }

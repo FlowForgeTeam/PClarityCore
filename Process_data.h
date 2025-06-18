@@ -38,8 +38,6 @@ public:
 
     Process_data(Win32_process_data win32_data);
 
-    // bool operator==(const Process_data& other);
-
     bool compare           (Process_data other);
     bool compare_as_tracked(Process_data other);
 

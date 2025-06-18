@@ -19,7 +19,7 @@ namespace G_state {
         this->message = string("");
     }
 
-    Error::Error(Error_type type, const char *message) {
+    Error::Error(Error_type type, const char* message) {
         this->type = type;
         this->message = string(message);
     }
@@ -27,8 +27,15 @@ namespace G_state {
     // ================================================
 
     // == G_state variables ==========================
+    bool need_complete_process_tree = false;
+    bool need_processes_for_report  = false;
+
+    vector<Node*>        roots_for_process_trees;
+    vector<Process_data> copy_currently_active_processes;
+    vector<Process_data> copy_tracked_processes;
+
     const char* path_file_tracked_processes = "tracked_processes.json";
-    const char* path_dir_sessions           = "Sessions_data";
+    const char* path_dir_sessions = "Sessions_data";
     vector<Process_data> currently_active_processes;
     vector<Process_data> tracked_processes;
 
@@ -40,7 +47,7 @@ namespace G_state {
     static Error save_tracked_processes();
 
     G_state::Error set_up_on_startup() {
-                
+
         std::error_code err_code_1;
         bool data_exists = fs::exists(G_state::path_file_tracked_processes, err_code_1);
 
@@ -62,18 +69,18 @@ namespace G_state {
         try {
             data_as_json = json::parse(text);
         }
-        catch(...) {
+        catch (...) {
             return Error(Error_type::json_parsing_failed, text.c_str());
         }
 
         vector<json> vector_of_j_tracked;
-        try { vector_of_j_tracked = data_as_json["process_paths_to_track"]; } 
-        catch(...) { return Error(Error_type::json_invalid_strcture); }
+        try { vector_of_j_tracked = data_as_json["process_paths_to_track"]; }
+        catch (...) { return Error(Error_type::json_invalid_strcture); }
 
-        for (json &j_path : vector_of_j_tracked) {
-            Process_data new_process(Win32_process_data{0});
+        for (json& j_path : vector_of_j_tracked) {
+            Process_data new_process(Win32_process_data{ 0 });
             new_process.data.exe_path = j_path; // TODO(damian): check what happends if this is not a string.
-            new_process.is_tracked    = true;
+            new_process.is_tracked = true;
 
             G_state::tracked_processes.push_back(new_process);
         }
@@ -91,7 +98,7 @@ namespace G_state {
 
         std::error_code err_code_3;
         bool is_dir = std::filesystem::is_directory(G_state::path_dir_sessions, err_code_3);
-        
+
         if (err_code_3) {
             return Error(Error_type::filesystem_error, err_code_3.message().c_str());
         }
@@ -111,11 +118,11 @@ namespace G_state {
         }
 
         // NOTE(damian): for code clarity.
-        for (Process_data &data : G_state::tracked_processes) {
+        for (Process_data& data : G_state::tracked_processes) {
             if (data.was_updated)
                 assert(false);
         }
-        for (Process_data &data : G_state::currently_active_processes) {
+        for (Process_data& data : G_state::currently_active_processes) {
             if (data.was_updated)
                 assert(false);
         }
@@ -126,6 +133,8 @@ namespace G_state {
             bool is_tracked = false;
             for (Process_data& g_state_data : G_state::tracked_processes) {
                 if (g_state_data.compare_as_tracked(win32_data)) {
+                    assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
+
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
                     is_tracked = true;
@@ -135,17 +144,17 @@ namespace G_state {
             }
 
             bool was_active_before = false;
-            if (!is_tracked) {
-                for (Process_data& g_state_data : G_state::currently_active_processes) {
-                    if (g_state_data.compare(win32_data)) {
-                        g_state_data.update_active();
-                        g_state_data.update_data(&win32_data);
-                        was_active_before = true;
+            //if (!is_tracked) { // NOTE(damian): removed this if to have chrome like processes to be stored and still be updates isnide cur active. 
+            for (Process_data& g_state_data : G_state::currently_active_processes) {
+                if (g_state_data.compare(win32_data)) {
+                    g_state_data.update_active();
+                    g_state_data.update_data(&win32_data);
+                    was_active_before = true;
 
-                        // TODO(damian): maybe assert to make sure that there is no other exact process.
-                    }
+                    // TODO(damian): maybe assert to make sure that there is no other exact process.
                 }
             }
+            //}
 
             if (!was_active_before && !is_tracked) {
                 Process_data new_process(win32_data);
@@ -155,9 +164,9 @@ namespace G_state {
         }
 
         // Removing the processes that are not tracked and stopped being active
-        for (auto it = G_state::currently_active_processes.begin(); 
-                  it != G_state::currently_active_processes.end();
-        ) {
+        for (auto it = G_state::currently_active_processes.begin();
+            it != G_state::currently_active_processes.end();
+            ) {
             if (!it->was_updated) {
                 it = G_state::currently_active_processes.erase(it);
             }
@@ -188,7 +197,7 @@ namespace G_state {
 
                 std::error_code err_code_1;
                 bool exists = std::filesystem::exists(csv_file_path, err_code_1);
-                
+
                 if (err_code_1) {
                     return Error(Error_type::filesystem_error, err_code_1.message().c_str());
                 }
@@ -202,14 +211,14 @@ namespace G_state {
                 if (!csv_file.is_open()) {
                     csv_file.clear(); // Resets the stream
                     csv_file.close();
-                    
+
                     return Error(Error_type::no_csv_file_for_tracked_process, process_path_copy.c_str());
                 }
 
-                csv_file << 
-                    new_session.duration_sec.count() << ", " << 
-                    new_session.system_start_time_in_seconds.count() << ", " << 
-                    new_session.system_end_time_in_seconds.count()   << 
+                csv_file <<
+                    new_session.duration_sec.count() << ", " <<
+                    new_session.system_start_time_in_seconds.count() << ", " <<
+                    new_session.system_end_time_in_seconds.count() <<
                     '\n';
             }
         }
@@ -222,13 +231,50 @@ namespace G_state {
             process_data.was_updated = false;
         }
 
-        // G_state::create_tree();
+        if (G_state::need_complete_process_tree) {
+            // Storing current active processes for client to use
+            // NOTE(damian): move is fine here, update_state() will add all of them back on the next iter. 
+            size_t prev_size                         = G_state::currently_active_processes.size();
+            G_state::copy_currently_active_processes = move(G_state::currently_active_processes);
+
+            G_state::currently_active_processes = vector<Process_data>();
+            G_state::currently_active_processes.reserve(prev_size);
+
+            // Storing a copy of tracked processes for client to use
+            // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
+            //               we only add processes on startup and when user decided to add/remove a process from being tracked.
+            //               update_state() just updates the state (is_active --> true / false)
+            G_state::copy_tracked_processes = G_state::tracked_processes;
+
+            G_state::create_tree();
+
+            G_state::need_complete_process_tree = false;
+        }
+
+        if (G_state::need_processes_for_report) {
+            // Storing current active processes for client to use
+            // NOTE(damian): move is fine here, update_state() will add all of them back on the next iter. 
+            size_t prev_size_active                  = G_state::currently_active_processes.size();
+            G_state::copy_currently_active_processes = move(G_state::currently_active_processes);
+
+            G_state::currently_active_processes = vector<Process_data>();
+            G_state::currently_active_processes.reserve(prev_size_active);
+
+            // Storing a copy of tracked processes for client to use
+            // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
+            //               we only add processes on startup and when user decided to add/remove a process from being tracked.
+            //               update_state() just updates the state (is_active --> true / false)
+            G_state::copy_tracked_processes = G_state::currently_active_processes;
+
+            // Telling the client thread that data for it is ready
+            G_state::need_processes_for_report = false;
+        }
 
         return Error(Error_type::ok);
     }
 
     G_state::Error add_process_to_track(string* path) {
-        Win32_process_data win32_data = {0};
+        Win32_process_data win32_data = { 0 };
 
         // TODO(damian): this is temporaty.
         win32_data.exe_path = *path;
@@ -236,7 +282,7 @@ namespace G_state {
         Process_data new_process(win32_data);
 
         bool already_tracking = false;
-        for (Process_data &process : G_state::tracked_processes) {
+        for (Process_data& process : G_state::tracked_processes) {
             if (process.compare_as_tracked(new_process))
                 already_tracking = true;
         }
@@ -248,9 +294,9 @@ namespace G_state {
         auto p_to_active = G_state::currently_active_processes.begin();
         bool found_active = false;
         for (;
-             p_to_active != G_state::currently_active_processes.end();
-             ++p_to_active
-        ) {
+            p_to_active != G_state::currently_active_processes.end();
+            ++p_to_active
+            ) {
             if (p_to_active->compare_as_tracked(new_process)) {
                 found_active = true;
                 break;
@@ -269,9 +315,9 @@ namespace G_state {
         }
 
         // TODO(damian): this is here now for clarity, move somewhere else.
-        for (Process_data &tracked : G_state::tracked_processes) {
-            for (Process_data &current : G_state::currently_active_processes) {
-                if (tracked.compare(current)) { 
+        for (Process_data& tracked : G_state::tracked_processes) {
+            for (Process_data& current : G_state::currently_active_processes) {
+                if (tracked.compare(current)) {
                     // NOTE(damian): not comaring as tracked, 
                     //               since then it would return Error for processes like chrome and vs code.
                     return Error(Error_type::tracked_and_current_process_vectors_share_data);
@@ -299,12 +345,12 @@ namespace G_state {
             return Error(Error_type::filesystem_error);
         }
 
-        if (!exists) { 
+        if (!exists) {
             std::ofstream new_file(csv_file_path);
             new_file << "duration_in_seconds, start_time_in_seconds_since_unix_epoch, end_time_in_seconds_since_unix_epoch" << "\n";
             new_file.close();
         }
-        
+
         return Error(Error_type::ok);
     }
 
@@ -312,9 +358,9 @@ namespace G_state {
         bool is_tracked = false;
         auto p_to_tracked = G_state::tracked_processes.begin();
         for (;
-             p_to_tracked != G_state::tracked_processes.end();
-             ++p_to_tracked
-        ) {
+            p_to_tracked != G_state::tracked_processes.end();
+            ++p_to_tracked
+            ) {
             if (p_to_tracked->data.exe_path == *path) {
                 is_tracked = true;
                 break;
@@ -340,7 +386,7 @@ namespace G_state {
         json j_tracked;
         vector<string> paths;
         for (Process_data& process : G_state::tracked_processes) {
-            paths.push_back(process.data.exe_path);            
+            paths.push_back(process.data.exe_path);
         }
         j_tracked["process_paths_to_track"] = paths;
 
@@ -353,14 +399,15 @@ namespace G_state {
 
         return Error(Error_type::ok);
     }
-   
 
+
+    // == Private helper functrions ===========================
 
     static void convert_path_to_windows_filename(string* path_to_be_changed) {
-        for (auto it  = path_to_be_changed->begin(); 
-                  it != path_to_be_changed->end();
-                ++it
-        ) {
+        for (auto it = path_to_be_changed->begin();
+            it != path_to_be_changed->end();
+            ++it
+            ) {
             if (*it == '\\') *it = '-';
             if (*it == ':')  *it = '~';
         }
@@ -380,7 +427,7 @@ namespace G_state {
         json j_tracked;
         vector<string> paths;
         for (Process_data& process : G_state::tracked_processes) {
-            paths.push_back(process.data.exe_path);            
+            paths.push_back(process.data.exe_path);
         }
         j_tracked["process_paths_to_track"] = paths;
 
@@ -418,54 +465,69 @@ namespace G_state {
 
     // ================================================
 
-    static void print_process_data(Process_data* process) {
-        std::cout << "(name: " << process->data.exe_name<< ", pid: " << process->data.pid << ", ppid: " << process->data.ppid << ")";
+    void create_tree() {
+        // Init a tree
+        unordered_map<DWORD, Node*> tree;
+
+        assert(G_state::need_complete_process_tree);
+
+        // NOTE(damian): only handling active processes, since they have a hierarchy.
+        //               tracked once are provided by the data thread, 
+        //               but will be jsoned inside the client thread into a single json list.  
+
+        for (Process_data& process : G_state::copy_currently_active_processes) {
+            Node* new_node = new Node{ &process, vector<Node*>() };
+            if (new_node == NULL) {
+                // TODO(damian): handle better.
+                assert(false);
+            }
+
+            tree[process.data.pid] = new_node;
+        }
+
+        // Fill the tree up with current data
+        for (Process_data& process : G_state::copy_currently_active_processes) {
+            auto process_node = tree.find(process.data.pid);
+            if (process_node == tree.end()) {
+                // TODO(damian): handle better.
+                assert(false); // This cant happend.
+            };
+
+            auto parent_node = tree.find(process.data.ppid);
+            if (parent_node == tree.end()) continue;
+            // Its ok, some processes dont have parents. 
+
+            parent_node->second->child_processes_nodes.push_back(process_node->second);
+        }
+
+        // Finding root processes
+        for (auto& pair : tree) {
+            Node* node = pair.second;
+            DWORD ppid = node->process->data.ppid;
+
+            auto it = tree.find(ppid);
+            if (it == tree.end()) { // Not found
+                G_state::roots_for_process_trees.push_back(node);
+            }
+        }
+
     }
 
-    // void create_tree() {
-    //     // Init a tree
-    //     unordered_map<DWORD, Node*> tree;
+        static void free_tree_memory(Node* node);
+    void clear_tree() {
+        // Freeing the dyn allocated memory
+        for (Node* root : G_state::roots_for_process_trees) {
+            free_tree_memory(root);
+        }
 
-    //     for (Process_data& process : G_state::currently_active_processes) {
-    //         Node* new_node = new Node; // TODO(damian): why does malloc then read access violate, but new doesnt?
-            
-    //         if (new_node == NULL) {
-    //             // TODO(damian): handle better.
-    //             assert(false);
-    //         }
+        // Removing dangling pointers
+        G_state::roots_for_process_trees.clear();
+    }
 
-    //         new_node->process               = &process;
-    //         new_node->child_processes_nodes = vector<Node*>();
-
-    //         tree[process.data.pid] = new_node;
-    //     }
-        
-    //     // Fill the tree up with current data
-    //     for (Process_data& process : G_state::currently_active_processes) {
-    //         auto process_node = tree.find(process.data.pid);
-    //         if (process_node == tree.end()) {
-    //             // TODO(damian): handle better.
-    //             assert(false); // This cant happend.
-    //         };            
-
-    //         auto parent_node = tree.find(process.data.ppid);
-    //         if (parent_node == tree.end()) continue; // Its ok
-
-    //         parent_node->second->child_processes_nodes.push_back(process_node->second);
-    //     }
-        
-    //     // Finding root processes
-    //     for (auto& pair : tree) {
-    //         Node* node = pair.second;
-    //         DWORD ppid = node->process->data.ppid;
-
-    //         auto it = tree.find(ppid);
-    //         if (it == tree.end()) {// Not found
-    //             G_state::roots_for_process_tree.push_back(node);
-    //         }
-    //     }
-        
-    // }
-
-    
+    static void free_tree_memory(Node* root) {
+        for (Node* child_node : root->child_processes_nodes) {
+            free_tree_memory(child_node);
+        }
+        delete root;
+    }
 }
