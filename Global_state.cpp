@@ -129,6 +129,9 @@ namespace G_state {
                 if (g_state_data.compare_as_tracked(win32_data)) {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
 
+                    if (g_state_data.data.exe_name == "Telegram.exe") {
+                        int x = 2;
+                    }
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
                     is_tracked = true;
@@ -213,6 +216,8 @@ namespace G_state {
                     new_session.system_end_time_in_seconds.count() <<
                     '\n';
             }
+
+            // TODO(damian): need to reset the data for a tracked but a non used process.
         }
 
         // Reseting the was_updated bool for future updates.
@@ -241,7 +246,7 @@ namespace G_state {
             // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
             //               we only add processes on startup and when user decided to add/remove a process from being tracked.
             //               update_state() just updates the state (is_active --> true / false)
-            data.copy_tracked_processes = G_state::currently_active_processes;
+            data.copy_tracked_processes = G_state::tracked_processes;
 
             // Telling the client thread that data for it is ready
             G_state::Client_data::maybe_data = data;

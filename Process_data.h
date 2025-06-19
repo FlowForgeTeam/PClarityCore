@@ -5,11 +5,13 @@
 #include <vector>
 #include <inttypes.h>
 #include <Windows.h>
+#include <optional>
 
 #include "Functions_win32.h"
 
 using nlohmann::json;
 using std::vector;
+using std::optional;
 
 struct Session;
 
@@ -17,17 +19,26 @@ class Process_data {
 
 public:
 
+    struct System_times {
+        ULONGLONG cpu_idle_time; 
+        ULONGLONG cpu_kernel_time; 
+        ULONGLONG cpu_user_time; 
+    };
+    
     // NOTE(damian): these are used later for process creation when the process ends.
     std::chrono::steady_clock::time_point steady_start; 
     std::chrono::system_clock::time_point system_start;
     
     Win32_process_data data;
-
+    
     // These are to track the changes in states. 
     bool is_active;    // NOTE(damian): is a stored process currently active.
     bool is_tracked;   // NOTE(damian): this is used to determine, if a process has to have sessions created when declarated inactive.
     bool was_updated;  // NOTE(damian): used inside global state to simbolasi if the process was updates, if not --> it 
-
+    
+    optional<System_times> sys_times;
+    optional<ULONGLONG>    cpu_usage;
+    
     // TODO(damian): maybe remove these flags and just store data and time here and session will be stored inside G_state inside a tuple:
     //               tracked_processes --> (Process_data, vec<Session>)
     //               regular_processes --> (Process_dasta)

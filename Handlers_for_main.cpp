@@ -149,6 +149,10 @@ namespace Main {
 
         vector<json> j_tracked;
         for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+            if (data.data.exe_name == "Telegram.exe") {
+                //data.data.
+            }
+            
             json temp;
             convert_to_json(&data, &temp);
             j_tracked.push_back(temp);

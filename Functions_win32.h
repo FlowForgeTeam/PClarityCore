@@ -53,7 +53,11 @@ struct Win32_process_data {
 
     SIZE_T ram_usage;
 
-    bool is_visible_app;
+    ULONGLONG cpu_idle_time;
+    ULONGLONG cpu_kernel_time;
+    ULONGLONG cpu_user_time;
+
+    // bool is_visible_app;
 };
 
 string wchar_to_utf8(const WCHAR* wchar_array);

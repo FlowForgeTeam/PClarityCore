@@ -59,6 +59,7 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         // 4. Process times
         // 5. Affinity masks
         // 6. RAM
+        // 7. CPU usage
 
         // 1.
         Win32_process_data data = {0};
@@ -111,15 +112,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
             continue;
         }
 
-        // NOTE(damian): dont know if we need to store the decoded vecrion.
-        // SYSTEMTIME creation_time;
-        // FileTimeToSystemTime(&process_creation_time, &creation_time);
-        // data.creation_time = creation_time;
-
-        // SYSTEMTIME exit_time;
-        // FileTimeToSystemTime(&process_last_exit_time, &exit_time);
-        // data.exit_time = exit_time;
-
         ULARGE_INTEGER creation_time;
         creation_time.LowPart  = process_creation_time.dwLowDateTime;
         creation_time.HighPart = process_creation_time.dwHighDateTime;
@@ -158,7 +150,30 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         }
         data.ram_usage = pmc.WorkingSetSize;
 
-        // CPU time
+        // 7. 
+        FILETIME cpu_idle_file_time;
+        FILETIME cpu_kernel_file_time;
+        FILETIME cpu_user_file_time;
+        if(GetSystemTimes(&cpu_idle_file_time, &cpu_kernel_file_time, &cpu_user_file_time) == 0) {
+            CloseHandle(process_handle);
+            continue;
+        }
+
+        ULARGE_INTEGER cpu_idle_time;
+        cpu_idle_time.LowPart  = cpu_idle_file_time.dwLowDateTime;
+        cpu_idle_time.HighPart = cpu_idle_file_time.dwHighDateTime;
+        data.cpu_idle_time = cpu_idle_time.QuadPart;
+
+        ULARGE_INTEGER cpu_kernel_time;
+        cpu_kernel_time.LowPart  = cpu_kernel_file_time.dwLowDateTime;
+        cpu_kernel_time.HighPart = cpu_kernel_file_time.dwHighDateTime;
+        data.cpu_kernel_time = cpu_kernel_time.QuadPart;
+
+        ULARGE_INTEGER cpu_user_time;
+        cpu_user_time.LowPart  = cpu_user_file_time.dwLowDateTime;
+        cpu_user_time.HighPart = cpu_user_file_time.dwHighDateTime;
+        data.cpu_user_time = cpu_user_time.QuadPart;
+
         // GPU
         // SOME OTHER STUFF (PROCESS LASSO TYPE SHIT)
         
@@ -167,10 +182,11 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         //               based on the docs, the first module retrived by the Module32First function 
         //               always contais data for the process whos modules are retrived.
 
-        data.is_visible_app = win32_is_process_an_app(process_handle, &data);
+        // data.is_visible_app = win32_is_process_an_app(process_handle, &data);
 
         process_data_vec.push_back(data);
 
+        // TODO(damian): make sure everuthoing that has to be closed is closed.
         CloseHandle(process_handle);
 
     } while (Process32Next(process_shapshot_handle, &pe32));
@@ -181,8 +197,8 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
 }
 
 tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle,
-    WCHAR* stack_buffer,
-    size_t stack_buffer_len)
+                                                                   WCHAR* stack_buffer,
+                                                                   size_t stack_buffer_len)
 {
     DWORD path_len = stack_buffer_len;
     BOOL  err      = QueryFullProcessImageNameW(process_handle, NULL, stack_buffer, &path_len); // Does null terminate.
@@ -292,7 +308,11 @@ void convert_to_json(Win32_process_data* win32_data, json* j) {
     (*j)["process_affinity"] = win32_data->process_affinity;
     (*j)["system_affinity"]  = win32_data->system_affinity;
     (*j)["ram_usage"]        = win32_data->ram_usage;
-    (*j)["is_visible_app"]   = win32_data->is_visible_app;
+    (*j)["cpu_idle_time"]    = win32_data->cpu_idle_time;
+    (*j)["cpu_kernel_time"]  = win32_data->cpu_kernel_time;
+    (*j)["cpu_user_time"]    = win32_data->cpu_user_time;
+
+    // (*j)["is_visible_app"]   = win32_data->is_visible_app;
 }
 
 bool convert_from_json(Win32_process_data* win32_data, json* j) {
@@ -311,7 +331,11 @@ bool convert_from_json(Win32_process_data* win32_data, json* j) {
         win32_data->process_affinity = (*j)["process_affinity"];
         win32_data->system_affinity  = (*j)["system_affinity"];
         win32_data->ram_usage        = (*j)["ram_usage"];
-        win32_data->is_visible_app   = (*j)["is_visible_app"];
+        win32_data->cpu_idle_time    = (*j)["cpu_idle_time"]; 
+        win32_data->cpu_kernel_time  = (*j)["cpu_kernel_time"]; 
+        win32_data->cpu_user_time    = (*j)["cpu_user_time"]; 
+        
+        // win32_data->is_visible_app   = (*j)["is_visible_app"];
     }
     catch (...) {
         return false;

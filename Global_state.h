@@ -80,8 +80,6 @@ namespace G_state {
 			vector<Process_data> copy_tracked_processes;	
 		};
 		extern optional<Data> maybe_data;
-
-		// extern bool is_data_present();
 	}
 
 }
