@@ -27,7 +27,7 @@ int main() {
 
 	int n = 1;
 	while (Main::running) {
-		std::chrono::duration<int> sleep_length(1);
+		std::chrono::seconds sleep_length(1);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;

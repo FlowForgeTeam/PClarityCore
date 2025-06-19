@@ -52,7 +52,6 @@ namespace G_state {
             return Error(Error_type::file_with_tracked_processes_doesnt_exist);
         }
 
-
         // Read data
         std::string text;
         if (read_file(G_state::path_file_tracked_processes, &text) != 0) {
@@ -72,13 +71,12 @@ namespace G_state {
         catch (...) { return Error(Error_type::json_invalid_strcture); }
 
         for (json& j_path : vector_of_j_tracked) {
-            Process_data new_process(Win32_process_data{ 0 });
-            new_process.data.exe_path = j_path; // TODO(damian): check what happends if this is not a string.
+            Process_data new_process(j_path);
+            new_process.exe_path   = j_path; // TODO(damian): check what happends if this is not a string.
             new_process.is_tracked = true;
 
             G_state::tracked_processes.push_back(new_process);
         }
-
 
         std::error_code err_code_2;
         bool exists = std::filesystem::exists(G_state::path_dir_sessions, err_code_2);
@@ -124,9 +122,16 @@ namespace G_state {
         // Updating the state
         for (Win32_process_data& win32_data : result.first) {
 
+            if (win32_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
+                int x = 2;
+            }
+
             bool is_tracked = false;
             for (Process_data& g_state_data : G_state::tracked_processes) {
-                if (g_state_data.compare_as_tracked(win32_data)) {
+                if (g_state_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
+                    int x = 2;
+                }
+                if (!g_state_data.was_updated && g_state_data.compare_as_tracked(win32_data)) {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
 
                     g_state_data.update_active();
@@ -134,25 +139,27 @@ namespace G_state {
                     is_tracked = true;
                 }
             }
+            if (is_tracked) continue;
 
             bool was_active_before = false;
-            //if (!is_tracked) { // NOTE(damian): removed this to have chrome like processes to be stored and still be updates isnide cur active. 
             for (Process_data& g_state_data : G_state::currently_active_processes) {
-                if (g_state_data.compare(win32_data)) {
+                if (g_state_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
+                    int x = 2;
+                }
+                if (!g_state_data.was_updated && g_state_data.compare(win32_data)) {
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
                     was_active_before = true;
+                    break;
 
                     // TODO(damian): maybe assert to make sure that there is no other exact process.
                 }
             }
-            //}
+            if (was_active_before) continue;
 
-            if (!was_active_before && !is_tracked) {
-                Process_data new_process(win32_data);
-                new_process.update_active();
-                G_state::currently_active_processes.push_back(new_process);
-            }
+            Process_data new_process(win32_data);
+            new_process.update_active();
+            G_state::currently_active_processes.push_back(new_process);
         }
 
         // Removing the processes that are not tracked and stopped being active
@@ -166,6 +173,16 @@ namespace G_state {
                 ++it;
             }
         }
+        
+        float total_cpu = 0.0;
+        
+        for (Process_data& data : G_state::currently_active_processes) {
+            total_cpu += data.cpu_usage.value_or(0);
+        }
+        for (Process_data& data : G_state::tracked_processes) {
+            total_cpu += data.cpu_usage.value_or(0);
+        }
+        std::cout << "Total cpu usage: " << total_cpu << std::endl;
 
         // Updating inactive tracked processes
         for (Process_data& process_data : G_state::tracked_processes) {
@@ -178,8 +195,7 @@ namespace G_state {
 
                 Session new_session = maybe_new_session.second;
 
-                // NOTE(damian): this path conversion for csv file name is temporary.
-                string process_path_copy = process_data.data.exe_path;
+                string process_path_copy = process_data.exe_path;
                 convert_path_to_windows_filename(&process_path_copy);
 
                 std::filesystem::path csv_file_path;
@@ -241,7 +257,7 @@ namespace G_state {
             // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
             //               we only add processes on startup and when user decided to add/remove a process from being tracked.
             //               update_state() just updates the state (is_active --> true / false)
-            data.copy_tracked_processes = G_state::currently_active_processes;
+            data.copy_tracked_processes = G_state::tracked_processes;
 
             // Telling the client thread that data for it is ready
             G_state::Client_data::maybe_data = data;
@@ -308,7 +324,7 @@ namespace G_state {
         if (err_code_1.type != Error_type::ok) return err_code_1;
 
         // Creating a csv file with Session history for the process
-        string process_path_copy = new_process.data.exe_path;
+        string process_path_copy = new_process.exe_path;
         convert_path_to_windows_filename(&process_path_copy);
 
         std::filesystem::path csv_file_path;
@@ -339,7 +355,8 @@ namespace G_state {
             p_to_tracked != G_state::tracked_processes.end();
             ++p_to_tracked
             ) {
-            if (p_to_tracked->data.exe_path == *path) {
+            
+            if (p_to_tracked->exe_path == *path) {
                 is_tracked = true;
                 break;
             }
@@ -364,7 +381,7 @@ namespace G_state {
         json j_tracked;
         vector<string> paths;
         for (Process_data& process : G_state::tracked_processes) {
-            paths.push_back(process.data.exe_path);
+            paths.push_back(process.exe_path);
         }
         j_tracked["process_paths_to_track"] = paths;
 
@@ -404,7 +421,7 @@ namespace G_state {
         json j_tracked;
         vector<string> paths;
         for (Process_data& process : G_state::tracked_processes) {
-            paths.push_back(process.data.exe_path);
+            paths.push_back(process.exe_path);
         }
         j_tracked["process_paths_to_track"] = paths;
 

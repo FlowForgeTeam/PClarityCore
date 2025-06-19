@@ -43,17 +43,21 @@ struct Win32_process_data {
 
     DWORD priority_class;
 
-    ULONGLONG creation_time;  
-    ULONGLONG exit_time;          
-    ULONGLONG kernel_time;    
-    ULONGLONG user_time;     
+    ULONGLONG process_creation_time;  
+    ULONGLONG process_exit_time;          
+    ULONGLONG process_kernel_time;    
+    ULONGLONG process_user_time;    
+
+    ULONGLONG system_idle_time;
+    ULONGLONG system_kernel_time;
+    ULONGLONG system_user_time;
 
     SIZE_T process_affinity;
     SIZE_T system_affinity;
 
     SIZE_T ram_usage;
 
-    bool is_visible_app;
+    // bool is_visible_app;
 };
 
 string wchar_to_utf8(const WCHAR* wchar_array);

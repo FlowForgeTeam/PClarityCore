@@ -305,18 +305,21 @@ namespace Main {
                 assert(false);
             }
 
-            tree[process.data.pid] = new_node;
+            if (!process.data.has_value()) {
+               assert(false);
+            }
+            tree[process.data.value().pid] = new_node;
         }
 
         // Fill the tree up with current data
         for (Process_data& process : *data) {
-            auto process_node = tree.find(process.data.pid);
+            auto process_node = tree.find(process.data.value().pid);
             if (process_node == tree.end()) {
                 // TODO(damian): handle better.
                 assert(false); // This cant happend.
             };
 
-            auto parent_node = tree.find(process.data.ppid);
+            auto parent_node = tree.find(process.data.value().ppid);
             if (parent_node == tree.end()) continue;
             // Its ok, some processes dont have parents. 
 
@@ -326,7 +329,7 @@ namespace Main {
         // Finding root processes
         for (auto& pair : tree) {
             Process_node* node = pair.second;
-            DWORD ppid = node->process->data.ppid;
+            DWORD ppid = node->process->data.value().ppid;
 
             auto it = tree.find(ppid);
             if (it == tree.end()) { // Not found

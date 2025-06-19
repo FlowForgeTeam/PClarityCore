@@ -6,6 +6,7 @@
 #include <nlohmann/json.hpp>
 
 #include "Functions_win32.h"
+// #pragma comment(lib, "Kernel32") // Linking the dll
 
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
@@ -102,43 +103,64 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         data.priority_class = priority;
 
         // 4.
-        FILETIME process_creation_time;
-        FILETIME process_last_exit_time;
-        FILETIME process_kernel_time;
-        FILETIME process_user_time;
-        if (GetProcessTimes(process_handle, &process_creation_time, &process_last_exit_time, &process_kernel_time, &process_user_time) == 0) {
+        FILETIME process_creation_f_time;
+        FILETIME process_last_exit_f_time;    // Counts of 100-nanosecond time units
+        FILETIME process_kernel_f_time;
+        FILETIME process_user_f_time;
+        if (GetProcessTimes(process_handle, 
+                            &process_creation_f_time, 
+                            &process_last_exit_f_time, 
+                            &process_kernel_f_time, 
+                            &process_user_f_time) == 0
+        ) {
             CloseHandle(process_handle);
             continue;
         }
 
-        // NOTE(damian): dont know if we need to store the decoded vecrion.
-        // SYSTEMTIME creation_time;
-        // FileTimeToSystemTime(&process_creation_time, &creation_time);
-        // data.creation_time = creation_time;
+        ULARGE_INTEGER process_creation_time;
+        process_creation_time.LowPart  = process_creation_f_time.dwLowDateTime;
+        process_creation_time.HighPart = process_creation_f_time.dwHighDateTime;
+        data.process_creation_time = process_creation_time.QuadPart;
 
-        // SYSTEMTIME exit_time;
-        // FileTimeToSystemTime(&process_last_exit_time, &exit_time);
-        // data.exit_time = exit_time;
+        ULARGE_INTEGER process_exit_time;
+        process_exit_time.LowPart  = process_last_exit_f_time.dwLowDateTime;
+        process_exit_time.HighPart = process_last_exit_f_time.dwHighDateTime;
+        data.process_exit_time = process_exit_time.QuadPart;
 
-        ULARGE_INTEGER creation_time;
-        creation_time.LowPart  = process_creation_time.dwLowDateTime;
-        creation_time.HighPart = process_creation_time.dwHighDateTime;
-        data.creation_time = creation_time.QuadPart;
+        ULARGE_INTEGER process_kernel_time;
+        process_kernel_time.LowPart  = process_kernel_f_time.dwLowDateTime;
+        process_kernel_time.HighPart = process_kernel_f_time.dwHighDateTime;
+        data.process_kernel_time = process_kernel_time.QuadPart;
 
-        ULARGE_INTEGER exit_time;
-        exit_time.LowPart  = process_last_exit_time.dwLowDateTime;
-        exit_time.HighPart = process_last_exit_time.dwHighDateTime;
-        data.exit_time = exit_time.QuadPart;
+        ULARGE_INTEGER process_user_time;
+        process_user_time.LowPart  = process_user_f_time.dwLowDateTime;
+        process_user_time.HighPart = process_user_f_time.dwHighDateTime;
+        data.process_user_time = process_user_time.QuadPart;
 
-        ULARGE_INTEGER kernel_time;
-        kernel_time.LowPart  = process_kernel_time.dwLowDateTime;
-        kernel_time.HighPart = process_kernel_time.dwHighDateTime;
-        data.kernel_time = kernel_time.QuadPart;
+        // Getting system times
+        FILETIME system_idle_f_time, system_kernel_f_time, system_user_f_time;
+        if (GetSystemTimes(&system_idle_f_time, 
+                           &system_kernel_f_time, 
+                           &system_user_f_time) == 0
+        ) {
+            CloseHandle(process_handle);
+            continue;
+        }
 
-        ULARGE_INTEGER user_time;
-        user_time.LowPart  = process_user_time.dwLowDateTime;
-        user_time.HighPart = process_user_time.dwHighDateTime;
-        data.user_time = user_time.QuadPart;
+        ULARGE_INTEGER system_idle_time;
+        system_idle_time.LowPart  = system_idle_f_time.dwLowDateTime;
+        system_idle_time.HighPart = system_idle_f_time.dwHighDateTime;
+        data.system_idle_time = system_idle_time.QuadPart;
+
+        ULARGE_INTEGER system_kernel_time;
+        system_kernel_time.LowPart  = system_kernel_f_time.dwLowDateTime;
+        system_kernel_time.HighPart = system_kernel_f_time.dwHighDateTime;
+        data.system_kernel_time = system_kernel_time.QuadPart;
+
+        ULARGE_INTEGER system_user_time;
+        system_user_time.LowPart  = system_user_f_time.dwLowDateTime;
+        system_user_time.HighPart = system_user_f_time.dwHighDateTime;
+        data.system_user_time = system_user_time.QuadPart;
 
         // 5.
         SIZE_T process_affinity_mask;
@@ -158,7 +180,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         }
         data.ram_usage = pmc.WorkingSetSize;
 
-        // CPU time
         // GPU
         // SOME OTHER STUFF (PROCESS LASSO TYPE SHIT)
         
@@ -167,7 +188,7 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         //               based on the docs, the first module retrived by the Module32First function 
         //               always contais data for the process whos modules are retrived.
 
-        data.is_visible_app = win32_is_process_an_app(process_handle, &data);
+        // data.is_visible_app = win32_is_process_an_app(process_handle, &data);
 
         process_data_vec.push_back(data);
 
@@ -271,54 +292,54 @@ BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam
 // =============================================================================================
 
 
-void convert_to_json(Win32_process_data* win32_data, json* j) {
-    (*j)["pid"]              = win32_data->pid;
-    (*j)["started_threads"]  = win32_data->started_threads;
-    (*j)["ppid"]             = win32_data->ppid;
-    (*j)["base_priority"]    = win32_data->base_priority;
-    try {
-        (*j)["exe_name"]         = win32_data->exe_name;
+//void convert_to_json(Win32_process_data* win32_data, json* j) {
+//    (*j)["pid"]              = win32_data->pid;
+//    (*j)["started_threads"]  = win32_data->started_threads;
+//    (*j)["ppid"]             = win32_data->ppid;
+//    (*j)["base_priority"]    = win32_data->base_priority;
+//    try {
+//        (*j)["exe_name"]         = win32_data->exe_name;
+//
+//    }
+//    catch (...) {
+//        int x = 2;
+//    }
+//    (*j)["exe_path"]         = win32_data->exe_path;
+//    (*j)["priority_class"]   = win32_data->priority_class;
+//    (*j)["creation_time"]    = win32_data->creation_time;  
+//    (*j)["exit_time"]        = win32_data->exit_time;          
+//    (*j)["kernel_time"]      = win32_data->kernel_time;    
+//    (*j)["user_time"]        = win32_data->user_time;     
+//    (*j)["process_affinity"] = win32_data->process_affinity;
+//    (*j)["system_affinity"]  = win32_data->system_affinity;
+//    (*j)["ram_usage"]        = win32_data->ram_usage;
+//    // (*j)["is_visible_app"]   = win32_data->is_visible_app;
+//}
 
-    }
-    catch (...) {
-        int x = 2;
-    }
-    (*j)["exe_path"]         = win32_data->exe_path;
-    (*j)["priority_class"]   = win32_data->priority_class;
-    (*j)["creation_time"]    = win32_data->creation_time;  
-    (*j)["exit_time"]        = win32_data->exit_time;          
-    (*j)["kernel_time"]      = win32_data->kernel_time;    
-    (*j)["user_time"]        = win32_data->user_time;     
-    (*j)["process_affinity"] = win32_data->process_affinity;
-    (*j)["system_affinity"]  = win32_data->system_affinity;
-    (*j)["ram_usage"]        = win32_data->ram_usage;
-    (*j)["is_visible_app"]   = win32_data->is_visible_app;
-}
-
-bool convert_from_json(Win32_process_data* win32_data, json* j) {
-    try {
-        win32_data->pid              = (*j)["pid"];
-        win32_data->started_threads  = (*j)["started_threads"];
-        win32_data->ppid             = (*j)["ppid"];
-        win32_data->base_priority    = (*j)["base_priority"];
-        win32_data->exe_name         = (*j)["exe_name"];
-        win32_data->exe_path         = (*j)["exe_path"];
-        win32_data->priority_class   = (*j)["priority_class"];
-        win32_data->creation_time    = (*j)["creation_time"];
-        win32_data->exit_time        = (*j)["exit_time"];
-        win32_data->kernel_time      = (*j)["kernel_time"];
-        win32_data->user_time        = (*j)["user_time"];
-        win32_data->process_affinity = (*j)["process_affinity"];
-        win32_data->system_affinity  = (*j)["system_affinity"];
-        win32_data->ram_usage        = (*j)["ram_usage"];
-        win32_data->is_visible_app   = (*j)["is_visible_app"];
-    }
-    catch (...) {
-        return false;
-    }
-    
-    return true;
-}
+//bool convert_from_json(Win32_process_data* win32_data, json* j) {
+//    try {
+//        win32_data->pid              = (*j)["pid"];
+//        win32_data->started_threads  = (*j)["started_threads"];
+//        win32_data->ppid             = (*j)["ppid"];
+//        win32_data->base_priority    = (*j)["base_priority"];
+//        win32_data->exe_name         = (*j)["exe_name"];
+//        win32_data->exe_path         = (*j)["exe_path"];
+//        win32_data->priority_class   = (*j)["priority_class"];
+//        win32_data->creation_time    = (*j)["creation_time"];
+//        win32_data->exit_time        = (*j)["exit_time"];
+//        win32_data->kernel_time      = (*j)["kernel_time"];
+//        win32_data->user_time        = (*j)["user_time"];
+//        win32_data->process_affinity = (*j)["process_affinity"];
+//        win32_data->system_affinity  = (*j)["system_affinity"];
+//        win32_data->ram_usage        = (*j)["ram_usage"];
+//        // win32_data->is_visible_app   = (*j)["is_visible_app"];
+//    }
+//    catch (...) {
+//        return false;
+//    }
+//    
+//    return true;
+//}
 
 
 
