@@ -36,6 +36,7 @@ namespace Main {
     extern void handle_track         (Track_command*    commnad);
     extern void handle_untrack       (Untrack_command*  commnad);
     extern void handle_grouped_report(Grouped_report_command* command);
+	extern void handle_pc_time       (Pc_time_command*  command);
 
 }
 

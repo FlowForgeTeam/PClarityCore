@@ -58,6 +58,7 @@ pair<Command_type, bool> command_type_from_int(int id) {
         case 3:  return pair(Command_type::track,          true);
         case 4:  return pair(Command_type::untrack,        true);
         case 5:  return pair(Command_type::grouped_report, true);
+		case 6:  return pair(Command_type::pc_time,        true);
         default: return pair(Command_type::report,         false);
     }
 }
@@ -78,6 +79,7 @@ pair<Command, bool> command_from_json(const char* json_as_c_str) {
             case Command_type::track:          return track(&j);
             case Command_type::untrack:        return untrack(&j);
             case Command_type::grouped_report: return grouped_report(&j);
+			case Command_type::pc_time:        return pc_time(&j);
             default:                           return pair(Command(), false);
     }
 }
@@ -132,7 +134,12 @@ pair<Command, bool> grouped_report(json* j) {
     return pair(cmd, true);
 }
 
-
+pair<Command, bool> pc_time(json* j) {
+	Command cmd;
+	cmd.type = Command_type::pc_time;
+	new(&cmd.data.pc_time) Pc_time_command();
+	return pair(cmd, true);
+}
 
 
 

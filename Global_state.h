@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <optional>
+#include <minwinbase.h>
 
 #include "Process_data.h"
 
@@ -82,6 +83,11 @@ namespace G_state {
 		extern optional<Data> maybe_data;
 
 		// extern bool is_data_present();
+	}
+
+	namespace System_info {
+		extern long long up_time;
+		extern SYSTEMTIME system_time;
 	}
 
 }

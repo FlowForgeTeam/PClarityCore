@@ -13,6 +13,7 @@ enum class Command_type {
     track    = 3,
     untrack  = 4,
     grouped_report = 5,
+	pc_time = 6
 };
 
 struct Report_command {};
@@ -21,6 +22,7 @@ struct Shutdown_command {};
 struct Track_command { std::string path; };
 struct Untrack_command { std::string path; };
 struct Grouped_report_command {};
+struct Pc_time_command {};
 
 struct Command {
     Command_type type;
@@ -32,6 +34,7 @@ struct Command {
         Track_command    track;
         Untrack_command  untrack;
         Grouped_report_command grouped_report;
+        Pc_time_command pc_time;
 
         Data() {}
         ~Data() {}
@@ -51,7 +54,7 @@ pair<Command, bool> shutdown      (json* j);
 pair<Command, bool> track         (json* j);
 pair<Command, bool> untrack       (json* j);
 pair<Command, bool> grouped_report(json* j);
-
+pair<Command, bool> pc_time(json* j);
 
 
 

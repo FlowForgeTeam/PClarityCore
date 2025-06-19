@@ -466,8 +466,10 @@ namespace G_state {
     }
 
 
-
-
+    namespace System_info {
+        long long up_time = 0;
+        SYSTEMTIME system_time{0};
+    }
 
 
 

@@ -1,5 +1,6 @@
 #include "Handlers_for_main.h"
 #include <fstream>
+#include <Windows.h>
 
 namespace Main {
 
@@ -101,6 +102,10 @@ namespace Main {
                     case Command_type::grouped_report: {
                         Main::handle_grouped_report(&result.first.data.grouped_report);
                     } break;
+
+					case Command_type::pc_time: {
+						Main::handle_pc_time(&result.first.data.pc_time);
+					} break;
 
                     default: {
                         assert(false);
@@ -286,6 +291,30 @@ namespace Main {
         //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
     }
 
+    void handle_pc_time(Pc_time_command* command) {
+        json system_json;
+        long long sys_time = GetTickCount64();
+
+        system_json["up_time"] = sys_time;
+
+        GetSystemTime(&G_state::System_info::system_time);
+
+		system_json["year"]     = G_state::System_info::system_time.wYear;
+        system_json["month"]    = G_state::System_info::system_time.wMonth;
+        system_json["day"]      = G_state::System_info::system_time.wDay;
+        system_json["hour"]     = G_state::System_info::system_time.wHour;
+        system_json["minute"]   = G_state::System_info::system_time.wMinute;
+        system_json["second"]   = G_state::System_info::system_time.wSecond;
+           
+		G_state::System_info::up_time = sys_time;
+
+        std::string message_as_str = json(system_json).dump(4);
+
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            // TODO: handle
+        }
+    }
 
     // == Helpers ========================================================
 
