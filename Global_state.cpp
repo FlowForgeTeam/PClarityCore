@@ -26,22 +26,16 @@ namespace G_state {
 
     // ================================================
 
-    // == G_state variables ==========================
-    bool need_complete_process_tree = false;
-    bool need_processes_for_report  = false;
-
-    vector<Node*>        roots_for_process_trees;
-    vector<Process_data> copy_currently_active_processes;
-    vector<Process_data> copy_tracked_processes;
-
+	// == Constants ===================================
     const char* path_file_tracked_processes = "tracked_processes.json";
-    const char* path_dir_sessions = "Sessions_data";
-    vector<Process_data> currently_active_processes;
-    vector<Process_data> tracked_processes;
-
+    const char* path_dir_sessions           = "Sessions_data";
     // ================================================
 
-    // == G_state functions ===========================
+
+	// == Data data ==============================================
+    vector<Process_data> currently_active_processes;
+    vector<Process_data> tracked_processes;
+    // ================================================
 
     static void  convert_path_to_windows_filename(string* path_to_be_changed);
     static Error save_tracked_processes();
@@ -138,13 +132,11 @@ namespace G_state {
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
                     is_tracked = true;
-
-                    // TODO(damian): maybe assert to make sure that there is no other exact process.
                 }
             }
 
             bool was_active_before = false;
-            //if (!is_tracked) { // NOTE(damian): removed this if to have chrome like processes to be stored and still be updates isnide cur active. 
+            //if (!is_tracked) { // NOTE(damian): removed this to have chrome like processes to be stored and still be updates isnide cur active. 
             for (Process_data& g_state_data : G_state::currently_active_processes) {
                 if (g_state_data.compare(win32_data)) {
                     g_state_data.update_active();
@@ -230,32 +222,17 @@ namespace G_state {
         for (Process_data& process_data : G_state::tracked_processes) {
             process_data.was_updated = false;
         }
+    
+        // Creating data for the clint.
 
-        if (G_state::need_complete_process_tree) {
+        if (G_state::Client_data::need_data) {
+
+            G_state::Client_data::Data data = {};
+
             // Storing current active processes for client to use
-            // NOTE(damian): move is fine here, update_state() will add all of them back on the next iter. 
-            size_t prev_size                         = G_state::currently_active_processes.size();
-            G_state::copy_currently_active_processes = move(G_state::currently_active_processes);
-
-            G_state::currently_active_processes = vector<Process_data>();
-            G_state::currently_active_processes.reserve(prev_size);
-
-            // Storing a copy of tracked processes for client to use
-            // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
-            //               we only add processes on startup and when user decided to add/remove a process from being tracked.
-            //               update_state() just updates the state (is_active --> true / false)
-            G_state::copy_tracked_processes = G_state::tracked_processes;
-
-            G_state::create_tree();
-
-            G_state::need_complete_process_tree = false;
-        }
-
-        if (G_state::need_processes_for_report) {
-            // Storing current active processes for client to use
-            // NOTE(damian): move is fine here, update_state() will add all of them back on the next iter. 
-            size_t prev_size_active                  = G_state::currently_active_processes.size();
-            G_state::copy_currently_active_processes = move(G_state::currently_active_processes);
+            // NOTE(damian): move is fine here, update_state() will add all of them back on the next iteration. 
+            size_t prev_size_active              = G_state::currently_active_processes.size();
+            data.copy_currently_active_processes = move(G_state::currently_active_processes);
 
             G_state::currently_active_processes = vector<Process_data>();
             G_state::currently_active_processes.reserve(prev_size_active);
@@ -264,10 +241,11 @@ namespace G_state {
             // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
             //               we only add processes on startup and when user decided to add/remove a process from being tracked.
             //               update_state() just updates the state (is_active --> true / false)
-            G_state::copy_tracked_processes = G_state::currently_active_processes;
+            data.copy_tracked_processes = G_state::currently_active_processes;
 
             // Telling the client thread that data for it is ready
-            G_state::need_processes_for_report = false;
+            G_state::Client_data::maybe_data = data;
+            G_state::Client_data::need_data  = false;
         }
 
         return Error(Error_type::ok);
@@ -400,8 +378,7 @@ namespace G_state {
         return Error(Error_type::ok);
     }
 
-
-    // == Private helper functrions ===========================
+    // == Private helper functrions ==================
 
     static void convert_path_to_windows_filename(string* path_to_be_changed) {
         for (auto it = path_to_be_changed->begin();
@@ -441,8 +418,35 @@ namespace G_state {
         return Error(Error_type::ok);
     }
 
+    
 
+    // ================================================
 
+    namespace Client_data {
+        bool need_data;
+		optional<Data> maybe_data;
+
+        bool check_integrity() {
+            // int turned_on_states_counter;
+            
+            // turned_on_states_counter     = 0;
+            // turned_on_states_counter    += (int) Client_data::need_processes_for_report;
+            // turned_on_states_counter    += (int) Client_data::need_complete_process_tree;
+            // if (turned_on_states_counter > 1) {
+            //     return false;
+            // }
+
+            // turned_on_states_counter     = 0;
+            // turned_on_states_counter    += (int) Client_data::maybe_report.has_value();
+            // turned_on_states_counter    += (int) Client_data::maybe_process_tree.has_value();
+            // if (turned_on_states_counter > 1) {
+            //     return false;
+            // }
+
+            return true;
+        }
+
+    }
 
 
 
@@ -465,69 +469,5 @@ namespace G_state {
 
     // ================================================
 
-    void create_tree() {
-        // Init a tree
-        unordered_map<DWORD, Node*> tree;
-
-        assert(G_state::need_complete_process_tree);
-
-        // NOTE(damian): only handling active processes, since they have a hierarchy.
-        //               tracked once are provided by the data thread, 
-        //               but will be jsoned inside the client thread into a single json list.  
-
-        for (Process_data& process : G_state::copy_currently_active_processes) {
-            Node* new_node = new Node{ &process, vector<Node*>() };
-            if (new_node == NULL) {
-                // TODO(damian): handle better.
-                assert(false);
-            }
-
-            tree[process.data.pid] = new_node;
-        }
-
-        // Fill the tree up with current data
-        for (Process_data& process : G_state::copy_currently_active_processes) {
-            auto process_node = tree.find(process.data.pid);
-            if (process_node == tree.end()) {
-                // TODO(damian): handle better.
-                assert(false); // This cant happend.
-            };
-
-            auto parent_node = tree.find(process.data.ppid);
-            if (parent_node == tree.end()) continue;
-            // Its ok, some processes dont have parents. 
-
-            parent_node->second->child_processes_nodes.push_back(process_node->second);
-        }
-
-        // Finding root processes
-        for (auto& pair : tree) {
-            Node* node = pair.second;
-            DWORD ppid = node->process->data.ppid;
-
-            auto it = tree.find(ppid);
-            if (it == tree.end()) { // Not found
-                G_state::roots_for_process_trees.push_back(node);
-            }
-        }
-
-    }
-
-        static void free_tree_memory(Node* node);
-    void clear_tree() {
-        // Freeing the dyn allocated memory
-        for (Node* root : G_state::roots_for_process_trees) {
-            free_tree_memory(root);
-        }
-
-        // Removing dangling pointers
-        G_state::roots_for_process_trees.clear();
-    }
-
-    static void free_tree_memory(Node* root) {
-        for (Node* child_node : root->child_processes_nodes) {
-            free_tree_memory(child_node);
-        }
-        delete root;
-    }
+    
 }

@@ -13,7 +13,6 @@ enum class Command_type {
     track    = 3,
     untrack  = 4,
     grouped_report = 5,
-    report_
 };
 
 struct Report_command {};

@@ -16,6 +16,11 @@ namespace Main {
 	    Command command;
     };
 
+    struct Process_node {
+		Process_data*         process;
+		vector<Process_node*> child_processes_nodes;
+	};
+
     extern list<Command_status> command_queue; 
     extern bool   running;        
     extern SOCKET client_socket;  

@@ -14,19 +14,11 @@ s.connect(('127.0.0.1', port))
 
 s.send(command.encode("utf-8"))
 responce = s.recv(500_000)
-# print(f"Responce: {responce.decode('utf-8')}")
+print(f"Responce: {responce.decode('utf-8')}")
 
 file = open("client_for_debugging\\response.txt", 'w', encoding="utf-8")
 file.write(responce.decode("utf-8"))
 file.close()
-
-print("=========================================")
-
-time.sleep(10)
-
-s.send(command.encode("utf-8"))
-responce = s.recv(500_000)
-# print(f"Responce: {responce.decode('utf-8')}")
 
 s.send("{\"command_id\": 1, \"extra\": {}}".encode("utf-8"))
 responce = s.recv(200)

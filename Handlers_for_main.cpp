@@ -9,6 +9,12 @@ namespace Main {
     bool   need_new_client = true;
     string error_message   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
 
+    static json create_json_from_tree_node(Process_node* root);
+    
+    static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
+    static void free_process_tree  (vector<Process_node*>* roots);
+    static void free_tree_memory   (Process_node* root);
+
     void client_thread() {
         while (running) {
             if (need_new_client) {
@@ -135,24 +141,21 @@ namespace Main {
     }
 
     void handle_report(Report_command* report) {
-        if (G_state::need_processes_for_report) {
-            std::cout << "Threading issue when reporting." << std::endl;
-            assert(false);            
-        } 
+        assert(!G_state::Client_data::need_data);
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
-        G_state::need_processes_for_report = true;
-        while(G_state::need_processes_for_report);         
+        G_state::Client_data::need_data = true;
+        while(G_state::Client_data::need_data);         
 
         vector<json> j_tracked;
-        for (Process_data& data : G_state::tracked_processes) {
+        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_tracked.push_back(temp);
         }
 
         vector<json> j_cur_active;
-        for (Process_data& data : G_state::copy_currently_active_processes) {
+        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_cur_active.push_back(temp);
@@ -241,25 +244,29 @@ namespace Main {
         }
     }
 
-        static json create_json_from_tree_node(G_state::Node* root);
     void handle_grouped_report(Grouped_report_command* report) {
-        if (G_state::need_complete_process_tree) {
-            assert(false);            
-        } 
+        assert(!G_state::Client_data::need_data);            
 
-        G_state::need_complete_process_tree = true;
+        G_state::Client_data::need_data = true;
 
-        while(G_state::need_complete_process_tree);    
-        
+        while(G_state::Client_data::need_data);    
+
+        assert(G_state::Client_data::maybe_data.has_value());
+
+        G_state::Client_data::Data* data = &G_state::Client_data::maybe_data.value();
+
         vector<json> j_tracked;
-        for (Process_data& data : G_state::copy_tracked_processes) {
+        for (Process_data& data : data->copy_tracked_processes) {
             json j_data;
             convert_to_json(&data, &j_data);
             j_tracked.push_back(j_data);
         }
 
+        vector<Process_node*> roots;
+        create_process_tree(&roots, &data->copy_currently_active_processes);
+
         vector<json> j_roots;
-        for (G_state::Node* root : G_state::roots_for_process_trees) { 
+        for (Process_node* root : roots) { 
             j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
         }
 
@@ -274,7 +281,7 @@ namespace Main {
             // TODO: handle
         }
 
-        G_state::clear_tree();
+        free_process_tree(&roots);
 
         //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
     }
@@ -282,7 +289,71 @@ namespace Main {
 
     // == Helpers ========================================================
 
-    static json create_json_from_tree_node(G_state::Node* root) {
+    static void create_process_tree(vector<Main::Process_node*>* roots, vector<Process_data>* data) {
+        // NOTE(damian): only handling active processes, since they have a hierarchy.
+        //               tracked once are provided by the data thread, 
+        //               but will be jsoned inside the client thread into a single json list.  
+
+        unordered_map<DWORD, Process_node*> tree;
+
+        // TODO(damian): dont like .value() here inside the loops. It also might throw.
+
+        for (Process_data& process : *data) {
+            Process_node* new_node = new Process_node{ &process, vector<Process_node*>() };
+            if (new_node == NULL) {
+                // TODO(damian): handle better.
+                assert(false);
+            }
+
+            tree[process.data.pid] = new_node;
+        }
+
+        // Fill the tree up with current data
+        for (Process_data& process : *data) {
+            auto process_node = tree.find(process.data.pid);
+            if (process_node == tree.end()) {
+                // TODO(damian): handle better.
+                assert(false); // This cant happend.
+            };
+
+            auto parent_node = tree.find(process.data.ppid);
+            if (parent_node == tree.end()) continue;
+            // Its ok, some processes dont have parents. 
+
+            parent_node->second->child_processes_nodes.push_back(process_node->second);
+        }
+
+        // Finding root processes
+        for (auto& pair : tree) {
+            Process_node* node = pair.second;
+            DWORD ppid = node->process->data.ppid;
+
+            auto it = tree.find(ppid);
+            if (it == tree.end()) { // Not found
+                roots->push_back(node);
+            }
+        }
+    }
+
+    static void free_process_tree(vector<Process_node*>* roots) {
+        // Freeing the dyn allocated memory
+        for (Process_node* root : *roots) {
+            free_tree_memory(root);
+        }
+
+        // No need to remove the dangling pointers here.
+        // Called is responsible for it.
+        // Also if we create the tree localy inside handle for grouped report, it will be deleted localy as well.
+    }
+
+    static void free_tree_memory(Process_node* root) {
+        for (Process_node* child_node : root->child_processes_nodes) {
+            free_tree_memory(child_node);
+        }
+        delete root;
+    }
+
+    static json create_json_from_tree_node(Process_node* root) {
         if (root == nullptr) {
             assert(false);
         }
@@ -294,7 +365,7 @@ namespace Main {
         j_node["process"] = j_process;
 
         vector<json> j_children;
-        for (G_state::Node* child_node : root->child_processes_nodes) {
+        for (Process_node* child_node : root->child_processes_nodes) {
             json j_child = create_json_from_tree_node(child_node);
 
             j_children.push_back(j_child);
