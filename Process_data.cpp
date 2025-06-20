@@ -12,7 +12,7 @@ Process_data::Process_data(string exe_path) {
     this->data          = std::nullopt;
 
     this->exe_path      = exe_path;
-    this->times = std::nullopt;
+    this->times         = std::nullopt;
     this->cpu_usage     = std::nullopt;
 }
 

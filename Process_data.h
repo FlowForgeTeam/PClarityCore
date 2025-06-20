@@ -59,8 +59,7 @@ public:
     // Special data, might have different update patterns and stuff
     string          exe_path;
     optional<Times> times;
-    optional<float>   cpu_usage;
-    
+    optional<float> cpu_usage;
 
     Process_data(string exe_path);
     Process_data(Win32_process_data win32_data);
@@ -72,7 +71,6 @@ public:
     bool compare           (Process_data other);
     bool compare_as_tracked(Process_data other);
 };
-
 
 using std::chrono::steady_clock; // NOTE(damian): steady clock is used for interval measures (it is more precise).
 using std::chrono::system_clock; // NOTE(damian): system clock is used for time/date storage, so i use it here to know when the date when the session started.
@@ -93,4 +91,24 @@ struct Session {
 // NOTE(damian): there are built in functions that we can overload from json packet, but it might want to do it like this for now.
 //bool convert_from_json(Process_data* process_data, json* j);
 void convert_to_json  (Process_data* process_data, json* j);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

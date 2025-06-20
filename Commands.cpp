@@ -72,13 +72,13 @@ pair<Command, bool> command_from_json(const char* json_as_c_str) {
     if (!result.second) return pair(Command(), false);
 
     switch (result.first) {
-            case Command_type::report:         return report(&j);
-            case Command_type::quit:           return quit(&j);
-            case Command_type::shutdown:       return shutdown(&j);
-            case Command_type::track:          return track(&j);
-            case Command_type::untrack:        return untrack(&j);
-            case Command_type::grouped_report: return grouped_report(&j);
-            default:                           return pair(Command(), false);
+        case Command_type::report:         return report(&j);
+        case Command_type::quit:           return quit(&j);
+        case Command_type::shutdown:       return shutdown(&j);
+        case Command_type::track:          return track(&j);
+        case Command_type::untrack:        return untrack(&j);
+        case Command_type::grouped_report: return grouped_report(&j);
+        default:                           return pair(Command(), false);
     }
 }
 

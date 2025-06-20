@@ -1,6 +1,7 @@
 #include "Handlers_for_main.h"
 #include <fstream>
 
+// TODO(damian): need a better name.
 namespace Main {
 
     list<Command_status> command_queue; 
@@ -110,23 +111,6 @@ namespace Main {
 
             // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
 
-            // // Preserve the new state
-            // std::ofstream data_file(G_state::file_path_with_tracked_processes);
-
-            // vector<json> processes_as_jsons;
-            // for (Process_data& process_data : G_state::tracked_processes) {
-            //     json temp;
-            //     convert_to_json(&process_data, &temp);
-            //     processes_as_jsons.push_back(temp);
-            // }
-            // json j_overall_data;
-            // j_overall_data["processes_to_track"] = processes_as_jsons;
-
-            // data_file << j_overall_data.dump(4) << std::endl;
-            // data_file.close();
-
-            // std::cout << "Saved data to file. \n" << std::endl;
-        
         }
     }
 
@@ -282,8 +266,6 @@ namespace Main {
         }
 
         free_process_tree(&roots);
-
-        //std::cout << "Message handling: " << message_as_str << "\n" << std::endl;
     }
 
 

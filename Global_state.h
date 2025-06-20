@@ -55,6 +55,7 @@ namespace G_state {
 		~Error() = default;
 	};
 	
+	// TODO(damian): move this out of here into their own separate namespace.
 	// == Constants =============================================
 	extern const char* path_file_tracked_processes;
 	extern const char* path_dir_sessions;
@@ -80,8 +81,6 @@ namespace G_state {
 			vector<Process_data> copy_tracked_processes;	
 		};
 		extern optional<Data> maybe_data;
-
-		// extern bool is_data_present();
 	}
 
 }

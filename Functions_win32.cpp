@@ -6,7 +6,6 @@
 #include <nlohmann/json.hpp>
 
 #include "Functions_win32.h"
-// #pragma comment(lib, "Kernel32") // Linking the dll
 
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
@@ -74,7 +73,7 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         }
 
         // 2.
-        const size_t stack_buffer_len = 256; // NOTE(damian): tested this with size of 5, woked well. 
+        const size_t stack_buffer_len = 256; 
         WCHAR stack_buffer[stack_buffer_len];
         tuple<WCHAR*, bool, DWORD, Win32_error> result = win32_get_path_for_process(process_handle, 
                                                                                     stack_buffer, 
@@ -120,22 +119,22 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         ULARGE_INTEGER process_creation_time;
         process_creation_time.LowPart  = process_creation_f_time.dwLowDateTime;
         process_creation_time.HighPart = process_creation_f_time.dwHighDateTime;
-        data.process_creation_time = process_creation_time.QuadPart;
+        data.process_creation_time     = process_creation_time.QuadPart;
 
         ULARGE_INTEGER process_exit_time;
         process_exit_time.LowPart  = process_last_exit_f_time.dwLowDateTime;
         process_exit_time.HighPart = process_last_exit_f_time.dwHighDateTime;
-        data.process_exit_time = process_exit_time.QuadPart;
+        data.process_exit_time     = process_exit_time.QuadPart;
 
         ULARGE_INTEGER process_kernel_time;
         process_kernel_time.LowPart  = process_kernel_f_time.dwLowDateTime;
         process_kernel_time.HighPart = process_kernel_f_time.dwHighDateTime;
-        data.process_kernel_time = process_kernel_time.QuadPart;
+        data.process_kernel_time     = process_kernel_time.QuadPart;
 
         ULARGE_INTEGER process_user_time;
         process_user_time.LowPart  = process_user_f_time.dwLowDateTime;
         process_user_time.HighPart = process_user_f_time.dwHighDateTime;
-        data.process_user_time = process_user_time.QuadPart;
+        data.process_user_time     = process_user_time.QuadPart;
 
         // Getting system times
         FILETIME system_idle_f_time, system_kernel_f_time, system_user_f_time;
@@ -150,17 +149,17 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         ULARGE_INTEGER system_idle_time;
         system_idle_time.LowPart  = system_idle_f_time.dwLowDateTime;
         system_idle_time.HighPart = system_idle_f_time.dwHighDateTime;
-        data.system_idle_time = system_idle_time.QuadPart;
+        data.system_idle_time     = system_idle_time.QuadPart;
 
         ULARGE_INTEGER system_kernel_time;
         system_kernel_time.LowPart  = system_kernel_f_time.dwLowDateTime;
         system_kernel_time.HighPart = system_kernel_f_time.dwHighDateTime;
-        data.system_kernel_time = system_kernel_time.QuadPart;
+        data.system_kernel_time     = system_kernel_time.QuadPart;
 
         ULARGE_INTEGER system_user_time;
         system_user_time.LowPart  = system_user_f_time.dwLowDateTime;
         system_user_time.HighPart = system_user_f_time.dwHighDateTime;
-        data.system_user_time = system_user_time.QuadPart;
+        data.system_user_time     = system_user_time.QuadPart;
 
         // 5.
         SIZE_T process_affinity_mask;
@@ -183,11 +182,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         // GPU
         // SOME OTHER STUFF (PROCESS LASSO TYPE SHIT)
         
-        // NOTE(damian): the name for the process might also be retrived via QueryFullProcessImageNameA.
-        //               currently we get it from the first module inside the process modules vector.
-        //               based on the docs, the first module retrived by the Module32First function 
-        //               always contais data for the process whos modules are retrived.
-
         // data.is_visible_app = win32_is_process_an_app(process_handle, &data);
 
         process_data_vec.push_back(data);
@@ -202,9 +196,9 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
 }
 
 tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE process_handle,
-    WCHAR* stack_buffer,
-    size_t stack_buffer_len)
-{
+                                                                   WCHAR* stack_buffer,
+                                                                   size_t stack_buffer_len
+) {
     DWORD path_len = stack_buffer_len;
     BOOL  err      = QueryFullProcessImageNameW(process_handle, NULL, stack_buffer, &path_len); // Does null terminate.
 
@@ -249,13 +243,9 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
 }
 
 
-static bool is_visible_app = false; 
-static BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam);
+    static bool is_visible_app = false; 
+    static BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam);
 bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data) {
-    if (data->exe_name == "Telegram.exe") {
-        int x = 2;
-    }
-
     BOOL err_code = EnumWindows(win32_is_process_an_app_callback, data->pid);
 
     if (is_visible_app) {
@@ -288,10 +278,10 @@ BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam
     return TRUE;
 }
 
-
 // =============================================================================================
 
 
+// NOTE(damian): didnt delete this just in case if we need it, be currently we doent uset it. 
 //void convert_to_json(Win32_process_data* win32_data, json* j) {
 //    (*j)["pid"]              = win32_data->pid;
 //    (*j)["started_threads"]  = win32_data->started_threads;

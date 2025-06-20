@@ -71,8 +71,8 @@ bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data);
 
 // =============================================================================================
 
-void convert_to_json  (Win32_process_data* win32_data, json* j);
-bool convert_from_json(Win32_process_data* win32_data, json* j);
+// void convert_to_json  (Win32_process_data* win32_data, json* j);
+// bool convert_from_json(Win32_process_data* win32_data, json* j);
 
 
 // NOTE(damian): there is a macro inside nlohman for manual serialisation. 

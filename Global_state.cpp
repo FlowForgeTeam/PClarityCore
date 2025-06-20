@@ -31,7 +31,6 @@ namespace G_state {
     const char* path_dir_sessions           = "Sessions_data";
     // ================================================
 
-
 	// == Data data ==============================================
     vector<Process_data> currently_active_processes;
     vector<Process_data> tracked_processes;
@@ -122,35 +121,43 @@ namespace G_state {
         // Updating the state
         for (Win32_process_data& win32_data : result.first) {
 
-            if (win32_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
-                int x = 2;
-            }
 
+            // NOTE(damian): sicne thracked work like tracked (They are compared only by path).
+            //               we might have chrome like processes that spawn 10 chromes. 
+            //               since we iterate over the win32 getched current processes, 
+            //               when we iterate with the first chrome and chrome is tracked, we will update the tracked one.
+            //               All the other ones have to go into currently_acrive_processes vector. 
+            //               To do so, we have to skip the tracked process that have alredy been updated.
+            //               This way the second chrome wont update the single, alredy updated tracked chrome data,
+            //                  but inted will go to the cur active and then compare itseld to the very presise other chrome data, 
+            //                  since curr active are compared via path and nano-second creation time, so there wont be a time when there are 2 same chromes in the cur_active.
             bool is_tracked = false;
             for (Process_data& g_state_data : G_state::tracked_processes) {
-                if (g_state_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
-                    int x = 2;
-                }
                 if (!g_state_data.was_updated && g_state_data.compare_as_tracked(win32_data)) {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
 
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
                     is_tracked = true;
+
+                    // break; // NOTE(damian): commented out for the assert to work while developing.
                 }
             }
             if (is_tracked) continue;
 
             bool was_active_before = false;
             for (Process_data& g_state_data : G_state::currently_active_processes) {
-                if (g_state_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
-                    int x = 2;
-                }
-                if (!g_state_data.was_updated && g_state_data.compare(win32_data)) {
+                if (!g_state_data.was_updated && g_state_data.compare(win32_data)) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
+                    assert(!was_active_before); // NOTE(damian): cant have 2 same active processes 
+                    if (was_active_before) {
+                        assert(!g_state_data.was_updated); // TODO(damian): delete later.
+                    }
+
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
                     was_active_before = true;
-                    break;
+
+                    // break; // NOTE(damian): commented out for the assert to work while developing.
 
                     // TODO(damian): maybe assert to make sure that there is no other exact process.
                 }
@@ -442,27 +449,6 @@ namespace G_state {
     namespace Client_data {
         bool need_data;
 		optional<Data> maybe_data;
-
-        bool check_integrity() {
-            // int turned_on_states_counter;
-            
-            // turned_on_states_counter     = 0;
-            // turned_on_states_counter    += (int) Client_data::need_processes_for_report;
-            // turned_on_states_counter    += (int) Client_data::need_complete_process_tree;
-            // if (turned_on_states_counter > 1) {
-            //     return false;
-            // }
-
-            // turned_on_states_counter     = 0;
-            // turned_on_states_counter    += (int) Client_data::maybe_report.has_value();
-            // turned_on_states_counter    += (int) Client_data::maybe_process_tree.has_value();
-            // if (turned_on_states_counter > 1) {
-            //     return false;
-            // }
-
-            return true;
-        }
-
     }
 
 
