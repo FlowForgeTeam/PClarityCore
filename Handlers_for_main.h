@@ -28,6 +28,7 @@ namespace Main {
     extern string error_message;   
 
     extern void client_thread();
+    extern inline void handle_socker_error();
     extern void wait_for_client_to_connect();
 
     extern void handle_report        (Report_command*   command);

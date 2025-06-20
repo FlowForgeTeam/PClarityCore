@@ -32,7 +32,15 @@ namespace Main {
 
             // TODO(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
             //				 assert to make sure there is not mix up in the middle.
-
+            // NOTE(andrii): asserted, probs needs better handling
+            bool is_handled = false;
+			for (Command_status& status : command_queue) {
+                if (status.handled && !is_handled) is_handled = true;
+				else if (!status.handled && is_handled) {
+					std::cout << "Error: command queue has a mix of handled and unhandled commands." << std::endl;
+					assert(false);
+				}
+			}
             // NOTE: dont forget to maybe extend it if needed, or error if the message is to long or something.
             // NOTE(damian): recv doesnt null terminate the string buffer, 
             //	             so terminating it myself, to then be able to use strcmp.
@@ -42,9 +50,7 @@ namespace Main {
 
             int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
             if (n_bytes_returned == SOCKET_ERROR) {
-                std::cout << "err_code: " << WSAGetLastError() << std::endl;
-                closesocket(Main::client_socket);
-                Main::need_new_client = true;
+                handle_socker_error();
                 continue;
             }
             if (n_bytes_returned > receive_buffer_size - 1) { // TODO(damian): handle this.
@@ -73,7 +79,8 @@ namespace Main {
                 const char* message = "Invalid command";
                 int send_err_code   = send(client_socket, message, strlen(message), NULL);
                 if (send_err_code == SOCKET_ERROR) {
-                    // TODO: handle
+                    handle_socker_error();
+                    continue;
                 }
             }
             else {
@@ -130,6 +137,12 @@ namespace Main {
         }
     }
 
+    void handle_socker_error() {
+        std::cout << "err_code: " << WSAGetLastError() << std::endl;
+        closesocket(Main::client_socket);
+        Main::need_new_client = true;
+    }
+
     void wait_for_client_to_connect() {
         std::cout << "Waiting for a new connection with a client." << std::endl;
         pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
@@ -169,7 +182,7 @@ namespace Main {
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            handle_socker_error();
         }
 
     }
@@ -179,7 +192,7 @@ namespace Main {
         
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            std::cout << "err_code: " << WSAGetLastError() << std::endl;
         }
 
         closesocket(Main::client_socket);
@@ -194,7 +207,7 @@ namespace Main {
 
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            std::cout << "err_code: " << WSAGetLastError() << std::endl;
         }
 
         closesocket(Main::client_socket);
@@ -220,7 +233,7 @@ namespace Main {
         string message = "The procided process will be added to the list of tracke processes.";
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            handle_socker_error();
         }
     }
 
@@ -240,7 +253,7 @@ namespace Main {
         string message = "The procided process will be removed from the list of tracke processes.";
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            handle_socker_error();
         }
     }
 
@@ -268,6 +281,7 @@ namespace Main {
         vector<json> j_roots;
         for (Process_node* root : roots) { 
             j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
+            // NOTE(andrii): it should auto move, no? compiler optimizations and stuff
         }
 
         json j_result;
@@ -278,7 +292,7 @@ namespace Main {
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            handle_socker_error();
         }
 
         free_process_tree(&roots);
