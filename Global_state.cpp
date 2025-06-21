@@ -451,6 +451,11 @@ namespace G_state {
 		optional<Data> maybe_data;
     }
 
+    namespace System_info {
+        long long up_time      = 0;
+        SYSTEMTIME system_time = {0};
+    }
+
 
 
 

@@ -20,7 +20,7 @@ file = open("client_for_debugging\\response.txt", 'w', encoding="utf-8")
 file.write(responce.decode("utf-8"))
 file.close()
 
-s.send("{\"command_id\": 1, \"extra\": {}}".encode("utf-8"))
+s.send("{\"request_id\": 1, \"extra\": {}}".encode("utf-8"))
 responce = s.recv(200)
 print(f"Responce: {responce.decode('utf-8')}")
 

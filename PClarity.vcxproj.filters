@@ -33,7 +33,7 @@
     <ClCompile Include="Process_data.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Commands.cpp">
+    <ClCompile Include="Request.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Handlers_for_main.cpp">
@@ -61,7 +61,7 @@
     <ClInclude Include="Process_data.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="Commands.h">
+    <ClInclude Include="Request.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Handlers_for_main.h">

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Commands.h"
+#include "Request.h"
 #include "Functions_networking.h"
 
 using std::list;
@@ -11,9 +11,9 @@ using std::list;
 //				 just to be more sure, that thread use shated data as little as possible.
 
 namespace Main {
-    struct Command_status {
+    struct Request_status {
     	bool    handled;
-	    Command command;
+	    Request request;
     };
 
     struct Process_node {
@@ -21,7 +21,7 @@ namespace Main {
 		vector<Process_node*> child_processes_nodes;
 	};
 
-    extern list<Command_status> command_queue; 
+    extern list<Request_status> request_queue; 
     extern bool   running;        
     extern SOCKET client_socket;  
     extern bool   need_new_client;
@@ -29,13 +29,15 @@ namespace Main {
 
     extern void client_thread();
     extern void wait_for_client_to_connect();
+    extern void handle_socker_error();
 
-    extern void handle_report        (Report_command*   command);
-    extern void handle_quit          (Quit_command*     commnad);
-    extern void handle_shutdown      (Shutdown_command* commnad);
-    extern void handle_track         (Track_command*    commnad);
-    extern void handle_untrack       (Untrack_command*  commnad);
-    extern void handle_grouped_report(Grouped_report_command* command);
+    extern void handle_report        (Report_request*   request);
+    extern void handle_quit          (Quit_request*     request);
+    extern void handle_shutdown      (Shutdown_request* request);
+    extern void handle_track         (Track_request*    request);
+    extern void handle_untrack       (Untrack_request*  request);
+    extern void handle_grouped_report(Grouped_report_request* request);
+    extern void handle_pc_time       (Pc_time_request* request);
 
 }
 

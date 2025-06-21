@@ -12,14 +12,19 @@
 #include "Functions_networking.h"
 #include "Functions_win32.h"
 #include "Global_state.h"
-#include "Commands.h"
+#include "Request.h"
 #include "Handlers_for_main.h"
 
 // NOTE(damian): bool represent wheather the command has alredy been handled.
 // TOOD(damian): maybe add this to the global state.
 
+static void handle_global_err(G_state::Error* err);
+
+static G_state::Error g_err(G_state::Error_type::ok);
+
 int main() {
-	G_state::set_up_on_startup();
+	g_err = G_state::set_up_on_startup();
+	
 	G_state::update_state();
 	std::cout << "Done setting up. \n" << std::endl;
 
@@ -34,43 +39,46 @@ int main() {
 
 		G_state::Error err = G_state::update_state();
 		if (err.type != G_state::Error_type::ok) {
-			std::cout << "Update state error: " << "'" << err.message << "'" << std::endl;
-			exit(1);
+			handle_global_err(&err);
 		}
 
 		// Getting the first command has not yet been handled
-		auto p_to_command    = Main::command_queue.begin(); 
+		auto p_to_request    = Main::request_queue.begin(); 
 		bool unhandled_found = false; 
-		for (; p_to_command != Main::command_queue.end(); ++p_to_command) {
-			if (!p_to_command->handled) {
+		for (; p_to_request != Main::request_queue.end(); ++p_to_request) {
+			if (!p_to_request->handled) {
 				unhandled_found = true;
 				break;
 			}
 		}
 
 		if (unhandled_found) {
-			switch (p_to_command->command.type) {
-				case Command_type::track: {
-					G_state::add_process_to_track(&p_to_command->command.data.track.path);
-				} break;
-				
-				case Command_type::untrack: {
-					G_state::remove_process_from_track(&p_to_command->command.data.untrack.path);
-				} break;
+			Track_request*   track   = std::get_if<Track_request>  (&p_to_request->request.variant);
+			Untrack_request* untrack = std::get_if<Untrack_request>(&p_to_request->request.variant);
 
-				default: {
-					assert(false);
-				} break;
+			if (track != nullptr) {
+				G_state::add_process_to_track(&track->path);
+			}
+			else if (untrack != nullptr) {
+				G_state::remove_process_from_track(&untrack->path);
+			}
+			else {
+				assert(false);
 			}
 
-			p_to_command->handled = true;
+			p_to_request->handled = true;
 		}
 
 	}
 
 	return 0;
 }
-  
+
+void handle_global_err(G_state::Error* err) {
+
+
+
+}
 
 
 

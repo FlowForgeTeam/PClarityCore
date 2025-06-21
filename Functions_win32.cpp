@@ -2,8 +2,9 @@
 #include <iostream>
 #include <Windows.h>
 #include <tlhelp32.h>
-#include <cassert>
 #include <nlohmann/json.hpp>
+#include <cassert>
+#pragma comment(lib, "version") // Linking the dll
 
 #include "Functions_win32.h"
 
@@ -68,10 +69,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         data.base_priority   = pe32.pcPriClassBase;
         data.started_threads = pe32.cntThreads;
 
-        if (data.exe_name == "Telegram.exe") {
-            int x = 2;
-        }
-
         // 2.
         const size_t stack_buffer_len = 256; 
         WCHAR stack_buffer[stack_buffer_len];
@@ -87,6 +84,44 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
 
         data.exe_path = wchar_to_utf8(buffer);
         
+        // Getting process product name
+        DWORD temp = 0;
+        DWORD version_size = GetFileVersionInfoSizeW(buffer, &temp);
+        
+        if (version_size == 0) continue;
+
+        vector<BYTE> version_data(version_size);
+        if(GetFileVersionInfoW(buffer, NULL, version_size, version_data.data()) == 0) {
+            continue;
+        }
+
+        // Now get the translation block (language + code page)
+        // struct LANGANDCODEPAGE {
+        //     WORD wLanguage;
+        //     WORD wCodePage;
+        // } *lpTranslate;
+
+        // int query_code = VerQueryValue(version_data.data(), 
+        //                                L"\\VarFileInfo\\Translation", 
+        //                                (LPVOID*)&lpTranslate, 
+        //                                &size);
+        // if (query_code == 0) continue;
+
+
+
+        // TCHAR subBlock[50];
+        // _stprintf_s(subBlock, 50,
+        //             TEXT("\\StringFileInfo\\%04x%04x\\ProductName"),
+        //             lpTranslate[0].wLanguage,
+        //             lpTranslate[0].wCodePage);
+
+        // LPVOID lpBuffer = nullptr;
+        // UINT dwBytes = 0;
+
+        // if (VerQueryValue(verData.data(), subBlock, &lpBuffer, &dwBytes)) {
+        //     std::wcout << L"Product Name: " << (LPCTSTR)lpBuffer << std::endl;
+        // }
+
         if(is_buffer_heap) { free(buffer); }
 
         // TODO(damian): when having a process snapshot, 

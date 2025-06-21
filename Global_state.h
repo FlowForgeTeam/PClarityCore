@@ -6,6 +6,7 @@
 #include <unordered_map>
 #include <filesystem>
 #include <optional>
+#include <minwinbase.h> // TODO(damian): check if this is actually needed
 
 #include "Process_data.h"
 
@@ -55,6 +56,8 @@ namespace G_state {
 		~Error() = default;
 	};
 	
+	extern Error err;
+
 	// TODO(damian): move this out of here into their own separate namespace.
 	// == Constants =============================================
 	extern const char* path_file_tracked_processes;
@@ -81,6 +84,11 @@ namespace G_state {
 			vector<Process_data> copy_tracked_processes;	
 		};
 		extern optional<Data> maybe_data;
+	}
+
+	namespace System_info {
+		extern long long up_time;
+		extern SYSTEMTIME system_time;
 	}
 
 }

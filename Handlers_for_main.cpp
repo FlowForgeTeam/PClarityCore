@@ -4,7 +4,7 @@
 // TODO(damian): need a better name.
 namespace Main {
 
-    list<Command_status> command_queue; 
+    list<Request_status> request_queue; 
     bool   running         = true;
     SOCKET client_socket   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
     bool   need_new_client = true;
@@ -24,15 +24,25 @@ namespace Main {
             }
 
             // Clearing out the command queue.
-            for (auto it = command_queue.begin(); it != command_queue.end();) {
+            for (auto it = request_queue.begin(); it != request_queue.end();) {
                 if (it->handled)
-                    it = command_queue.erase(it);
+                    it = request_queue.erase(it);
                 else
                     ++it;
             }
 
             // TODO(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
             //				 assert to make sure there is not mix up in the middle.
+            bool is_handled = false;
+			for (Request_status& status : request_queue) {
+                if (status.handled && !is_handled) {
+                    is_handled = true;
+                }
+				else if (!status.handled && is_handled) {
+					std::cout << "Error: command queue has a mix of handled and unhandled commands." << std::endl;
+					assert(false);
+				}
+            }
 
             // NOTE: dont forget to maybe extend it if needed, or error if the message is to long or something.
             // NOTE(damian): recv doesnt null terminate the string buffer, 
@@ -43,9 +53,7 @@ namespace Main {
 
             int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
             if (n_bytes_returned == SOCKET_ERROR) {
-                std::cout << "err_code: " << WSAGetLastError() << std::endl;
-                closesocket(Main::client_socket);
-                Main::need_new_client = true;
+                Main::handle_socker_error();
                 continue;
             }
             if (n_bytes_returned > receive_buffer_size - 1) { // TODO(damian): handle this.
@@ -69,44 +77,49 @@ namespace Main {
             std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
             // Parsing the request.
-            std::pair<Command, bool> result = command_from_json(receive_buffer);
+            std::pair<Request, bool> result = request_from_json(receive_buffer);
             if (!result.second) {
-                const char* message = "Invalid command";
+                const char* message = "Invalid request";
                 int send_err_code   = send(client_socket, message, strlen(message), NULL);
                 if (send_err_code == SOCKET_ERROR) {
-                    // TODO: handle
+                    Main::handle_socker_error();
                 }
             }
             else {
-                switch (result.first.type) {
-                    case Command_type::report: {
-                        Main::handle_report(&result.first.data.report);
-                    } break;
+                   Report_request*         report         = std::get_if<Report_request>        (&result.first.variant);
+                   Quit_request*           quit           = std::get_if<Quit_request>          (&result.first.variant);
+                   Shutdown_request*       shutdown       = std::get_if<Shutdown_request>      (&result.first.variant);
+                   Track_request*          track          = std::get_if<Track_request>         (&result.first.variant);
+                   Untrack_request*        untrack        = std::get_if<Untrack_request>       (&result.first.variant);
+                   Grouped_report_request* grouped_report = std::get_if<Grouped_report_request>(&result.first.variant);
+                   Pc_time_request*        pc_time        = std::get_if<Pc_time_request>       (&result.first.variant);
 
-                    case Command_type::quit: {
-                        Main::handle_quit(&result.first.data.quit);
-                    } break;
 
-                    case Command_type::shutdown: {
-                        Main::handle_shutdown(&result.first.data.shutdown);
-                    } break;
-
-                    case Command_type::track: {
-                        Main::handle_track(&result.first.data.track);
-                    } break;
-
-                    case Command_type::untrack: {
-                        Main::handle_untrack(&result.first.data.untrack);
-                    } break;
-
-                    case Command_type::grouped_report: {
-                        Main::handle_grouped_report(&result.first.data.grouped_report);
-                    } break;
-
-                    default: {
+                    if (report != nullptr) {
+                        Main::handle_report(report);
+                    } 
+                    else if (quit != nullptr) {
+                        Main::handle_quit(quit);
+                    }
+                    else if (shutdown != nullptr) {
+                        Main::handle_shutdown(shutdown);
+                    } 
+                    else if (track != nullptr) {
+                        Main::handle_track(track);
+                    }
+                    else if (untrack != nullptr) {
+                        Main::handle_untrack(untrack);
+                    }
+                    else if (grouped_report != nullptr) {
+                        Main::handle_grouped_report(grouped_report);
+                    }
+                    else if (pc_time != nullptr) {
+                        Main::handle_pc_time(pc_time);
+                    }
+                    else {
                         assert(false);
-                    } break;
-                }
+                    }
+
             }
 
             // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
@@ -124,7 +137,13 @@ namespace Main {
         std::cout << "Client connected. \n" << std::endl;
     }
 
-    void handle_report(Report_command* report) {
+    void handle_socker_error() {
+        std::cout << "err_code: " << WSAGetLastError() << std::endl;
+        closesocket(Main::client_socket);
+        Main::need_new_client = true;
+    }
+
+    void handle_report(Report_request* report) {
         assert(!G_state::Client_data::need_data);
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
@@ -153,17 +172,17 @@ namespace Main {
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            Main::handle_socker_error();                
         }
 
     }
 
-    void handle_quit(Quit_command* quit) {
+    void handle_quit(Quit_request* quit) {
         string message = "Client disconnected.";
         
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            Main::handle_socker_error();                
         }
 
         closesocket(Main::client_socket);
@@ -173,12 +192,12 @@ namespace Main {
         Main::need_new_client = true;
     }
 
-    void handle_shutdown(Shutdown_command* shutdown) {
+    void handle_shutdown(Shutdown_request* shutdown) {
         string message = "Stopped traking.";
 
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            Main::handle_socker_error(); 
         }
 
         closesocket(Main::client_socket);
@@ -188,47 +207,41 @@ namespace Main {
         Main::running = false;
     }
 
-    void handle_track(Track_command* track) {
-        Command command;
-        command.type = Command_type::track;
+    void handle_track(Track_request* track) {
+        Request request = {};
+        request.variant = *track;
 
-        // Correctly construct the union member using placement new
-        new (&command.data.track) Track_command(*track);
-
-        Command_status status;
+        Request_status status;
         status.handled = false;
-        status.command = command;
+        status.request = request;
 
-        Main::command_queue.push_back(status);
+        Main::request_queue.push_back(status);
 
         string message = "The procided process will be added to the list of tracke processes.";
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            Main::handle_socker_error(); 
         }
     }
 
-    void handle_untrack(Untrack_command* untrack) {
-        Command command;
-        command.type = Command_type::untrack;
+    void handle_untrack(Untrack_request* untrack) {
+        Request request = {};
+        request.variant = *untrack;
 
-        // Correctly construct the union member using placement new
-        new (&command.data.untrack) Untrack_command(*untrack);
-
-        Command_status status;
+        Request_status status;
         status.handled = false;
-        status.command = command;
+        status.request = request;
 
-        Main::command_queue.push_back(status);
+        Main::request_queue.push_back(status);
 
         string message = "The procided process will be removed from the list of tracke processes.";
         int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            Main::handle_socker_error(); 
         }
     }
 
-    void handle_grouped_report(Grouped_report_command* report) {
+    void handle_grouped_report(Grouped_report_request* report) {
         assert(!G_state::Client_data::need_data);            
 
         G_state::Client_data::need_data = true;
@@ -262,10 +275,35 @@ namespace Main {
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            // TODO: handle
+            Main::handle_socker_error(); 
         }
 
         free_process_tree(&roots);
+    }
+
+    void handle_pc_time(Pc_time_request* request) {
+        json system_json;
+        long long sys_time = GetTickCount64();
+
+        system_json["up_time"] = sys_time;
+
+        GetSystemTime(&G_state::System_info::system_time);
+
+		system_json["year"]     = G_state::System_info::system_time.wYear;
+        system_json["month"]    = G_state::System_info::system_time.wMonth;
+        system_json["day"]      = G_state::System_info::system_time.wDay;
+        system_json["hour"]     = G_state::System_info::system_time.wHour;
+        system_json["minute"]   = G_state::System_info::system_time.wMinute;
+        system_json["second"]   = G_state::System_info::system_time.wSecond;
+           
+		G_state::System_info::up_time = sys_time;
+
+        std::string message_as_str = json(system_json).dump(4);
+
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Main::handle_socker_error(); 
+        }
     }
 
 
