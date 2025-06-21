@@ -32,6 +32,7 @@ struct Regular_data {
     DWORD     ppid;
     LONG      base_priority;
     string    exe_name;
+    string    product_name;
 
     DWORD     priority_class;
     
@@ -62,14 +63,17 @@ public:
     optional<float> cpu_usage;
 
     Process_data(string exe_path);
-    Process_data(Win32_process_data win32_data);
+    Process_data(Win32_process_data* win32_data);
 
     void update_active();
     std::pair<bool, Session> update_inactive();
     void update_data(Win32_process_data* new_win32_data);
 
-    bool compare           (Process_data other);
-    bool compare_as_tracked(Process_data other);
+    bool compare           (Process_data*       other);
+    bool compare           (Win32_process_data* data);
+
+    bool compare_as_tracked(Process_data*       other);
+    bool compare_as_tracked(Win32_process_data* data);
 };
 
 using std::chrono::steady_clock; // NOTE(damian): steady clock is used for interval measures (it is more precise).

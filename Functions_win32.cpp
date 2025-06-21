@@ -7,35 +7,44 @@
 #pragma comment(lib, "version") // Linking the dll
 
 #include "Functions_win32.h"
+#include "Get_process_exe_icon.h"
+
+#include <cwchar>
+
+namespace fs = std::filesystem;
+
+const std::string default_icon_path = "icons\\";
 
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
 //               rather then getting none. (Just something to think about).
 
-// NOTE(damian): this was claude generated, need to make sure its is correct. 
-std::string wchar_to_utf8(const WCHAR* wstr) {
-    if (!wstr) return "";
+static bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name);
+static bool get_process_times       (HANDLE process_handle, Win32_process_data* data);
+static bool store_process_icon_image(Win32_process_data* data);
+
+ 
+// TODO(damian): check parameters for the win32 string functions.
+void wchar_to_utf8(WCHAR* wstr, string* str) {
+    if (!wstr) *str = "";
 
     int size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);
-    if (size <= 0) return "";
+    if (size <= 0) *str = "";
 
-    std::string result(size - 1, 0); // size-1 to exclude null terminator
-    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, &result[0], size, nullptr, nullptr);
-
-    return result;
+    str->resize(size); // size to include the null terminator
+    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str->data(), size, nullptr, nullptr);
 }
 
 std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
+    // Take a snapshot of all processes in the system.
     HANDLE process_shapshot_handle;
     PROCESSENTRY32 pe32;
 
-    // Take a snapshot of all processes in the system.
     process_shapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (process_shapshot_handle == INVALID_HANDLE_VALUE) {
         return pair(vector<Win32_process_data>(), Win32_error::CreateToolhelp32Snapshot_failed);
     }
 
-    // Set the size of the structure before using it.
     pe32.dwSize = sizeof(PROCESSENTRY32);
 
     if (!Process32First(process_shapshot_handle, &pe32)) {
@@ -43,92 +52,57 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         return pair(vector<Win32_process_data>(), Win32_error::Process32First_failed);
     }
 
-    vector<Win32_process_data> process_data_vec;
 
+    vector<Win32_process_data> process_data_vec;
     do {
         // Opening a handle, all the data for the process is kept until all the handles are released.
         HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,
                                             FALSE,
                                             pe32.th32ProcessID);
-        if (process_handle == NULL) {
-            continue;
-        }
+        if (process_handle == NULL) { continue; }
 
-        // 1. Snapshot data
-        // 2. Full process path
-        // 3. Priority
-        // 4. Process times
-        // 5. Affinity masks
-        // 6. RAM
-
-        // 1.
+        // 1. Getting snapshot data
         Win32_process_data data = {0};
         data.pid             = pe32.th32ProcessID;
         data.ppid            = pe32.th32ParentProcessID;
-        data.exe_name        = wchar_to_utf8(pe32.szExeFile);
+        wchar_to_utf8(pe32.szExeFile, &data.exe_name);
         data.base_priority   = pe32.pcPriClassBase;
         data.started_threads = pe32.cntThreads;
 
-        // 2.
-        const size_t stack_buffer_len = 256; 
-        WCHAR stack_buffer[stack_buffer_len];
+        // 2. Getting process path
+        const size_t path_stack_buffer_len = 140; 
+        WCHAR path_stack_buffer[path_stack_buffer_len];
         tuple<WCHAR*, bool, DWORD, Win32_error> result = win32_get_path_for_process(process_handle, 
-                                                                                    stack_buffer, 
-                                                                                    stack_buffer_len);
-        WCHAR* buffer         = std::get<0>(result);
-        bool   is_buffer_heap = std::get<1>(result);
-        DWORD  buffer_len     = std::get<2>(result);
-        Win32_error err_code  = std::get<3>(result);
+                                                                                    path_stack_buffer, 
+                                                                                    path_stack_buffer_len);
+        WCHAR*      path_buffer    = std::get<0>(result); // Stack or Heap, for convinient usage
+        bool        is_buffer_heap = std::get<1>(result);
+        DWORD       buffer_len     = std::get<2>(result);
+        Win32_error err_code_2     = std::get<3>(result);
         
-        if (err_code != Win32_error::ok) { continue; }
-
-        data.exe_path = wchar_to_utf8(buffer);
-        
-        // Getting process product name
-        DWORD temp = 0;
-        DWORD version_size = GetFileVersionInfoSizeW(buffer, &temp);
-        
-        if (version_size == 0) continue;
-
-        vector<BYTE> version_data(version_size);
-        if(GetFileVersionInfoW(buffer, NULL, version_size, version_data.data()) == 0) {
+        if (err_code_2 != Win32_error::ok) { 
+            if (is_buffer_heap) free(path_buffer);
             continue;
         }
 
-        // Now get the translation block (language + code page)
-        // struct LANGANDCODEPAGE {
-        //     WORD wLanguage;
-        //     WORD wCodePage;
-        // } *lpTranslate;
+        wchar_to_utf8(path_buffer, &data.exe_path);
+        
+        // 3. Getting process product name (ONLY IN ENGLISH)
+        bool err_code_3 = get_process_product_name(process_handle, path_buffer, &data.product_name);
 
-        // int query_code = VerQueryValue(version_data.data(), 
-        //                                L"\\VarFileInfo\\Translation", 
-        //                                (LPVOID*)&lpTranslate, 
-        //                                &size);
-        // if (query_code == 0) continue;
+        if (is_buffer_heap) free(path_buffer);
+        if (!err_code_3) {
+            CloseHandle(process_handle);
+            continue;
+        }
 
-
-
-        // TCHAR subBlock[50];
-        // _stprintf_s(subBlock, 50,
-        //             TEXT("\\StringFileInfo\\%04x%04x\\ProductName"),
-        //             lpTranslate[0].wLanguage,
-        //             lpTranslate[0].wCodePage);
-
-        // LPVOID lpBuffer = nullptr;
-        // UINT dwBytes = 0;
-
-        // if (VerQueryValue(verData.data(), subBlock, &lpBuffer, &dwBytes)) {
-        //     std::wcout << L"Product Name: " << (LPCTSTR)lpBuffer << std::endl;
-        // }
-
-        if(is_buffer_heap) { free(buffer); }
-
+        // =====================================================
         // TODO(damian): when having a process snapshot, 
         //               need to figure out how we can tell if the process has ended to the pid is invlid now.
         // NOTE(damian): using GetExitCodeProcess is the answer. 
+        // =====================================================
 
-        // 3.
+        // 4. 
         DWORD priority = GetPriorityClass(process_handle);
         if (priority == 0) {
             CloseHandle(process_handle); 
@@ -136,67 +110,14 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         }
         data.priority_class = priority;
 
-        // 4.
-        FILETIME process_creation_f_time;
-        FILETIME process_last_exit_f_time;    // Counts of 100-nanosecond time units
-        FILETIME process_kernel_f_time;
-        FILETIME process_user_f_time;
-        if (GetProcessTimes(process_handle, 
-                            &process_creation_f_time, 
-                            &process_last_exit_f_time, 
-                            &process_kernel_f_time, 
-                            &process_user_f_time) == 0
-        ) {
-            CloseHandle(process_handle);
+        // 5. Getting times for process
+        bool err_code_4 = get_process_times(process_handle, &data);
+        if (!err_code_4) {
+            CloseHandle(process_handle); 
             continue;
         }
 
-        ULARGE_INTEGER process_creation_time;
-        process_creation_time.LowPart  = process_creation_f_time.dwLowDateTime;
-        process_creation_time.HighPart = process_creation_f_time.dwHighDateTime;
-        data.process_creation_time     = process_creation_time.QuadPart;
-
-        ULARGE_INTEGER process_exit_time;
-        process_exit_time.LowPart  = process_last_exit_f_time.dwLowDateTime;
-        process_exit_time.HighPart = process_last_exit_f_time.dwHighDateTime;
-        data.process_exit_time     = process_exit_time.QuadPart;
-
-        ULARGE_INTEGER process_kernel_time;
-        process_kernel_time.LowPart  = process_kernel_f_time.dwLowDateTime;
-        process_kernel_time.HighPart = process_kernel_f_time.dwHighDateTime;
-        data.process_kernel_time     = process_kernel_time.QuadPart;
-
-        ULARGE_INTEGER process_user_time;
-        process_user_time.LowPart  = process_user_f_time.dwLowDateTime;
-        process_user_time.HighPart = process_user_f_time.dwHighDateTime;
-        data.process_user_time     = process_user_time.QuadPart;
-
-        // Getting system times
-        FILETIME system_idle_f_time, system_kernel_f_time, system_user_f_time;
-        if (GetSystemTimes(&system_idle_f_time, 
-                           &system_kernel_f_time, 
-                           &system_user_f_time) == 0
-        ) {
-            CloseHandle(process_handle);
-            continue;
-        }
-
-        ULARGE_INTEGER system_idle_time;
-        system_idle_time.LowPart  = system_idle_f_time.dwLowDateTime;
-        system_idle_time.HighPart = system_idle_f_time.dwHighDateTime;
-        data.system_idle_time     = system_idle_time.QuadPart;
-
-        ULARGE_INTEGER system_kernel_time;
-        system_kernel_time.LowPart  = system_kernel_f_time.dwLowDateTime;
-        system_kernel_time.HighPart = system_kernel_f_time.dwHighDateTime;
-        data.system_kernel_time     = system_kernel_time.QuadPart;
-
-        ULARGE_INTEGER system_user_time;
-        system_user_time.LowPart  = system_user_f_time.dwLowDateTime;
-        system_user_time.HighPart = system_user_f_time.dwHighDateTime;
-        data.system_user_time     = system_user_time.QuadPart;
-
-        // 5.
+        // 5. 
         SIZE_T process_affinity_mask;
         SIZE_T system_affinity_mask;
         if(GetProcessAffinityMask(process_handle, &process_affinity_mask, &system_affinity_mask) == 0) {
@@ -214,11 +135,16 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         }
         data.ram_usage = pmc.WorkingSetSize;
 
+        // 7.
+        bool err_code_7 = store_process_icon_image(&data);
+        if (!err_code_7) {
+            CloseHandle(process_handle);
+            continue;
+        }
+
         // GPU
         // SOME OTHER STUFF (PROCESS LASSO TYPE SHIT)
         
-        // data.is_visible_app = win32_is_process_an_app(process_handle, &data);
-
         process_data_vec.push_back(data);
 
         CloseHandle(process_handle);
@@ -277,6 +203,40 @@ tuple<WCHAR*, bool, DWORD, Win32_error> win32_get_path_for_process(HANDLE proces
 
 }
 
+bool SaveIconToPath(PBYTE icon, DWORD buf, std::string output_path) {
+    try {
+        // Extract directory path and create it if it doesn't exist
+        fs::path filePath(output_path);
+        fs::path dirPath = filePath.parent_path();
+
+        if (!dirPath.empty() && !fs::exists(dirPath)) {
+            std::cout << "Creating directory: " << dirPath << std::endl;
+            fs::create_directories(dirPath);
+        }
+
+        std::ofstream file(output_path, std::ios::binary);
+        if (file.is_open()) {
+            file.write(reinterpret_cast<char*>(icon), buf);
+            file.close();
+            std::cout << "Icon saved to: " << output_path << std::endl;
+            return true;
+        }
+        else {
+            std::cout << "Failed to create output file: " << output_path << std::endl;
+            return false;
+        }
+    }
+    catch (const fs::filesystem_error& ex) {
+        std::cout << "Filesystem error: " << ex.what() << std::endl;
+        return false;
+    }
+}
+
+bool FileExists(const std::string& path) {
+    DWORD fileAttr = GetFileAttributesA(path.c_str());
+    return (fileAttr != INVALID_FILE_ATTRIBUTES &&
+        !(fileAttr & FILE_ATTRIBUTE_DIRECTORY));
+}
 
     static bool is_visible_app = false; 
     static BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam);
@@ -290,6 +250,206 @@ bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data) {
 
     return false;
 }
+
+
+// =============================================================================================
+
+bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name) {
+    DWORD file_version_size_bytes = GetFileVersionInfoSizeW(exe_path_buffer, NULL);
+    if (file_version_size_bytes == 0) { return false; }
+
+    const size_t stack_alloc_len   = 2500;
+    uint8_t      stack_alloc[stack_alloc_len];
+
+    uint8_t* file_version_data = stack_alloc;
+    int      file_info_err     = 0;
+    bool     heap_used         = false;
+    
+    // NOTE(damian): tested the average size returned by GetFileVersionInfoSizeW, it was around 2100 bytes.
+    
+    if (file_version_size_bytes <= stack_alloc_len) {
+        file_info_err = GetFileVersionInfoW(exe_path_buffer, NULL, file_version_size_bytes, file_version_data);
+    }
+    else {
+        file_version_data = (uint8_t*) malloc(file_version_size_bytes);
+        if (file_version_data == NULL) {
+            assert(false);
+            // TODO(damian): handle better.
+        }
+        file_info_err           = GetFileVersionInfoW(exe_path_buffer, NULL, file_version_size_bytes, file_version_data);
+        heap_used               = true;
+    }
+
+    if (file_info_err == 0) {
+        if (heap_used) free(file_version_data);
+        return false;        
+        // TODO(damian): handle better.
+    }
+
+    WCHAR* product_name_engl = nullptr;
+    UINT   product_name_len_engl = 0;
+    int translation_err = VerQueryValueW(file_version_data, 
+                                         L"\\StringFileInfo\\040904B0\\ProductName", // NOTE(damian): (0409 is hexadec for 1033, 04B0 is hexedec for 1200) and read the comment bellow.
+                                         (void**) &product_name_engl, 
+                                         &product_name_len_engl);
+    if (translation_err == 0) {
+        if (heap_used) free(file_version_data);
+        return false;
+        // TODO(damian): handle better.
+    }  
+
+    wchar_to_utf8(product_name_engl, product_name);
+
+    return true;
+
+    // This iterated over the langs and codepages a process supports.
+    // NOTE(damian): dont know what to if the process supports more than 1 lang for the proouctname.
+    //               i would probably store all of them and then the client picks 1, 
+    //               problem is that i would need to send data for the client about the langcodes,
+    //               but there is no func that cann convert a lang code to some win32 enum value or string representing a lang name.
+    //
+    //               even lang codes are not documented, so just hardcoding the english once in
+    //               English lang --> 1033, Unicode_codepage --> 1200. 
+    //               There are some link, but good fucking luck finding them.
+    //               Codepages  --> https://learn.microsoft.com/en-us/windows/win32/intl/code-page-identifiers 
+    //               Lang_codes --> https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/70feba9f-294e-491e-b6eb-56532684c37f
+    //                  (Downloda the file and scroll til lyou find a table with lang ids) 
+
+    // struct Lang_and_codepage {
+    //     WORD lang;
+    //     WORD codepage;
+    // };
+
+    // Lang_and_codepage* arr_lang_and_codepage = nullptr;
+    // UINT  lang_and_codepage_arr_size_bytes   = 0;
+    // int translation_err = VerQueryValueW(file_version_data, 
+    //                                      L"\\VarFileInfo\\Translation", 
+    //                                      (void**) &arr_lang_and_codepage, 
+    //                                      &lang_and_codepage_arr_size_bytes);
+    // if (translation_err == 0) {
+    //     CloseHandle(process_handle); 
+    //     continue;
+    //     // TODO(damian): handle better.
+    // }  
+    // for (int i = 0; i<lang_and_codepage_arr_size_bytes / sizeof(Lang_and_codepage); ++i) {
+    //     WCHAR subBlock[256];
+    //     swprintf_s(subBlock, L"\\StringFileInfo\\%04X%04X\\ProductName", 
+    //             arr_lang_and_codepage[i].lang, arr_lang_and_codepage[i].codepage);
+    //
+    //     WCHAR* product_name      = nullptr; 
+    //     UINT   product_name_len  = 0;
+    //
+    //     int product_name_err = VerQueryValueW(file_version_data, 
+    //                                      subBlock, 
+    //                                      (void**) &product_name, 
+    //                                      &product_name_len);
+    //     if (product_name_err == 0) {
+    //         CloseHandle(process_handle);
+    //         break;
+    //     }
+    // }
+}
+
+bool get_process_times(HANDLE process_handle, Win32_process_data* data) {
+    // Getting process times
+    FILETIME process_creation_f_time;
+    FILETIME process_last_exit_f_time;    // Counts of 100-nanosecond time units
+    FILETIME process_kernel_f_time;
+    FILETIME process_user_f_time;
+    if (GetProcessTimes(process_handle, 
+                        &process_creation_f_time, 
+                        &process_last_exit_f_time, 
+                        &process_kernel_f_time, 
+                        &process_user_f_time) == 0
+    ) {
+        return false;
+    }
+
+    ULARGE_INTEGER process_creation_time;
+    process_creation_time.LowPart  = process_creation_f_time.dwLowDateTime;
+    process_creation_time.HighPart = process_creation_f_time.dwHighDateTime;
+    data->process_creation_time     = process_creation_time.QuadPart;
+
+    ULARGE_INTEGER process_exit_time;
+    process_exit_time.LowPart  = process_last_exit_f_time.dwLowDateTime;
+    process_exit_time.HighPart = process_last_exit_f_time.dwHighDateTime;
+    data->process_exit_time     = process_exit_time.QuadPart;
+
+    ULARGE_INTEGER process_kernel_time;
+    process_kernel_time.LowPart  = process_kernel_f_time.dwLowDateTime;
+    process_kernel_time.HighPart = process_kernel_f_time.dwHighDateTime;
+    data->process_kernel_time     = process_kernel_time.QuadPart;
+
+    ULARGE_INTEGER process_user_time;
+    process_user_time.LowPart  = process_user_f_time.dwLowDateTime;
+    process_user_time.HighPart = process_user_f_time.dwHighDateTime;
+    data->process_user_time     = process_user_time.QuadPart;
+
+    // Getting system times
+    FILETIME system_idle_f_time, system_kernel_f_time, system_user_f_time;
+    if (GetSystemTimes(&system_idle_f_time, 
+                        &system_kernel_f_time, 
+                        &system_user_f_time) == 0
+    ) {
+        return false;
+    }
+
+    ULARGE_INTEGER system_idle_time;
+    system_idle_time.LowPart  = system_idle_f_time.dwLowDateTime;
+    system_idle_time.HighPart = system_idle_f_time.dwHighDateTime;
+    data->system_idle_time     = system_idle_time.QuadPart;
+
+    ULARGE_INTEGER system_kernel_time;
+    system_kernel_time.LowPart  = system_kernel_f_time.dwLowDateTime;
+    system_kernel_time.HighPart = system_kernel_f_time.dwHighDateTime;
+    data->system_kernel_time     = system_kernel_time.QuadPart;
+
+    ULARGE_INTEGER system_user_time;
+    system_user_time.LowPart  = system_user_f_time.dwLowDateTime;
+    system_user_time.HighPart = system_user_f_time.dwHighDateTime;
+    data->system_user_time     = system_user_time.QuadPart;
+
+    return true;
+}
+
+bool store_process_icon_image(Win32_process_data* data) {
+    // Creating image if none exists
+    // NOTE(andrii): default_icon_path - the path to which the icons are saved.
+    // The directory "icons" in the same directory by default
+    if (!data->has_image) {
+        std::string icon_path = default_icon_path + data->exe_name + ".ico";
+
+        if (!FileExists(icon_path)) {
+            DWORD bufLen = 0;
+            PBYTE icon = get_exe_icon_from_file_utf8(data->exe_path.c_str(), TRUE, &bufLen);
+
+            // NOTE(andrii): commented code was for debugging, could implement better logging
+            // if (data.exe_name == "zen.exe") {
+            //     std::cout << "Zen icon found for: " << data.exe_name << std::endl;
+            // }
+
+            if (icon) {
+                if (!SaveIconToPath(icon, bufLen, icon_path)) {
+                    //std::cerr << "Failed to save icon to path: " << icon_path << std::endl;
+                }
+                else {
+                    data->has_image = true;
+                }
+                free(icon);
+            }
+            else {
+                //std::cerr << "Failed to get icon for process: " << data->exe_name << std::endl;
+            }
+        }
+        else {
+            data->has_image = true;
+        }
+    }
+
+    return true;
+}
+
+
 
 BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam) {
     // Check if there is an active widnow, if yes, return FALSE and set LPARAM to represent it.
@@ -312,68 +472,6 @@ BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam
 
     return TRUE;
 }
-
-// =============================================================================================
-
-
-// NOTE(damian): didnt delete this just in case if we need it, be currently we doent uset it. 
-//void convert_to_json(Win32_process_data* win32_data, json* j) {
-//    (*j)["pid"]              = win32_data->pid;
-//    (*j)["started_threads"]  = win32_data->started_threads;
-//    (*j)["ppid"]             = win32_data->ppid;
-//    (*j)["base_priority"]    = win32_data->base_priority;
-//    try {
-//        (*j)["exe_name"]         = win32_data->exe_name;
-//
-//    }
-//    catch (...) {
-//        int x = 2;
-//    }
-//    (*j)["exe_path"]         = win32_data->exe_path;
-//    (*j)["priority_class"]   = win32_data->priority_class;
-//    (*j)["creation_time"]    = win32_data->creation_time;  
-//    (*j)["exit_time"]        = win32_data->exit_time;          
-//    (*j)["kernel_time"]      = win32_data->kernel_time;    
-//    (*j)["user_time"]        = win32_data->user_time;     
-//    (*j)["process_affinity"] = win32_data->process_affinity;
-//    (*j)["system_affinity"]  = win32_data->system_affinity;
-//    (*j)["ram_usage"]        = win32_data->ram_usage;
-//    // (*j)["is_visible_app"]   = win32_data->is_visible_app;
-//}
-
-//bool convert_from_json(Win32_process_data* win32_data, json* j) {
-//    try {
-//        win32_data->pid              = (*j)["pid"];
-//        win32_data->started_threads  = (*j)["started_threads"];
-//        win32_data->ppid             = (*j)["ppid"];
-//        win32_data->base_priority    = (*j)["base_priority"];
-//        win32_data->exe_name         = (*j)["exe_name"];
-//        win32_data->exe_path         = (*j)["exe_path"];
-//        win32_data->priority_class   = (*j)["priority_class"];
-//        win32_data->creation_time    = (*j)["creation_time"];
-//        win32_data->exit_time        = (*j)["exit_time"];
-//        win32_data->kernel_time      = (*j)["kernel_time"];
-//        win32_data->user_time        = (*j)["user_time"];
-//        win32_data->process_affinity = (*j)["process_affinity"];
-//        win32_data->system_affinity  = (*j)["system_affinity"];
-//        win32_data->ram_usage        = (*j)["ram_usage"];
-//        // win32_data->is_visible_app   = (*j)["is_visible_app"];
-//    }
-//    catch (...) {
-//        return false;
-//    }
-//    
-//    return true;
-//}
-
-
-
-
-
-
-
-
-
 
 
 
@@ -516,169 +614,6 @@ BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam
 
 
 
-
-
-// pair<int, Win32_error> get_all_active_processe_ids(DWORD* process_ids_arr, size_t arr_len) {
-//     DWORD number_of_bytes_returned;
-//     int err_code = EnumProcesses(process_ids_arr, 
-//                                  (DWORD)(arr_len * sizeof(DWORD)), 
-//                                  &number_of_bytes_returned);
-    
-//     if (err_code == 0) {
-//         return pair(0, Win32_error::win32_EnumProcesses_failed);
-//     }
-
-//     if (number_of_bytes_returned == arr_len * sizeof(DWORD)) {
-//         return pair(0, Win32_error::win32_EnumProcess_buffer_too_small);
-//     }
-
-//     return pair(number_of_bytes_returned, Win32_error::ok);     // Success
-// }
-
-// pair<int, Win32_error> get_process_path(DWORD process_id, WCHAR* path_buffer, size_t path_buffer_len) {
-//     // TODO: see if using ACCESS_ALL is better here.
-//     HANDLE process_handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, // These specify the access rights
-//                                         FALSE,                                       // This is for process creation, we dont need it, so FALSE
-//                                         process_id);                                 // Process id to get a handle of
-//     if (process_handle == NULL) return pair(0, Win32_error::win32_OpenProcess_failed);
-    
-//     HMODULE module_handle;              // NOTE(damian): this is the same as HINSTANCE. This is a legacy type, back from 16-bit windows. 
-//     DWORD   number_of_bytes_returned;
-
-//     // NOTE(damian): doesnt null terminate. So if overflow, then the name for sure did not fit. No \0.
-//     int err_code = EnumProcessModules(process_handle, 
-//                                       &module_handle, 
-//                                       sizeof(module_handle), 
-//                                       &number_of_bytes_returned);
-//     if (err_code == 0) {
-//         return pair(0, Win32_error::win32_EnumProcessModules_failed);
-//     }
-//     DWORD path_buffer_new_len =  GetModuleFileNameExW(process_handle, 
-//                                                       module_handle, 
-//                                                       path_buffer, 
-//                                                       path_buffer_len / sizeof(WCHAR));
-//     if (path_buffer_new_len == 0) return pair(0, Win32_error::win32_GetModuleFileNameExW_failed);
-//     if (path_buffer_new_len == path_buffer_len) return pair(0, Win32_error::win32_GetModuleFileNameExW_buffer_too_small);
-
-//     CloseHandle(process_handle);
-
-//     return pair(path_buffer_new_len, Win32_error::ok);
-// }
-
-
-// // NOTE(damian): this gets all the active process, deals with static buffer overflow. 
-// //               if static buffer is too small, uses a bigger dynamic one. 
-// //               if a dynamic one was used, pointer to it, allong with the arr length will be returned, 
-// //                  else returs nullptr.
-// //               DONT FORGET TO DELETE THE DYNAMIC MEMORY LATER
-// pair<DWORD*, int> helper_get_all_active_processe_ids(DWORD* process_ids_buffer_on_stack, int process_ids_buffer_on_stack_len) {
-//     DWORD* process_ids_buffer_on_heap     = nullptr;
-//     int    process_ids_buffer_on_heap_len = process_ids_buffer_on_stack_len * 2;
-//     int    bytes_returned                 = -1;  
-
-//     while(true) {
-//         std::pair<int, Win32_error> result;
-//         if (process_ids_buffer_on_heap == nullptr)
-//             result = get_all_active_processe_ids(process_ids_buffer_on_stack, process_ids_buffer_on_stack_len);
-//         else 
-//             result = get_all_active_processe_ids(process_ids_buffer_on_heap, process_ids_buffer_on_heap_len);
-
-//         if (result.second == Win32_error::win32_EnumProcesses_failed) {
-//             std::cout << "Error when getting active windows processes." << std::endl;
-//             assert(false);
-//         }
-//         else if (result.second == Win32_error::win32_EnumProcess_buffer_too_small) {
-//             if (process_ids_buffer_on_heap == nullptr) {
-//                 process_ids_buffer_on_heap = (DWORD*) malloc(sizeof(DWORD) * process_ids_buffer_on_heap_len);
-//             }
-//             else {
-//                 process_ids_buffer_on_heap_len *= 2;
-//                 int bytes_needed                = sizeof(DWORD) * process_ids_buffer_on_heap_len;
-//                 process_ids_buffer_on_heap = (DWORD*) realloc(process_ids_buffer_on_heap, bytes_needed);
-//                 // TODO(damian): handle realooc NULL.
-//             }
-
-//             if (process_ids_buffer_on_heap == NULL) {
-//                 std::cout << "Not enought memory to allocate a buffer." << std::endl;
-//                 assert(false);
-//             }
-
-//         }
-//         else if (result.second == Win32_error::ok) {
-//             bytes_returned = result.first;
-//             break;
-//         }
-//         else {
-//             std::cout << "Unhandeled error." << std::endl;
-//                 assert(false);
-//         }
-//     }
-//     assert(bytes_returned != -1);
-
-//     return pair(process_ids_buffer_on_heap, bytes_returned);
-// }
-
-// // NOTE(damian): this gets the name for the provided process id, deals with static buffer overflow. 
-// //               if static buffer is too small, uses a bigger dynamic one. 
-// //               if a dynamic one was used, pointer to it, allong with the name string length will be returned, 
-// //                  else returs nullptr.
-// //               Error is returned as the thirf element, this is done in order to skip the unaccesible processes.
-// //               DONT FORGET TO DELETE THE DYNAMIC MEMORY LATER
-// std::tuple<WCHAR*, int, Win32_error> helper_get_process_path(DWORD process_id, WCHAR* stack_process_path_buffer, int stack_process_path_buffer_len) {
-//     WCHAR* process_path_buffer_on_heap     = nullptr;
-//     int    process_path_buffer_on_heap_len = stack_process_path_buffer_len * 2;
-//     int    process_path_str_len            = -1;  
-
-//     while(true) {
-//         std::pair<int, Win32_error> result;
-//         if (process_path_buffer_on_heap == nullptr)
-//             result = get_process_path(process_id, stack_process_path_buffer, stack_process_path_buffer_len);
-//         else 
-//             result = get_process_path(process_id, process_path_buffer_on_heap, process_path_buffer_on_heap_len);
-        
-//         if (result.second == Win32_error::win32_OpenProcess_failed) {
-//             /*std::cout << "Error, was not able to open a process." << std::endl;
-//             assert(false);*/
-//             // NOTE(damian): Some procecces are not accasible due to security and some other reasons, 
-//             //               so this failing is probably ok.
-//             return std::tuple(nullptr, -1, Win32_error::win32_OpenProcess_failed);
-//         }
-//         else if (result.second == Win32_error::win32_EnumProcessModules_failed) {
-//             /*std::cout << "Error, was not able to enum process modules." << std::endl;
-//             assert(false);*/
-//             // NOTE(damian): Not sure if this failing is ok.
-//             return std::tuple(nullptr, -1, Win32_error::win32_EnumProcessModules_failed);
-//         }
-//         else if (result.second == Win32_error::win32_GetModuleFileNameExW_buffer_too_small) {
-//             if (process_path_buffer_on_heap == nullptr) {
-//                 process_path_buffer_on_heap = (WCHAR*) malloc(sizeof(WCHAR) * process_path_buffer_on_heap_len);
-//             }
-//             else {
-//                 process_path_buffer_on_heap_len *= 2;
-//                 int bytes_needed                 = sizeof(WCHAR) * process_path_buffer_on_heap_len;
-//                 process_path_buffer_on_heap = (WCHAR*) realloc(process_path_buffer_on_heap, bytes_needed);
-//             }
-
-//             if (process_path_buffer_on_heap == NULL) {
-//                 std::cout << "Not enought memory to allocate a buffer." << std::endl;
-//                 assert(false);
-//             }
-//         }
-//         else if (result.second == Win32_error::ok) {
-//             process_path_str_len = result.first;
-//             break;
-//         }
-//         else {
-//             std::cout << "Unhandeled error." << std::endl;
-//                 assert(false);
-//         }
-//     }
-//     assert(process_path_str_len != -1);
-
-//     return std::tuple(process_path_buffer_on_heap, process_path_str_len, Win32_error::ok);
-
-// }
-    
 
 
 

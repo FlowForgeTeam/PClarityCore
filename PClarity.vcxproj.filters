@@ -39,6 +39,9 @@
     <ClCompile Include="Handlers_for_main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Get_process_exe_icon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include=".gitignore" />
@@ -65,6 +68,9 @@
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="Handlers_for_main.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Get_process_exe_icon.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

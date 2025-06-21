@@ -16,27 +16,27 @@ Process_data::Process_data(string exe_path) {
     this->cpu_usage     = std::nullopt;
 }
 
-static Regular_data win32_data_to_regular_data(Win32_process_data win32_data) {
+static Regular_data win32_data_to_regular_data(Win32_process_data* win32_data) {
     Regular_data data         = {0};
 
-    data.pid                  = win32_data.pid;
-    data.started_threads      = win32_data.started_threads;
-    data.ppid                 = win32_data.ppid;
-    data.base_priority        = win32_data.base_priority;
-    data.exe_name             = win32_data.exe_name;
+    data.pid                  = win32_data->pid;
+    data.started_threads      = win32_data->started_threads;
+    data.ppid                 = win32_data->ppid;
+    data.base_priority        = win32_data->base_priority;
+    data.exe_name             = win32_data->exe_name.c_str();
+    data.product_name         = win32_data->product_name.c_str();
 
-    data.priority_class       = win32_data.priority_class;
+    data.priority_class       = win32_data->priority_class;
 
-    data.process_affinity     = win32_data.process_affinity;
-    data.system_affinity      = win32_data.system_affinity;
+    data.process_affinity     = win32_data->process_affinity;
+    data.system_affinity      = win32_data->system_affinity;
 
-    data.ram_usage            = win32_data.ram_usage;
+    data.ram_usage            = win32_data->ram_usage;
 
     return data;
 }
 
-
-Process_data::Process_data(Win32_process_data win32_data) {
+Process_data::Process_data(Win32_process_data* win32_data) {
     this->is_tracked          = false;
     this->is_active           = false;
     this->was_updated         = false;
@@ -46,17 +46,17 @@ Process_data::Process_data(Win32_process_data win32_data) {
    
     this->data                = win32_data_to_regular_data(win32_data);
 
-    this->exe_path            = win32_data.exe_path;
+    this->exe_path            = win32_data->exe_path.c_str();
 
     Times times = {0};
-    times.process_creation_time = win32_data.process_creation_time;
-    times.process_exit_time     = win32_data.process_exit_time;
-    times.process_kernel_time   = win32_data.process_kernel_time;
-    times.process_user_time     = win32_data.process_user_time;
+    times.process_creation_time = win32_data->process_creation_time;
+    times.process_exit_time     = win32_data->process_exit_time;
+    times.process_kernel_time   = win32_data->process_kernel_time;
+    times.process_user_time     = win32_data->process_user_time;
     
-    times.system_idle_time      = win32_data.system_idle_time;
-    times.system_kernel_time    = win32_data.system_kernel_time;
-    times.system_user_time      = win32_data.system_user_time;
+    times.system_idle_time      = win32_data->system_idle_time;
+    times.system_kernel_time    = win32_data->system_kernel_time;
+    times.system_user_time      = win32_data->system_user_time;
 
     this->times     = times;
     this->cpu_usage = std::nullopt;
@@ -110,7 +110,9 @@ std::pair<bool, Session> Process_data::update_inactive() {
 }
 
 void Process_data::update_data(Win32_process_data* new_win32_data) {
-    this->data = win32_data_to_regular_data(*new_win32_data);
+    assert(this->exe_path == new_win32_data->exe_path);
+    
+    this->data = win32_data_to_regular_data(new_win32_data);
 
     if (this->times.has_value()) {
         ULONGLONG prev_process_time    = this->times.value().process_kernel_time + this->times.value().process_user_time;
@@ -138,7 +140,7 @@ void Process_data::update_data(Win32_process_data* new_win32_data) {
     times.process_exit_time     = new_win32_data->process_exit_time;
     times.process_kernel_time   = new_win32_data->process_kernel_time;
     times.process_user_time     = new_win32_data->process_user_time;
-    
+                                                
     times.system_idle_time      = new_win32_data->system_idle_time;
     times.system_kernel_time    = new_win32_data->system_kernel_time;
     times.system_user_time      = new_win32_data->system_user_time;
@@ -146,20 +148,35 @@ void Process_data::update_data(Win32_process_data* new_win32_data) {
     this->times = times;
 }
 
-bool Process_data::compare(Process_data other) {
+bool Process_data::compare(Process_data* other) {
     if (   !this->times.has_value()
-        || !other.times.has_value() 
+        || !other->times.has_value() 
     ) {
+        // TODO(damian): handle better.
         assert(false);
     }
 
-    return (   this->exe_path == other.exe_path 
-            && this->times.value().process_creation_time == other.times.value().process_creation_time
+    return (   this->exe_path == other->exe_path 
+            && this->times.value().process_creation_time == other->times.value().process_creation_time
            ); 
 }
 
-bool Process_data::compare_as_tracked(Process_data other) {
-    return this->exe_path == other.exe_path;
+bool Process_data::compare(Win32_process_data* data) {
+    if (!this->times.has_value()) {
+        assert(false);
+    }
+
+    return (   this->exe_path == data->exe_path 
+            && this->times.value().process_creation_time == data->process_creation_time
+           ); 
+}
+
+bool Process_data::compare_as_tracked(Process_data* other) {
+    return this->exe_path == other->exe_path;
+}
+
+bool Process_data::compare_as_tracked(Win32_process_data* data) {
+    return string(this->exe_path) == string(data->exe_path);
 }
 
 // == Process_data::Session =================================================================
@@ -221,16 +238,17 @@ void convert_to_json(Process_data* process_data, json* j) {
         data["started_threads"]  = process_data->data.value().started_threads;
         data["base_priority"]    = process_data->data.value().base_priority;
         data["exe_name"]         = process_data->data.value().exe_name;
+        data["product_name"]     = process_data->data.value().product_name;
         data["priority_class"]   = process_data->data.value().priority_class;
         data["process_affinity"] = process_data->data.value().process_affinity;
         data["system_affinity"]  = process_data->data.value().system_affinity;
         data["ram_usage"]        = process_data->data.value().ram_usage;
-        
+            
         (*j)["data"] = data;
     } 
     else { (*j)["data"] = nullptr; }
 
-    (*j)["exe_path"] = process_data->exe_path;
+    (*j)["exe_path"]     = process_data->exe_path;
 
     // if (process_data->times.has_value()) {
     //     json data;

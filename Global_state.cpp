@@ -120,7 +120,13 @@ namespace G_state {
 
         // Updating the state
         for (Win32_process_data& win32_data : result.first) {
-
+            if (win32_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
+                int x = 2;
+            }
+            
+            if (win32_data.exe_name == "chrome.exe") {
+                int x = 2;
+            }
 
             // NOTE(damian): sicne thracked work like tracked (They are compared only by path).
             //               we might have chrome like processes that spawn 10 chromes. 
@@ -133,7 +139,7 @@ namespace G_state {
             //                  since curr active are compared via path and nano-second creation time, so there wont be a time when there are 2 same chromes in the cur_active.
             bool is_tracked = false;
             for (Process_data& g_state_data : G_state::tracked_processes) {
-                if (!g_state_data.was_updated && g_state_data.compare_as_tracked(win32_data)) {
+                if (!g_state_data.was_updated && g_state_data.compare_as_tracked(&win32_data)) {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
 
                     g_state_data.update_active();
@@ -144,10 +150,12 @@ namespace G_state {
                 }
             }
             if (is_tracked) continue;
+            
+            // TODO(damian): since we use move for updates, cheking if it is still valid would be nice.
 
             bool was_active_before = false;
             for (Process_data& g_state_data : G_state::currently_active_processes) {
-                if (!g_state_data.was_updated && g_state_data.compare(win32_data)) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
+                if (!g_state_data.was_updated && g_state_data.compare(&win32_data)) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
                     assert(!was_active_before); // NOTE(damian): cant have 2 same active processes 
                     if (was_active_before) {
                         assert(!g_state_data.was_updated); // TODO(damian): delete later.
@@ -164,7 +172,7 @@ namespace G_state {
             }
             if (was_active_before) continue;
 
-            Process_data new_process(win32_data);
+            Process_data new_process(&win32_data);
             new_process.update_active();
             G_state::currently_active_processes.push_back(new_process);
         }
@@ -188,6 +196,9 @@ namespace G_state {
         }
         for (Process_data& data : G_state::tracked_processes) {
             total_cpu += data.cpu_usage.value_or(0);
+        }
+        if (total_cpu == 0) {
+            int x = 2;
         }
         std::cout << "Total cpu usage: " << total_cpu << std::endl;
 
@@ -280,11 +291,11 @@ namespace G_state {
         // TODO(damian): this is temporaty.
         win32_data.exe_path = *path;
 
-        Process_data new_process(win32_data);
+        Process_data new_process(&win32_data);
 
         bool already_tracking = false;
         for (Process_data& process : G_state::tracked_processes) {
-            if (process.compare_as_tracked(new_process))
+            if (process.compare_as_tracked(&new_process))
                 already_tracking = true;
         }
 
@@ -298,7 +309,7 @@ namespace G_state {
             p_to_active != G_state::currently_active_processes.end();
             ++p_to_active
             ) {
-            if (p_to_active->compare_as_tracked(new_process)) {
+            if (p_to_active->compare_as_tracked(&new_process)) {
                 found_active = true;
                 break;
             }
@@ -318,7 +329,7 @@ namespace G_state {
         // TODO(damian): this is here now for clarity, move somewhere else.
         for (Process_data& tracked : G_state::tracked_processes) {
             for (Process_data& current : G_state::currently_active_processes) {
-                if (tracked.compare(current)) {
+                if (tracked.compare(&current)) {
                     // NOTE(damian): not comaring as tracked, 
                     //               since then it would return Error for processes like chrome and vs code.
                     return Error(Error_type::tracked_and_current_process_vectors_share_data);
