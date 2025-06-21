@@ -28,11 +28,11 @@ int main() {
 	G_state::update_state();
 	std::cout << "Done setting up. \n" << std::endl;
 
-	std::thread client (Main::client_thread); // This starts right away.
+	std::thread client (Client::client_thread); // This starts right away.
 
 	int n = 1;
-	while (Main::running) {
-		std::chrono::seconds sleep_length(1);
+	while (Client::running) {
+		std::chrono::milliseconds sleep_length(500);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;
@@ -43,9 +43,9 @@ int main() {
 		}
 
 		// Getting the first command has not yet been handled
-		auto p_to_request    = Main::request_queue.begin(); 
+		auto p_to_request    = Client::request_queue.begin(); 
 		bool unhandled_found = false; 
-		for (; p_to_request != Main::request_queue.end(); ++p_to_request) {
+		for (; p_to_request != Client::request_queue.end(); ++p_to_request) {
 			if (!p_to_request->handled) {
 				unhandled_found = true;
 				break;

@@ -16,7 +16,8 @@ enum class Request_type {
     track    = 3,
     untrack  = 4,
     grouped_report = 5,
-    pc_time = 6
+    pc_time     = 6,
+    report_apps_only = 7,
 };
 
 struct Report_request {};
@@ -33,6 +34,7 @@ struct Grouped_report_request {};
 
 struct Pc_time_request {};
 
+struct Report_apps_only_request {};
 
 struct Request {
     variant<Report_request,
@@ -41,7 +43,8 @@ struct Request {
             Track_request,
             Untrack_request,
             Grouped_report_request,
-            Pc_time_request> variant; 
+            Pc_time_request,
+            Report_apps_only_request> variant; 
 };
 
 pair<Request_type, bool> request_type_from_int(int id);
@@ -53,6 +56,8 @@ pair<Request, bool> track         (json* j);
 pair<Request, bool> untrack       (json* j);
 pair<Request, bool> grouped_report(json* j);
 pair<Request, bool> pc_time       (json* j);
+pair<Request, bool> report_apps_only(json* j);
+
 
 
 

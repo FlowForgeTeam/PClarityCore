@@ -115,37 +115,42 @@ void Process_data::update_data(Win32_process_data* new_win32_data) {
     win32_data_to_regular_data(new_win32_data, &reg_data);
     this->data = reg_data;
 
+    
     if (this->times.has_value()) {
         ULONGLONG prev_process_time    = this->times.value().process_kernel_time + this->times.value().process_user_time;
         ULONGLONG current_process_time = new_win32_data->process_kernel_time + new_win32_data->process_user_time;
         ULONGLONG delta_process_time   = current_process_time - prev_process_time;
-
+        
         // NOTE(damian): idle time is included into kernel for system times, so have to remove it.
         ULONGLONG prev_system_time    = (this->times.value().system_kernel_time - this->times.value().system_idle_time) + this->times.value().system_user_time;
         ULONGLONG current_system_time = (new_win32_data->system_kernel_time - new_win32_data->system_idle_time) + new_win32_data->system_user_time;
         ULONGLONG delta_system_time   = current_system_time - prev_system_time;
-
+        
         if (delta_system_time == 0) {
             assert(false);
         }
-
+        
         SYSTEM_INFO sys_info;
         GetSystemInfo(&sys_info);
         DWORD n_cores = sys_info.dwNumberOfProcessors;
-
+        
         this->cpu_usage = ((double) delta_process_time / (delta_system_time * n_cores)) * 100;
     }
 
+    if (this->data.value().exe_name == "FortniteClient-Win64-Shipping.exe" && this->cpu_usage.value_or(-1) == 0.0   ) {
+        int x = 2;
+    }
+    
     Times times = {0};
     times.process_creation_time = new_win32_data->process_creation_time;
     times.process_exit_time     = new_win32_data->process_exit_time;
     times.process_kernel_time   = new_win32_data->process_kernel_time;
     times.process_user_time     = new_win32_data->process_user_time;
-                                                
+    
     times.system_idle_time      = new_win32_data->system_idle_time;
     times.system_kernel_time    = new_win32_data->system_kernel_time;
     times.system_user_time      = new_win32_data->system_user_time;
-
+    
     this->times = times;
 }
 

@@ -10,18 +10,23 @@ using std::list;
 // TOOD(damian): think about namespacing function for both thread,
 //				 just to be more sure, that thread use shated data as little as possible.
 
-namespace Main {
+namespace Client {
     struct Request_status {
-    	bool    handled;
+        bool    handled;
 	    Request request;
     };
+    
+    struct Data_thread_error_status {
+        bool handled;
+        G_state::Error error;
+    };
 
-    struct Process_node {
-		Process_data*         process;
-		vector<Process_node*> child_processes_nodes;
-	};
+    // Only data thread can add new entries here. Client thread will use them and mark as handled.
+    extern list<Data_thread_error_status> data_thread_error_queue;
 
+    // TODO(damian): this has to be on the data thread side, move this into the G_state.
     extern list<Request_status> request_queue; 
+
     extern bool   running;        
     extern SOCKET client_socket;  
     extern bool   need_new_client;
@@ -38,6 +43,7 @@ namespace Main {
     extern void handle_untrack       (Untrack_request*  request);
     extern void handle_grouped_report(Grouped_report_request* request);
     extern void handle_pc_time       (Pc_time_request* request);
+    extern void handle_report_apps_only(Report_apps_only_request* request);
 
 }
 

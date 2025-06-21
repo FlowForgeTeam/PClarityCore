@@ -3,6 +3,8 @@
 using G_state::Error_type;
 using G_state::Error;
 
+
+
 pair<SOCKET, G_state::Error> initialise_tcp_connection_with_client() {
 	// Getting data about windows socket implementation
 	// Using MAKEWORD(2,2) since 2.2 is the current spec version for Windows

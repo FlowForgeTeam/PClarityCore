@@ -1,8 +1,16 @@
 #include "Handlers_for_main.h"
+//#include "Global_state.h"
 #include <fstream>
 
 // TODO(damian): need a better name.
-namespace Main {
+
+// This is file private
+struct Process_node {
+    Process_data*         process;
+	vector<Process_node*> child_processes_nodes;
+};
+
+namespace Client {
 
     list<Request_status> request_queue; 
     bool   running         = true;
@@ -11,15 +19,19 @@ namespace Main {
     string error_message   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
 
     static json create_json_from_tree_node(Process_node* root);
-    
+
     static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
     static void free_process_tree  (vector<Process_node*>* roots);
     static void free_tree_memory   (Process_node* root);
 
+    static std::optional<G_state::Error> maybe_error = std::nullopt;
+
     void client_thread() {
         while (running) {
+            // Checking if an error was left unhandled, this cant be the case.
+
             if (need_new_client) {
-                Main::wait_for_client_to_connect();
+                Client::wait_for_client_to_connect();
                 need_new_client = false;
             }
 
@@ -44,16 +56,27 @@ namespace Main {
 				}
             }
 
-            // NOTE: dont forget to maybe extend it if needed, or error if the message is to long or something.
             // NOTE(damian): recv doesnt null terminate the string buffer, 
             //	             so terminating it myself, to then be able to use strcmp.
+
+            auto p_to_error    = Client::data_thread_error_queue.begin(); 
+            for (; p_to_error != Client::data_thread_error_queue.end(); ) {
+                if (!p_to_error->handled) {
+                    maybe_error = p_to_error->error; // TODO: maybe move here
+                    p_to_error->handled = true; // TODO(damian): hate it here, but fine.
+                    ++p_to_error; 
+                }
+                else {
+                    p_to_error = Client::data_thread_error_queue.erase(p_to_error);
+                }
+            }
 
             const size_t receive_buffer_size = 512;
             char receive_buffer[receive_buffer_size];
 
             int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
             if (n_bytes_returned == SOCKET_ERROR) {
-                Main::handle_socker_error();
+                Client::handle_socker_error();
                 continue;
             }
             if (n_bytes_returned > receive_buffer_size - 1) { // TODO(damian): handle this.
@@ -82,48 +105,52 @@ namespace Main {
                 const char* message = "Invalid request";
                 int send_err_code   = send(client_socket, message, strlen(message), NULL);
                 if (send_err_code == SOCKET_ERROR) {
-                    Main::handle_socker_error();
+                    Client::handle_socker_error();
                 }
             }
             else {
-                   Report_request*         report         = std::get_if<Report_request>        (&result.first.variant);
-                   Quit_request*           quit           = std::get_if<Quit_request>          (&result.first.variant);
-                   Shutdown_request*       shutdown       = std::get_if<Shutdown_request>      (&result.first.variant);
-                   Track_request*          track          = std::get_if<Track_request>         (&result.first.variant);
-                   Untrack_request*        untrack        = std::get_if<Untrack_request>       (&result.first.variant);
-                   Grouped_report_request* grouped_report = std::get_if<Grouped_report_request>(&result.first.variant);
-                   Pc_time_request*        pc_time        = std::get_if<Pc_time_request>       (&result.first.variant);
+                Report_request*         report         = std::get_if<Report_request>        (&result.first.variant);
+                Quit_request*           quit           = std::get_if<Quit_request>          (&result.first.variant);
+                Shutdown_request*       shutdown       = std::get_if<Shutdown_request>      (&result.first.variant);
+                Track_request*          track          = std::get_if<Track_request>         (&result.first.variant);
+                Untrack_request*        untrack        = std::get_if<Untrack_request>       (&result.first.variant);
+                Grouped_report_request* grouped_report = std::get_if<Grouped_report_request>(&result.first.variant);
+                Pc_time_request*        pc_time        = std::get_if<Pc_time_request>       (&result.first.variant);
+                Report_apps_only_request* apps_only    = std::get_if<Report_apps_only_request>(&result.first.variant);
 
-
-                    if (report != nullptr) {
-                        Main::handle_report(report);
-                    } 
-                    else if (quit != nullptr) {
-                        Main::handle_quit(quit);
-                    }
-                    else if (shutdown != nullptr) {
-                        Main::handle_shutdown(shutdown);
-                    } 
-                    else if (track != nullptr) {
-                        Main::handle_track(track);
-                    }
-                    else if (untrack != nullptr) {
-                        Main::handle_untrack(untrack);
-                    }
-                    else if (grouped_report != nullptr) {
-                        Main::handle_grouped_report(grouped_report);
-                    }
-                    else if (pc_time != nullptr) {
-                        Main::handle_pc_time(pc_time);
-                    }
-                    else {
-                        assert(false);
-                    }
+                if (report != nullptr) {
+                    Client::handle_report(report);
+                } 
+                else if (quit != nullptr) {
+                    Client::handle_quit(quit);
+                }
+                else if (shutdown != nullptr) {
+                    Client::handle_shutdown(shutdown);
+                } 
+                else if (track != nullptr) {
+                    Client::handle_track(track);
+                }
+                else if (untrack != nullptr) {
+                    Client::handle_untrack(untrack);
+                }
+                else if (grouped_report != nullptr) {
+                    Client::handle_grouped_report(grouped_report);
+                }
+                else if (pc_time != nullptr) {
+                    Client::handle_pc_time(pc_time);
+                }
+                else if (apps_only != nullptr) {
+                    Client::handle_report_apps_only(apps_only);
+                }
+                else {
+                    assert(false);
+                }
 
             }
 
-            // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
+            assert(!maybe_error.has_value());
 
+            // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
         }
     }
 
@@ -131,16 +158,34 @@ namespace Main {
         std::cout << "Waiting for a new connection with a client." << std::endl;
         pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
         if (result.second.type == G_state::Error_type::ok) {
-            Main::client_socket = result.first;
+            Client::client_socket = result.first;
         }
-        else assert(false);
+        else assert(false); // TODO(damian): this fail here we might not need to handle ))
         std::cout << "Client connected. \n" << std::endl;
     }
 
     void handle_socker_error() {
         std::cout << "err_code: " << WSAGetLastError() << std::endl;
-        closesocket(Main::client_socket);
-        Main::need_new_client = true;
+        closesocket(Client::client_socket);
+        Client::need_new_client = true;
+    }
+
+    static void create_responce(G_state::Error* err, json* data, json* responce) {
+        if (err->type == G_state::Error_type::ok) {
+            (*responce)["err_code"] = G_state::Error_type::ok;
+            (*responce)["data"]     = *data; // TODO(damian): move this bitch.  
+        }
+        else if ((int) err->type < 100) {
+            (*responce)["err_code"] = err->type;
+            (*responce)["data"]     = *data; // TODO(damian): move this bitch.
+            (*responce)["warning"]  = err->message;
+        }
+        else {
+            (*responce)["err_code"] = err->type;
+            (*responce)["message"]  = err->message;
+
+            // TODO(damian): take care of not starting the loop again if a fatal one occurs.
+        }
     }
 
     void handle_report(Report_request* report) {
@@ -164,15 +209,20 @@ namespace Main {
             j_cur_active.push_back(temp);
         }
 
-        json global_json;
-        global_json["tracked"]          = j_tracked;
-        global_json["currently_active"] = j_cur_active;
+        json j_data;
+        j_data["tracked"]          = j_tracked;
+        j_data["currently_active"] = j_cur_active;
 
-        std::string message_as_str = global_json.dump(4);
+        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+        std::string message_as_str = responce.dump(4);
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error();                
+            Client::handle_socker_error();                
         }
 
     }
@@ -180,31 +230,35 @@ namespace Main {
     void handle_quit(Quit_request* quit) {
         string message = "Client disconnected.";
         
-        int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
+        int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error();                
+            Client::handle_socker_error();                
         }
 
-        closesocket(Main::client_socket);
+        // TODO(damian): make sure new messages dont come in.
+        
+        closesocket(Client::client_socket);
 
         std::cout << "Message handling: " << message << "\n" << std::endl;
 
-        Main::need_new_client = true;
+        Client::need_new_client = true;
     }
 
     void handle_shutdown(Shutdown_request* shutdown) {
         string message = "Stopped traking.";
 
-        int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
+        int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error(); 
+            Client::handle_socker_error(); 
         }
 
-        closesocket(Main::client_socket);
+        closesocket(Client::client_socket);
+
+        // TODO(damian): make sure new messages dont come in.
 
         std::cout << "Message handling: " << message << "\n" << std::endl;
         
-        Main::running = false;
+        Client::running = false;
     }
 
     void handle_track(Track_request* track) {
@@ -215,13 +269,21 @@ namespace Main {
         status.handled = false;
         status.request = request;
 
-        Main::request_queue.push_back(status);
+        Client::request_queue.push_back(status);
 
-        string message = "The procided process will be added to the list of tracke processes.";
-        int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
+        json j_data; // Nothing inside data json part for this request.
+
+        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+        std::string message_as_str = responce.dump(4);
+        int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error(); 
+            Client::handle_socker_error(); 
         }
+
     }
 
     void handle_untrack(Untrack_request* untrack) {
@@ -232,13 +294,21 @@ namespace Main {
         status.handled = false;
         status.request = request;
 
-        Main::request_queue.push_back(status);
+        Client::request_queue.push_back(status);
 
-        string message = "The procided process will be removed from the list of tracke processes.";
-        int send_err_code = send(Main::client_socket, message.c_str(), message.length(), NULL);
+        json j_data; // Nothing inside data json part for this request.
+
+        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+        std::string message_as_str = responce.dump(4);
+        int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error(); 
+            Client::handle_socker_error(); 
         }
+
     }
 
     void handle_grouped_report(Grouped_report_request* report) {
@@ -267,15 +337,20 @@ namespace Main {
             j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
         }
 
-        json j_result;
-        j_result["tracked"] = j_tracked;
-        j_result["active"]  = j_roots;
+        json j_data;
+        j_data["tracked"] = j_tracked;
+        j_data["active"]  = j_roots;
 
-        std::string message_as_str = json(j_result).dump(4);
+        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+         std::string message_as_str = responce.dump(4);
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error(); 
+            Client::handle_socker_error(); 
         }
 
         free_process_tree(&roots);
@@ -298,18 +373,89 @@ namespace Main {
            
 		G_state::System_info::up_time = sys_time;
 
-        std::string message_as_str = json(system_json).dump(4);
+        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        json responce;
+        create_responce(&err, &system_json, &responce);
+        Client::maybe_error.reset();
+
+        std::string message_as_str = responce.dump(4);
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Main::handle_socker_error(); 
+            Client::handle_socker_error();                
         }
+
+    }
+
+    void handle_report_apps_only(Report_apps_only_request* report_apps_only) {
+        assert(!G_state::Client_data::need_data);
+
+        // Telling the data thread to produce a copy of thread safe data for us to use 
+        G_state::Client_data::need_data = true;
+        while(G_state::Client_data::need_data);         
+
+        vector<json> j_tracked;
+        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+            json temp;
+            convert_to_json(&data, &temp);
+            j_tracked.push_back(temp);
+        }
+
+        bool is_set = false;
+        DWORD explorer_pid = 0;
+        
+        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+            if (!data.data.has_value()) continue;
+            if (data.data.value().exe_name == "explorer.exe") {
+                explorer_pid = data.data.value().pid;
+                is_set = true;
+                break;
+            }
+        }
+
+        if (!is_set) {
+            for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+                if (!data.data.has_value()) continue;
+                if (data.data.value().exe_name == "explorer.exe") {
+                    explorer_pid = data.data.value().pid;
+                    is_set = true;
+                    break;
+                }
+            }
+        }
+
+        vector<json> j_apps;
+        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+            if (!data.data.has_value()) continue;
+            if (data.data.value().ppid == explorer_pid) {
+                json temp;
+                convert_to_json(&data, &temp);
+                j_apps.push_back(temp);
+            }
+        }
+
+        json j_data;
+        j_data["tracked"] = j_tracked;
+        j_data["apps"]    = j_apps;
+
+        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+        std::string message_as_str = responce.dump(4);
+
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error();                
+        }
+
     }
 
 
     // == Helpers ========================================================
 
-    static void create_process_tree(vector<Main::Process_node*>* roots, vector<Process_data>* data) {
+    static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data) {
         // NOTE(damian): only handling active processes, since they have a hierarchy.
         //               tracked once are provided by the data thread, 
         //               but will be jsoned inside the client thread into a single json list.  

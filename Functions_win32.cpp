@@ -238,20 +238,7 @@ bool FileExists(const std::string& path) {
         !(fileAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-    static bool is_visible_app = false; 
-    static BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam);
-bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data) {
-    BOOL err_code = EnumWindows(win32_is_process_an_app_callback, data->pid);
-
-    if (is_visible_app) {
-        is_visible_app = false;
-        return true;
-    }
-
-    return false;
-}
-
-
+   
 // =============================================================================================
 
 bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name) {
@@ -451,27 +438,27 @@ bool store_process_icon_image(Win32_process_data* data) {
 
 
 
-BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam) {
-    // Check if there is an active widnow, if yes, return FALSE and set LPARAM to represent it.
+// BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam) {
+//     // Check if there is an active widnow, if yes, return FALSE and set LPARAM to represent it.
 
-    DWORD window_creator_pid;
-    if (GetWindowThreadProcessId(window_handle, &window_creator_pid) == 0) {
-        return TRUE; // Just skipping it
-        // TODO(damian): dont know why this might fails, since we only get widnow handles by the win32 enum function.
-    }
+//     DWORD window_creator_pid;
+//     if (GetWindowThreadProcessId(window_handle, &window_creator_pid) == 0) {
+//         return TRUE; // Just skipping it
+//         // TODO(damian): dont know why this might fails, since we only get widnow handles by the win32 enum function.
+//     }
     
-    // GetWindow failed, so keep enumerating by returning TRUE
-    if (window_creator_pid == 0) return TRUE; 
+//     // GetWindow failed, so keep enumerating by returning TRUE
+//     if (window_creator_pid == 0) return TRUE; 
 
-    // GetWindow didnt fail, its creator process is the passed in pid (lParam) and it is visible --> 
-    //      --> set the flag to true, return FALSE to stop iterating over windows
-    if (window_creator_pid == (DWORD) lParam && IsWindowVisible(window_handle)) {
-        is_visible_app = true;
-        return FALSE;
-    } 
+//     // GetWindow didnt fail, its creator process is the passed in pid (lParam) and it is visible --> 
+//     //      --> set the flag to true, return FALSE to stop iterating over windows
+//     if (window_creator_pid == (DWORD) lParam && IsWindowVisible(window_handle)) {
+//         is_visible_app = true;
+//         return FALSE;
+//     } 
 
-    return TRUE;
-}
+//     return TRUE;
+// }
 
 
 

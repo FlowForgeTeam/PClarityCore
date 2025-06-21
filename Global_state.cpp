@@ -3,14 +3,27 @@
 #include <fstream>
 #include <tuple>
 #include <unordered_map>
+#include <ctime>
+#include <iomanip>
 
 #include "Functions_win32.h"
 #include "Functions_file_system.h"
 #include "Global_state.h"
 
+// #include "Handlers_for_main.h"
+
 using G_state::Error;
 using G_state::Error_type;
 using std::unordered_map;
+
+namespace Client {
+    struct Data_thread_error_status {
+        bool handled;
+        G_state::Error error;
+    };
+    std::list<Data_thread_error_status> data_thread_error_queue;
+}
+
 
 namespace G_state {
     // == Error type inits ============================
@@ -27,6 +40,7 @@ namespace G_state {
     // ================================================
 
 	// == Constants ===================================
+    const char* path_file_error_logs        = "Error_logs.txt"; // TODO(damian): create on start up and warn if this was for some reason not created already.
     const char* path_file_tracked_processes = "tracked_processes.json";
     const char* path_dir_sessions           = "Sessions_data";
     // ================================================
@@ -39,22 +53,131 @@ namespace G_state {
     static void  convert_path_to_windows_filename(string* path_to_be_changed);
     static Error save_tracked_processes();
 
+    static bool handle_error(Error* error) {
+
+        if ((int) error->type < 10) return false;
+        
+        if ((int) error->type < 100) { // Warning
+
+            bool logs_file_was_not_pressent = false;
+            std::error_code err_1;
+            bool exists = std::filesystem::exists(G_state::path_file_error_logs, err_1);
+            if (err_1) {
+                // TODO(damian): handle.
+                assert(false);
+            }
+            if (!exists) {
+                std::fstream file(G_state::path_file_error_logs, std::ios::out);
+                logs_file_was_not_pressent = true;
+
+                if (file.is_open()) {
+                    file.close();
+                } else {
+                    assert(false);
+                    // TODO: handle.
+                }
+            }
+
+            std::fstream logs_file(G_state::path_file_error_logs, std::ios::out | std::ios::app);
+            if (!logs_file.is_open()) {
+                // TODO(damian): handle.
+                assert(false);
+            }
+
+            auto   now  = std::chrono::system_clock::now();
+            time_t time = std::chrono::system_clock::to_time_t(now);
+            tm tm;
+            int err_time = localtime_s(&tm, &time); 
+            if (err_time != 0) {
+                logs_file << "error_converting_time" << "\n";
+            }
+            else {
+                logs_file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M)")
+                      << "\t" << error->message 
+                      << "\n";
+            }
+            logs_file.close();
+        
+            if(logs_file_was_not_pressent) {
+                Client::Data_thread_error_status new_status{false, Error(Error_type::err_logs_file_was_not_present)};
+                Client::data_thread_error_queue.push_back(new_status);
+            }
+
+            Client::Data_thread_error_status new_status{false, *error};
+            Client::data_thread_error_queue.push_back(new_status);
+
+            switch(error->type) {
+                case Error_type::file_with_tracked_processes_doesnt_exist: {
+                    std::fstream file(G_state::path_file_tracked_processes, std::ios::out);
+    
+                    if (file.is_open()) {
+                        json empty_json = json::object();
+                        file << empty_json.dump(4);
+                        file.close();
+                    } else {
+                        assert(false);
+                        // TODO: handle.
+                    }
+                } break;
+
+                case Error_type::sessions_data_folder_doesnt_exist: {
+                    if (std::filesystem::create_directory(G_state::path_dir_sessions)) {} 
+                    else {
+                        assert(false);
+                        // TODO: handle
+                    }
+                } break;
+
+                case Error_type::trying_to_track_the_same_process_more_than_once: {
+                    // Nothing here, we just notify the client
+                } break;
+
+                case Error_type::trying_to_untrack_a_non_tracked_process: {
+                    // Nothing here, we just notify the client
+                } break;
+
+                case Error_type::no_csv_file_for_tracked_process: {
+                    // TODO: handle.
+                } break;
+
+                default: {
+                    // TODO(damian): handle better, probablt a fatal error ))
+                    assert(false);
+                } break;
+            }
+
+            return false;
+        }
+        else {
+            // Nothing to do here, everything is all fucked up alredy.
+
+            // TODO(damian): complete the fatal err handeling.
+            return true;
+        }
+    }
+
     G_state::Error set_up_on_startup() {
 
         std::error_code err_code_1;
         bool data_exists = fs::exists(G_state::path_file_tracked_processes, err_code_1);
 
         if (err_code_1) {
-            return Error(Error_type::filesystem_error, err_code_1.message().c_str());
+            Error err(Error_type::filesystem_error, err_code_1.message().c_str());
+            if(handle_error(&err)) { return err; }
         }
         if (!data_exists) {
-            return Error(Error_type::file_with_tracked_processes_doesnt_exist);
+            Error err(Error_type::file_with_tracked_processes_doesnt_exist);
+            if(handle_error(&err)) { return err; }
         }
 
         // Read data
         std::string text;
         if (read_file(G_state::path_file_tracked_processes, &text) != 0) {
-            return Error(Error_type::error_reading_a_file);
+            // Error err(Error_type::error_reading_a_file);
+            // if(handle_error(&err)) { return err; }
+
+            // TODO(damian): need to do.
+            assert(false);
         }
 
         json data_as_json;
@@ -62,12 +185,13 @@ namespace G_state {
             data_as_json = json::parse(text);
         }
         catch (...) {
-            return Error(Error_type::json_parsing_failed, text.c_str());
+            Error err(Error_type::startup_json_tracked_processes_file_parsing_failed, text.c_str());
+            if(handle_error(&err)) { return err; }
         }
 
         vector<json> vector_of_j_tracked;
         try { vector_of_j_tracked = data_as_json["process_paths_to_track"]; }
-        catch (...) { return Error(Error_type::json_invalid_strcture); }
+        catch (...) { return Error(Error_type::startup_json_tracked_processes_file_invalid_structure); }
 
         for (json& j_path : vector_of_j_tracked) {
             Process_data new_process(j_path);
@@ -81,26 +205,18 @@ namespace G_state {
         bool exists = std::filesystem::exists(G_state::path_dir_sessions, err_code_2);
 
         if (err_code_2) {
-            return Error(Error_type::filesystem_error, err_code_2.message().c_str());
+            assert(false);
+            // TODO: handle better.
         }
-        if (!err_code_2) {
-            return Error(Error_type::sessions_data_folder_doesnt_exist);
-        }
-
-        std::error_code err_code_3;
-        bool is_dir = std::filesystem::is_directory(G_state::path_dir_sessions, err_code_3);
-
-        if (err_code_3) {
-            return Error(Error_type::filesystem_error, err_code_3.message().c_str());
-        }
-        if (!is_dir) {
-            return Error(Error_type::sessions_data_folder_doesnt_exist);
+        if (!exists) {
+            Error err(Error_type::sessions_data_folder_doesnt_exist, "Dir with session was not present when it was supposed to be.");
+            if(handle_error(&err)) { return err; }
         }
 
         return Error(Error_type::ok);
     }
 
-    G_state::Error G_state::update_state() {
+    G_state::Error update_state() {
 
         pair<vector<Win32_process_data>, Win32_error> result = win32_get_process_data();
         if (result.second != Win32_error::ok) {
@@ -120,15 +236,7 @@ namespace G_state {
 
         // Updating the state
         for (Win32_process_data& win32_data : result.first) {
-            if (win32_data.exe_path == "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe") {
-                int x = 2;
-            }
-            
-            if (win32_data.exe_name == "chrome.exe") {
-                int x = 2;
-            }
-
-            // NOTE(damian): sicne thracked work like tracked (They are compared only by path).
+            // NOTE(damian): since thracked work like tracked (They are compared only by path).
             //               we might have chrome like processes that spawn 10 chromes. 
             //               since we iterate over the win32 getched current processes, 
             //               when we iterate with the first chrome and chrome is tracked, we will update the tracked one.
@@ -141,6 +249,12 @@ namespace G_state {
             for (Process_data& g_state_data : G_state::tracked_processes) {
                 if (!g_state_data.was_updated && g_state_data.compare_as_tracked(&win32_data)) {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
+
+                    if (g_state_data.data.has_value()) {
+                        if (g_state_data.data.value().exe_name == "Telegram.exe") {
+                            int x = 2;
+                        }
+                    }
 
                     g_state_data.update_active();
                     g_state_data.update_data(&win32_data);
@@ -192,6 +306,10 @@ namespace G_state {
         float total_cpu = 0.0;
         
         for (Process_data& data : G_state::currently_active_processes) {
+            if (data.data.value().exe_name == "Telegram.exe") {
+                int x = 2;
+            }
+
             total_cpu += data.cpu_usage.value_or(0);
         }
         for (Process_data& data : G_state::tracked_processes) {
@@ -200,6 +318,17 @@ namespace G_state {
         if (total_cpu == 0) {
             int x = 2;
         }
+
+        for (Process_data& data : G_state::currently_active_processes) {
+            if (data.data.value().exe_name == "chrome.exe") {
+                int x = 2;
+            }
+            total_cpu += data.cpu_usage.value_or(0);
+        }
+        for (Process_data& data : G_state::tracked_processes) {
+            total_cpu += data.cpu_usage.value_or(0);
+        }
+
         std::cout << "Total cpu usage: " << total_cpu << std::endl;
 
         // Updating inactive tracked processes
@@ -213,6 +342,19 @@ namespace G_state {
 
                 Session new_session = maybe_new_session.second;
 
+                std::error_code err_code_1;
+                bool exists_dir = std::filesystem::exists(G_state::path_dir_sessions);
+                if (err_code_1) {
+                    assert(false);
+                    // TODO(damian): handle better.
+                    return Error(Error_type::filesystem_error, err_code_1.message().c_str());
+                }
+                if (!exists_dir) {
+                    Error err(Error_type::sessions_data_folder_doesnt_exist, "Dir with sessions data was not pressesnt when it was supposed to be.");
+                    if (handle_error(&err)) { return err; }
+                }
+
+
                 string process_path_copy = process_data.exe_path;
                 convert_path_to_windows_filename(&process_path_copy);
 
@@ -221,15 +363,20 @@ namespace G_state {
                 csv_file_path.append(process_path_copy);
                 csv_file_path.replace_extension(".csv"); // NOTE(damian): this is error prone. 
 
-                std::error_code err_code_1;
-                bool exists = std::filesystem::exists(csv_file_path, err_code_1);
+                std::error_code err_code_2;
+                bool exists = std::filesystem::exists(csv_file_path, err_code_2);
 
-                if (err_code_1) {
-                    return Error(Error_type::filesystem_error, err_code_1.message().c_str());
+                if (err_code_2) {
+                    assert(false);
+                    // TODO(damian): handle better.
+                    return Error(Error_type::filesystem_error, err_code_2.message().c_str());
                 }
                 if (!exists) {
-                    return Error(Error_type::no_csv_file_for_tracked_process);
+                    Error err(Error_type::no_csv_file_for_tracked_process, "CSV file was not present when a session was created. This was not suppose to happen.");
+                    if(handle_error(&err)) { return err; }
                 }
+
+                // TODO(damian): file is created here regardless of wheather it existed, this has to change.
 
                 std::fstream csv_file; // NOTE(damian): std::ios::app also create a file if it doesnt exist, that why i check for exists above.
                 csv_file.open(csv_file_path, std::ios::out | std::ios::app);
@@ -238,7 +385,14 @@ namespace G_state {
                     csv_file.clear(); // Resets the stream
                     csv_file.close();
 
+                    assert(false);
+                    // TODO: handle better.
+                    
                     return Error(Error_type::no_csv_file_for_tracked_process, process_path_copy.c_str());
+                }
+
+                if (!exists) {
+                    csv_file << "duration_in_seconds, start_time_in_seconds_since_unix_epoch, end_time_in_seconds_since_unix_epoch" << "\n";
                 }
 
                 csv_file <<
@@ -246,6 +400,8 @@ namespace G_state {
                     new_session.system_start_time_in_seconds.count() << ", " <<
                     new_session.system_end_time_in_seconds.count() <<
                     '\n';
+
+                csv_file.close();
             }
         }
 
@@ -266,10 +422,10 @@ namespace G_state {
             // Storing current active processes for client to use
             // NOTE(damian): move is fine here, update_state() will add all of them back on the next iteration. 
             size_t prev_size_active              = G_state::currently_active_processes.size();
-            data.copy_currently_active_processes = move(G_state::currently_active_processes);
+            data.copy_currently_active_processes = G_state::currently_active_processes; // move(G_state::currently_active_processes);
 
-            G_state::currently_active_processes = vector<Process_data>();
-            G_state::currently_active_processes.reserve(prev_size_active);
+            /*G_state::currently_active_processes = vector<Process_data>();
+            G_state::currently_active_processes.reserve(prev_size_active);*/
 
             // Storing a copy of tracked processes for client to use
             // NOTE(damian): move isnt used here, since tracked are not added nor removed inside update_state(),
@@ -299,8 +455,12 @@ namespace G_state {
                 already_tracking = true;
         }
 
-        if (already_tracking)
+        if (already_tracking) {
+            Error err(Error_type::trying_to_track_the_same_process_more_than_once);
+            if(handle_error(&err)) { return err; }
+
             return Error(Error_type::trying_to_track_the_same_process_more_than_once);
+        }
 
         // Checking if it is already being tracked inside the vector active once
         auto p_to_active = G_state::currently_active_processes.begin();
@@ -350,6 +510,8 @@ namespace G_state {
         csv_file_path.append(process_path_copy);
         csv_file_path.replace_extension(".csv");
 
+        // TODO(damian): handle existasnce of session dir here.
+
         std::error_code err_code_2;
         bool exists = std::filesystem::exists(csv_file_path, err_code_2);
 
@@ -380,8 +542,10 @@ namespace G_state {
             }
         }
 
-        if (!is_tracked)
-            return Error(Error_type::trying_to_untrack_a_non_tracked_process);
+        if (!is_tracked) {
+            Error err(Error_type::trying_to_untrack_a_non_tracked_process);
+            if(handle_error(&err)) { return err; }
+        }
 
         G_state::tracked_processes.erase(p_to_tracked);
 
@@ -390,10 +554,14 @@ namespace G_state {
         bool data_exists = fs::exists(G_state::path_file_tracked_processes, err_code_1);
 
         if (err_code_1) {
+            assert(false);
+            // TODO: handle
+
             return Error(Error_type::filesystem_error, err_code_1.message().c_str());
         }
         if (!data_exists) {
-            return Error(Error_type::file_with_tracked_processes_doesnt_exist);
+            Error err(Error_type::file_with_tracked_processes_doesnt_exist, "File with tracked processes was not present when was expected.");
+            if(handle_error(&err)) { return err; }
         }
 
         json j_tracked;
@@ -405,7 +573,9 @@ namespace G_state {
 
         std::ofstream file(G_state::path_file_tracked_processes, std::ios::out | std::ios::trunc);
         if (!file.is_open()) {
-            return Error(Error_type::file_with_tracked_processes_doesnt_exist);
+            assert(false);
+            // TODO: handle
+
         }
         file << j_tracked.dump(4);
         file.close();
@@ -430,10 +600,14 @@ namespace G_state {
         bool data_exists = fs::exists(G_state::path_file_tracked_processes, err_code);
 
         if (err_code) {
+            assert(false);
+            // TODO: handle
+
             return Error(Error_type::filesystem_error, err_code.message().c_str());
         }
         if (!data_exists) {
-            return Error(Error_type::file_with_tracked_processes_doesnt_exist);
+            Error err(Error_type::file_with_tracked_processes_doesnt_exist, "File with tracked processes was not present when it was supposed to be.");
+            if(handle_error(&err)) { return err; }
         }
 
         json j_tracked;
@@ -445,15 +619,16 @@ namespace G_state {
 
         std::ofstream file(G_state::path_file_tracked_processes, std::ios::out | std::ios::trunc);
         if (!file.is_open()) {
-            return Error(Error_type::file_with_tracked_processes_doesnt_exist);
+            assert(false);
+            // TODO: handle
+
+            // return Error(Error_type::file_with_tracked_processes_doesnt_exist);
         }
         file << j_tracked.dump(4);
         file.close();
 
         return Error(Error_type::ok);
     }
-
-    
 
     // ================================================
 

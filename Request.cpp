@@ -12,6 +12,7 @@ pair<Request_type, bool> request_type_from_int(int id) {
         case 4:  return pair(Request_type::untrack,        true);
         case 5:  return pair(Request_type::grouped_report, true);
         case 6:  return pair(Request_type::pc_time,        true);
+        case 7:  return pair(Request_type::report_apps_only, true);
 
         default: return pair(Request_type::report,         false);
     }
@@ -27,14 +28,15 @@ pair<Request, bool> request_from_json(const char* json_as_c_str) {
     if (!result.second) return pair(Request(), false);
 
     switch (result.first) {
-        case Request_type::report:         return report(&j);
-        case Request_type::quit:           return quit(&j);
-        case Request_type::shutdown:       return shutdown(&j);
-        case Request_type::track:          return track(&j);
-        case Request_type::untrack:        return untrack(&j);
-        case Request_type::grouped_report: return grouped_report(&j);
-        case Request_type::pc_time:        return pc_time(&j);
-        default:                           return pair(Request(), false);
+        case Request_type::report:           return report(&j);
+        case Request_type::quit:             return quit(&j);
+        case Request_type::shutdown:         return shutdown(&j);
+        case Request_type::track:            return track(&j);
+        case Request_type::untrack:          return untrack(&j);
+        case Request_type::grouped_report:   return grouped_report(&j);
+        case Request_type::pc_time:          return pc_time(&j);
+        case Request_type::report_apps_only: return report_apps_only(&j);
+        default:                             return pair(Request(), false);
     }
 }
 
@@ -78,11 +80,11 @@ pair<Request, bool> untrack(json* j) {
         return pair(Request(), false);
     }
 
-    Track_request track = {};
-    track.path          = (*j)["extra"]["path"];
+    Untrack_request untrack = {};
+    untrack.path            = (*j)["extra"]["path"];
 
     Request request = {};
-    request.variant = track;
+    request.variant = untrack;
     
     return pair(request, true);
 }
@@ -98,6 +100,13 @@ pair<Request, bool> pc_time(json* j) {
 	Request request = {};
     request.variant = Pc_time_request{};
 
+    return pair(request, true);
+}
+
+pair<Request, bool> report_apps_only(json* j) {
+    Request request = {};
+    request.variant = Report_apps_only_request{};
+    
     return pair(request, true);
 }
 

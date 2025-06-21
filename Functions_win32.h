@@ -30,8 +30,6 @@ enum class Win32_error {
     win32_GetRam_failed,
 };
 
-
-// TODO(damian): deal with const wchar* overflow.
 struct Win32_process_data {
     DWORD      pid;
     DWORD      started_threads;
@@ -61,7 +59,6 @@ struct Win32_process_data {
 
     bool has_image;
 
-    // bool is_visible_app;
 };
 
 void wchar_to_utf8(WCHAR* wstr, string* str);

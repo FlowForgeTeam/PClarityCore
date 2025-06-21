@@ -6,7 +6,6 @@
 #include <unordered_map>
 #include <filesystem>
 #include <optional>
-#include <minwinbase.h> // TODO(damian): check if this is actually needed
 
 #include "Process_data.h"
 
@@ -18,33 +17,36 @@ using std::optional;
 
 namespace G_state {
 	
+	// Error levels:
+	//	1   --> ok
+	//  1__ --> Warning
+	//  1__ --> FATAL
+
 	enum class Error_type {
-		ok,
+		ok = 1,
+
+		// Temporary
+		tracked_and_current_process_vectors_share_data, // NOTE(damian): Ttis is used with asserts right now
 
 		// State
-		file_with_tracked_processes_doesnt_exist,
-		sessions_data_folder_doesnt_exist,
-		trying_to_track_the_same_process_more_than_once,
-		trying_to_untrack_a_non_tracked_process,
-		tracked_and_current_process_vectors_share_data,
-		process_data_invalid_behaviour,
-		no_csv_file_for_tracked_process,
+		file_with_tracked_processes_doesnt_exist        = 10,			
+		sessions_data_folder_doesnt_exist               = 11,					
+		trying_to_track_the_same_process_more_than_once = 12,	
+		trying_to_untrack_a_non_tracked_process         = 13,					 
+		no_csv_file_for_tracked_process                 = 14, 			
+		err_logs_file_was_not_present                   = 15, 
 
-		// json
-		json_parsing_failed,
-		json_invalid_strcture,
+		// Startup
+		startup_json_tracked_processes_file_parsing_failed    = 100,    
+		startup_json_tracked_processes_file_invalid_structure = 101, 
 
+		// TODO(damian): remove
 		// Network
-		tcp_initialisation_failed,
+		tcp_initialisation_failed, // Not on the data thread
 
-		// Other
-		unhandled_error_caught,
-		error_reading_a_file,
-
-		filesystem_error,
-
-		// TODO: Temp placeholder
-		other,
+		// File system
+		error_reading_a_file, // TODO(damian): what do we do with this?
+		filesystem_error,	  // TODO(damian): what do we do with this?
 	};
 
 	struct Error {
@@ -60,6 +62,7 @@ namespace G_state {
 
 	// TODO(damian): move this out of here into their own separate namespace.
 	// == Constants =============================================
+	extern const char* path_file_error_logs;
 	extern const char* path_file_tracked_processes;
 	extern const char* path_dir_sessions;
 	// ===========================================================

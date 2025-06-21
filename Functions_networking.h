@@ -1,10 +1,8 @@
 #pragma once
 
-#include <winsock2.h>
 #include <iostream>
-#include <ws2tcpip.h>
 #include <utility>
-#pragma comment(lib, "ws2_32") // Linking the dll
+#include "Winsock_include.h"
 #include "Global_state.h"
 
 using std::pair;

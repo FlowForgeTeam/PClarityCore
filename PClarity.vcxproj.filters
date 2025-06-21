@@ -73,5 +73,8 @@
     <ClInclude Include="Get_process_exe_icon.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Winsock_include.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>
