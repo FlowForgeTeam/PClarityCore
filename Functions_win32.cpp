@@ -1,16 +1,20 @@
-#include <fstream>      
+#include <fstream>  
+#include <filesystem>
 #include <iostream>
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <nlohmann/json.hpp>
 #include <cassert>
 #pragma comment(lib, "version") // Linking the dll
-
+#include "get-exe-icon.h"
 #include "Functions_win32.h"
 
+namespace fs = std::filesystem;
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
 //               rather then getting none. (Just something to think about).
+
+const std::string default_icon_path = "icons\\";
 
 // NOTE(damian): this was claude generated, need to make sure its is correct. 
 std::string wchar_to_utf8(const WCHAR* wstr) {
@@ -84,6 +88,36 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
 
         data.exe_path = wchar_to_utf8(buffer);
         
+        // Creating image if none exists
+		// NOTE(andrii): default_icon_path - the path to which the icons are saved.
+        // the directory "icons" in the same directory by default
+		if (!data.has_image) {
+            std::string icon_path = default_icon_path + data.exe_name + ".ico";
+			if (!FileExists(icon_path)) {
+				DWORD bufLen = 0;
+				PBYTE icon = get_exe_icon_from_file_utf8(data.exe_path.c_str(), TRUE, &bufLen);
+                //NOTE(andrii): commented code was for debugging, could implement better logging
+     //           if (data.exe_name == "zen.exe") {
+					//std::cout << "Zen icon found for: " << data.exe_name << std::endl;
+     //           }
+				if (icon) {
+					if (!SaveIconToPath(icon, bufLen, icon_path)) {
+						std::cerr << "Failed to save icon to path: " << icon_path << std::endl;
+					}
+					else {
+						data.has_image = true;
+					}
+					free(icon);
+				}
+				else {
+					std::cerr << "Failed to get icon for process: " << data.exe_name << std::endl;
+				}
+			}
+            else {
+                data.has_image = true;
+            }
+		}
+
         // Getting process product name
         DWORD temp = 0;
         DWORD version_size = GetFileVersionInfoSizeW(buffer, &temp);
@@ -311,6 +345,41 @@ BOOL CALLBACK win32_is_process_an_app_callback(HWND window_handle, LPARAM lParam
     } 
 
     return TRUE;
+}
+
+bool SaveIconToPath(PBYTE icon, DWORD buf, std::string output_path) {
+    try {
+        // Extract directory path and create it if it doesn't exist
+        fs::path filePath(output_path);
+        fs::path dirPath = filePath.parent_path();
+
+        if (!dirPath.empty() && !fs::exists(dirPath)) {
+            std::cout << "Creating directory: " << dirPath << std::endl;
+            fs::create_directories(dirPath);
+        }
+
+        std::ofstream file(output_path, std::ios::binary);
+        if (file.is_open()) {
+            file.write(reinterpret_cast<char*>(icon), buf);
+            file.close();
+            std::cout << "Icon saved to: " << output_path << std::endl;
+            return true;
+        }
+        else {
+            std::cout << "Failed to create output file: " << output_path << std::endl;
+            return false;
+        }
+    }
+    catch (const fs::filesystem_error& ex) {
+        std::cout << "Filesystem error: " << ex.what() << std::endl;
+        return false;
+    }
+}
+
+bool FileExists(const std::string& path) {
+    DWORD fileAttr = GetFileAttributesA(path.c_str());
+    return (fileAttr != INVALID_FILE_ATTRIBUTES &&
+        !(fileAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // =============================================================================================

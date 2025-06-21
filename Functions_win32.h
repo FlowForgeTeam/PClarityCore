@@ -39,6 +39,8 @@ struct Win32_process_data {
     LONG       base_priority;
     string     exe_name;
 
+    bool       has_image = false;
+
     string exe_path;
 
     DWORD priority_class;
@@ -69,6 +71,8 @@ tuple<WCHAR*, bool, DWORD, Win32_error>win32_get_path_for_process(HANDLE process
                                                                   size_t stack_buffer_len);
 bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data);
 
+bool SaveIconToPath(PBYTE icon, DWORD buf, std::string output_path);
+bool FileExists(const std::string& path);
 // =============================================================================================
 
 // void convert_to_json  (Win32_process_data* win32_data, json* j);
