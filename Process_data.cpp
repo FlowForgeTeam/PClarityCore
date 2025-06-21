@@ -16,24 +16,20 @@ Process_data::Process_data(string exe_path) {
     this->cpu_usage     = std::nullopt;
 }
 
-static Regular_data win32_data_to_regular_data(Win32_process_data* win32_data) {
-    Regular_data data         = {0};
+static void win32_data_to_regular_data(Win32_process_data* win32_data, Regular_data* reg_data) {
+    reg_data->pid                  = win32_data->pid;
+    reg_data->started_threads      = win32_data->started_threads;
+    reg_data->ppid                 = win32_data->ppid;
+    reg_data->base_priority        = win32_data->base_priority;
+    reg_data->exe_name             = win32_data->exe_name;
+    reg_data->product_name         = win32_data->product_name;
 
-    data.pid                  = win32_data->pid;
-    data.started_threads      = win32_data->started_threads;
-    data.ppid                 = win32_data->ppid;
-    data.base_priority        = win32_data->base_priority;
-    data.exe_name             = win32_data->exe_name.c_str();
-    data.product_name         = win32_data->product_name.c_str();
+    reg_data->priority_class       = win32_data->priority_class;
 
-    data.priority_class       = win32_data->priority_class;
+    reg_data->process_affinity     = win32_data->process_affinity;
+    reg_data->system_affinity      = win32_data->system_affinity;
 
-    data.process_affinity     = win32_data->process_affinity;
-    data.system_affinity      = win32_data->system_affinity;
-
-    data.ram_usage            = win32_data->ram_usage;
-
-    return data;
+    reg_data->ram_usage            = win32_data->ram_usage;
 }
 
 Process_data::Process_data(Win32_process_data* win32_data) {
@@ -43,10 +39,13 @@ Process_data::Process_data(Win32_process_data* win32_data) {
     
     this->steady_start        = std::nullopt;
     this->system_start        = std::nullopt;
-   
-    this->data                = win32_data_to_regular_data(win32_data);
+    
+    
+    Regular_data reg_data;
+    win32_data_to_regular_data(win32_data, &reg_data);
+    this->data = std::move(reg_data);
 
-    this->exe_path            = win32_data->exe_path.c_str();
+    this->exe_path = win32_data->exe_path;
 
     Times times = {0};
     times.process_creation_time = win32_data->process_creation_time;
@@ -112,7 +111,9 @@ std::pair<bool, Session> Process_data::update_inactive() {
 void Process_data::update_data(Win32_process_data* new_win32_data) {
     assert(this->exe_path == new_win32_data->exe_path);
     
-    this->data = win32_data_to_regular_data(new_win32_data);
+    Regular_data reg_data = {};
+    win32_data_to_regular_data(new_win32_data, &reg_data);
+    this->data = reg_data;
 
     if (this->times.has_value()) {
         ULONGLONG prev_process_time    = this->times.value().process_kernel_time + this->times.value().process_user_time;

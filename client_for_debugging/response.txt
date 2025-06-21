@@ -1,7 +1,7 @@
 {
     "currently_active": [
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "sihost.exe",
@@ -9,19 +9,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 33026048,
-                "started_threads": 10,
+                "ram_usage": 33071104,
+                "started_threads": 12,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\sihost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "svchost.exe",
@@ -29,19 +29,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 38596608,
+                "ram_usage": 40173568,
                 "started_threads": 9,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\svchost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "svchost.exe",
@@ -49,19 +49,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 37658624,
-                "started_threads": 5,
+                "ram_usage": 37494784,
+                "started_threads": 6,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\svchost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "taskhostw.exe",
@@ -69,19 +69,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 26570752,
-                "started_threads": 8,
+                "ram_usage": 27172864,
+                "started_threads": 9,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\taskhostw.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "explorer.exe",
@@ -89,19 +89,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 159277056,
-                "started_threads": 193,
+                "ram_usage": 188510208,
+                "started_threads": 221,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\explorer.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 6,
                 "exe_name": "bitsumsessionagent.exe",
@@ -109,19 +109,19 @@
                 "priority_class": 16384,
                 "process_affinity": 1048575,
                 "product_name": "Process Lasso",
-                "ram_usage": 2588672,
+                "ram_usage": 2506752,
                 "started_threads": 2,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files\\Process Lasso\\bitsumsessionagent.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "taskhostw.exe",
@@ -129,19 +129,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 39342080,
-                "started_threads": 6,
+                "ram_usage": 41844736,
+                "started_threads": 8,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\taskhostw.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "svchost.exe",
@@ -149,19 +149,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 36896768,
+                "ram_usage": 37011456,
                 "started_threads": 8,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\svchost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "RuntimeBroker.exe",
@@ -169,19 +169,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 30019584,
+                "ram_usage": 32784384,
                 "started_threads": 2,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\RuntimeBroker.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "RuntimeBroker.exe",
@@ -189,19 +189,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 48386048,
+                "ram_usage": 49717248,
                 "started_threads": 13,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\RuntimeBroker.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "SearchApp.exe",
@@ -209,19 +209,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 257490944,
-                "started_threads": 62,
+                "ram_usage": 272531456,
+                "started_threads": 108,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\SystemApps\\Microsoft.Windows.Search_cw5n1h2txyewy\\SearchApp.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "PowerToys.exe",
@@ -229,19 +229,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "PowerToys",
-                "ram_usage": 25415680,
+                "ram_usage": 26288128,
                 "started_threads": 14,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "PowerToys.AlwaysOnTop.exe",
@@ -249,19 +249,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "PowerToys",
-                "ram_usage": 1978368,
+                "ram_usage": 2072576,
                 "started_threads": 3,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.AlwaysOnTop.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "PowerToys.CropAndLock.exe",
@@ -276,12 +276,12 @@
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.CropAndLock.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "PowerToys.FancyZones.exe",
@@ -289,19 +289,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "PowerToys",
-                "ram_usage": 4845568,
+                "ram_usage": 35192832,
                 "started_threads": 31,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\PowerToys\\PowerToys.FancyZones.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "LockApp.exe",
@@ -309,19 +309,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 79609856,
+                "ram_usage": 79605760,
                 "started_threads": 24,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\SystemApps\\Microsoft.LockApp_cw5n1h2txyewy\\LockApp.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "RuntimeBroker.exe",
@@ -329,19 +329,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 24735744,
+                "ram_usage": 24920064,
                 "started_threads": 2,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\RuntimeBroker.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "RuntimeBroker.exe",
@@ -349,19 +349,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 29687808,
+                "ram_usage": 30744576,
                 "started_threads": 8,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\RuntimeBroker.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "TextInputHost.exe",
@@ -369,19 +369,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 51957760,
+                "ram_usage": 52940800,
                 "started_threads": 22,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\SystemApps\\MicrosoftWindows.Client.CBS_cw5n1h2txyewy\\TextInputHost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "SystemSettings.exe",
@@ -396,12 +396,12 @@
             "exe_path": "C:\\Windows\\ImmersiveControlPanel\\SystemSettings.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "ApplicationFrameHost.exe",
@@ -409,19 +409,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 24449024,
+                "ram_usage": 27373568,
                 "started_threads": 2,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\ApplicationFrameHost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "dllhost.exe",
@@ -429,19 +429,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 16293888,
+                "ram_usage": 16506880,
                 "started_threads": 8,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\dllhost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 6,
                 "exe_name": "MusNotifyIcon.exe",
@@ -456,12 +456,12 @@
             "exe_path": "C:\\Windows\\System32\\MusNotifyIcon.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "dllhost.exe",
@@ -469,19 +469,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 13680640,
+                "ram_usage": 13873152,
                 "started_threads": 5,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\dllhost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.09259258955717087,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -489,19 +489,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 126889984,
-                "started_threads": 49,
+                "ram_usage": 145653760,
+                "started_threads": 52,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -509,19 +509,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 27688960,
+                "ram_usage": 27738112,
                 "started_threads": 7,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.7142857313156128,
             "data": {
                 "base_priority": 10,
                 "exe_name": "Code.exe",
@@ -529,19 +529,19 @@
                 "priority_class": 32768,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 115986432,
+                "ram_usage": 124424192,
                 "started_threads": 51,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -549,19 +549,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 44863488,
+                "ram_usage": 45371392,
                 "started_threads": 17,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.4464285671710968,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -569,19 +569,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 566296576,
-                "started_threads": 36,
+                "ram_usage": 598630400,
+                "started_threads": 38,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -589,19 +589,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 247648256,
-                "started_threads": 21,
+                "ram_usage": 243863552,
+                "started_threads": 22,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -609,19 +609,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 88846336,
+                "ram_usage": 91340800,
                 "started_threads": 19,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -629,19 +629,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 82595840,
+                "ram_usage": 83415040,
                 "started_threads": 20,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.2678571343421936,
             "data": {
                 "base_priority": 8,
                 "exe_name": "devenv.exe",
@@ -649,19 +649,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 1126801408,
-                "started_threads": 151,
+                "ram_usage": 1351741440,
+                "started_threads": 156,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -669,19 +669,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 84389888,
+                "ram_usage": 86102016,
                 "started_threads": 8,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "conhost.exe",
@@ -696,12 +696,12 @@
             "exe_path": "C:\\Windows\\System32\\conhost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -709,39 +709,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 88334336,
+                "ram_usage": 92758016,
                 "started_threads": 8,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "conhost.exe",
-                "pid": 21000,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 6479872,
-                "started_threads": 2,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Windows\\System32\\conhost.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "svchost.exe",
@@ -749,59 +729,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 27680768,
+                "ram_usage": 27414528,
                 "started_threads": 3,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\svchost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417416,
+            "system_start": 1750515236,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "Telegram.exe",
-                "pid": 29672,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Telegram Desktop",
-                "ram_usage": 255066112,
-                "started_threads": 131,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "conhost.exe",
-                "pid": 796,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 6475776,
-                "started_threads": 2,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Windows\\System32\\conhost.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "Code.exe",
@@ -809,19 +749,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Visual Studio Code",
-                "ram_usage": 106553344,
+                "ram_usage": 109854720,
                 "started_threads": 22,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "conhost.exe",
@@ -829,19 +769,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 7307264,
+                "ram_usage": 7495680,
                 "started_threads": 5,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\conhost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.09090909361839294,
             "data": {
                 "base_priority": 8,
                 "exe_name": "powershell.exe",
@@ -849,179 +789,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 59842560,
+                "ram_usage": 74305536,
                 "started_threads": 12,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 27572,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 339746816,
-                "started_threads": 42,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 8068,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 9519104,
-                "started_threads": 7,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 10,
-                "exe_name": "chrome.exe",
-                "pid": 8160,
-                "priority_class": 32768,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 162189312,
-                "started_threads": 57,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 34492,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 80191488,
-                "started_threads": 20,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 19756,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 24395776,
-                "started_threads": 10,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 30252,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 51765248,
-                "started_threads": 30,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 12620,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 75595776,
-                "started_threads": 27,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 25280,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 74227712,
-                "started_threads": 33,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "ShellExperienceHost.exe",
@@ -1029,19 +809,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 72036352,
+                "ram_usage": 73547776,
                 "started_threads": 25,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\SystemApps\\ShellExperienceHost_cw5n1h2txyewy\\ShellExperienceHost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "RuntimeBroker.exe",
@@ -1049,899 +829,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 25927680,
+                "ram_usage": 26120192,
                 "started_threads": 3,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\RuntimeBroker.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 31952,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 81936384,
-                "started_threads": 33,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 34264,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 72155136,
-                "started_threads": 28,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 9496,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 73633792,
-                "started_threads": 33,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 22680,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 88059904,
-                "started_threads": 31,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 20040,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 77520896,
-                "started_threads": 30,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 20288,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 90615808,
-                "started_threads": 30,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 6912,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 16072704,
-                "started_threads": 9,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 29120,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 56815616,
-                "started_threads": 39,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 10456,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 97013760,
-                "started_threads": 31,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 24848,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 46747648,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 22744,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 39436288,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 10192,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 51736576,
-                "started_threads": 23,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 4764,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 46145536,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 13636,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 16080896,
-                "started_threads": 9,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 12112,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 49643520,
-                "started_threads": 18,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 28876,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 55287808,
-                "started_threads": 18,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 31644,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 48943104,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 26900,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43769856,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 7044,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43433984,
-                "started_threads": 13,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 30536,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 45191168,
-                "started_threads": 18,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 26420,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 47915008,
-                "started_threads": 18,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 20252,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 46780416,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 21580,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 47316992,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 2012,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43913216,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 8600,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 41259008,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 14696,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 41209856,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 18144,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 49922048,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 12784,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43786240,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 3392,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 47435776,
-                "started_threads": 17,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 27416,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 40906752,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 30676,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 42618880,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 4664,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 52019200,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 30140,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 41422848,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 17416,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 42196992,
-                "started_threads": 20,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 1812,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 42266624,
-                "started_threads": 19,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 26864,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 40370176,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 21076,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43384832,
-                "started_threads": 18,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 20796,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43995136,
-                "started_threads": 18,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 30196,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 42876928,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 26232,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 41652224,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 14532,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 40038400,
-                "started_threads": 13,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 23468,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43884544,
-                "started_threads": 20,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 13976,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 39251968,
-                "started_threads": 17,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 29128,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 77312000,
-                "started_threads": 33,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "CompPkgSrv.exe",
@@ -1949,299 +849,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 10100736,
+                "ram_usage": 10932224,
                 "started_threads": 1,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\CompPkgSrv.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 22636,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 23592960,
-                "started_threads": 9,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 16200,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 81182720,
-                "started_threads": 31,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 18836,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 72425472,
-                "started_threads": 31,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 23612,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 44371968,
-                "started_threads": 20,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 28988,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 65937408,
-                "started_threads": 30,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 14784,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 54239232,
-                "started_threads": 20,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 21324,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 44593152,
-                "started_threads": 20,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 14144,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 54468608,
-                "started_threads": 19,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 19788,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 19206144,
-                "started_threads": 8,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 20756,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 94765056,
-                "started_threads": 7,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 15536,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 311488512,
-                "started_threads": 28,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 15948,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 75415552,
-                "started_threads": 33,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 1792,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 19681280,
-                "started_threads": 8,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 18612,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 77647872,
-                "started_threads": 33,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "svchost.exe",
@@ -2249,299 +869,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 14348288,
+                "ram_usage": 14336000,
                 "started_threads": 3,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\System32\\svchost.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 25916,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 22589440,
-                "started_threads": 8,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 19796,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 413134848,
-                "started_threads": 40,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 34136,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 74395648,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 33016,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 63782912,
-                "started_threads": 22,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 16360,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 106549248,
-                "started_threads": 32,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 9312,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 40456192,
-                "started_threads": 13,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "chrome.exe",
-                "pid": 26228,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 16101376,
-                "started_threads": 9,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 14312,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 43995136,
-                "started_threads": 19,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 30564,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 42156032,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 9520,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 42037248,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "conhost.exe",
-                "pid": 28896,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 6709248,
-                "started_threads": 2,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Windows\\System32\\conhost.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vctip.exe",
-                "pid": 32096,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 56385536,
-                "started_threads": 21,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\vctip.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "conhost.exe",
-                "pid": 18212,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 12447744,
-                "started_threads": 2,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Windows\\System32\\conhost.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "chrome.exe",
-                "pid": 31964,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Google Chrome",
-                "ram_usage": 129593344,
-                "started_threads": 27,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "explorer.exe",
@@ -2549,99 +889,19 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 63365120,
-                "started_threads": 14,
+                "ram_usage": 67186688,
+                "started_threads": 15,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\explorer.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 24652,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 376950784,
-                "started_threads": 28,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "vcpkgsrv.exe",
-                "pid": 17732,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 170061824,
-                "started_threads": 7,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "VsDebugConsole.exe",
-                "pid": 3660,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft ® Visual Studio ®",
-                "ram_usage": 6139904,
-                "started_threads": 2,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Platform\\Debugger\\VsDebugConsole.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "conhost.exe",
-                "pid": 32784,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 17969152,
-                "started_threads": 4,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Windows\\System32\\conhost.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "explorer.exe",
@@ -2649,227 +909,837 @@
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Windows® Operating System",
-                "ram_usage": 61837312,
+                "ram_usage": 65163264,
                 "started_threads": 13,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Windows\\explorer.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "pid": 30740,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 12353536,
+                "started_threads": 2,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\conhost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 6,
+                "exe_name": "Microsoft.SharePoint.exe",
+                "pid": 20668,
+                "priority_class": 16384,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft SharePoint",
+                "ram_usage": 5275648,
+                "started_threads": 18,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft OneDrive\\25.095.0518.0002\\Microsoft.SharePoint.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "pid": 2508,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Discord",
+                "ram_usage": 148361216,
+                "started_threads": 52,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\ProgramData\\Admin\\Discord\\app-1.0.9196\\Discord.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "pid": 17860,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Discord",
+                "ram_usage": 34877440,
+                "started_threads": 7,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\ProgramData\\Admin\\Discord\\app-1.0.9196\\Discord.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 10,
+                "exe_name": "Discord.exe",
+                "pid": 20944,
+                "priority_class": 32768,
+                "process_affinity": 1048575,
+                "product_name": "Discord",
+                "ram_usage": 281370624,
+                "started_threads": 57,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\ProgramData\\Admin\\Discord\\app-1.0.9196\\Discord.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "pid": 19104,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Discord",
+                "ram_usage": 58134528,
+                "started_threads": 16,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\ProgramData\\Admin\\Discord\\app-1.0.9196\\Discord.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "pid": 21100,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Discord",
+                "ram_usage": 435777536,
+                "started_threads": 63,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\ProgramData\\Admin\\Discord\\app-1.0.9196\\Discord.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Discord.exe",
+                "pid": 25996,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Discord",
+                "ram_usage": 88596480,
+                "started_threads": 7,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\ProgramData\\Admin\\Discord\\app-1.0.9196\\Discord.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "pid": 23096,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Visual Studio®",
+                "ram_usage": 242823168,
+                "started_threads": 28,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "pid": 19580,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 12357632,
+                "started_threads": 2,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\conhost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "pid": 14128,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 12349440,
+                "started_threads": 2,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\conhost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "pid": 30828,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 12349440,
+                "started_threads": 2,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\conhost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 4,
+                "exe_name": "SearchProtocolHost.exe",
+                "pid": 6088,
+                "priority_class": 64,
+                "process_affinity": 1048575,
+                "product_name": "Windows® Search",
+                "ram_usage": 9596928,
+                "started_threads": 5,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\SearchProtocolHost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "pid": 20412,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 12476416,
+                "started_threads": 2,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\conhost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vctip.exe",
+                "pid": 14104,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Visual Studio®",
+                "ram_usage": 54120448,
+                "started_threads": 14,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\VC\\Tools\\MSVC\\14.44.35207\\bin\\Hostx64\\x64\\vctip.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "pid": 11272,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Visual Studio®",
+                "ram_usage": 20066304,
+                "started_threads": 8,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "pid": 25452,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Visual Studio®",
+                "ram_usage": 20115456,
+                "started_threads": 8,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "VsDebugConsole.exe",
+                "pid": 6620,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft ® Visual Studio ®",
+                "ram_usage": 6156288,
+                "started_threads": 2,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\CommonExtensions\\Platform\\Debugger\\VsDebugConsole.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "conhost.exe",
+                "pid": 5688,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 18014208,
+                "started_threads": 4,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\conhost.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "pid": 18136,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Visual Studio®",
+                "ram_usage": 20193280,
+                "started_threads": 10,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "smartscreen.exe",
+                "pid": 11576,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Windows® Operating System",
+                "ram_usage": 24850432,
+                "started_threads": 8,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Windows\\System32\\smartscreen.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "pid": 17112,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 229998592,
+                "started_threads": 41,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "pid": 17432,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 10272768,
+                "started_threads": 8,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 10,
+                "exe_name": "chrome.exe",
+                "pid": 7940,
+                "priority_class": 32768,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 103596032,
+                "started_threads": 50,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "pid": 17868,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 60506112,
+                "started_threads": 19,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "pid": 29396,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 22749184,
+                "started_threads": 9,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 4,
                 "exe_name": "chrome.exe",
-                "pid": 6268,
+                "pid": 20888,
                 "priority_class": 64,
                 "process_affinity": 1048575,
                 "product_name": "Google Chrome",
-                "ram_usage": 28864512,
+                "ram_usage": 108670976,
+                "started_threads": 27,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "pid": 4832,
+                "priority_class": 64,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 47382528,
+                "started_threads": 13,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "chrome.exe",
+                "pid": 26596,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 64135168,
+                "started_threads": 28,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "pid": 23204,
+                "priority_class": 64,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 150364160,
+                "started_threads": 33,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417421,
+            "system_start": 1750515241,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 4,
+                "exe_name": "chrome.exe",
+                "pid": 18568,
+                "priority_class": 64,
+                "process_affinity": 1048575,
+                "product_name": "Google Chrome",
+                "ram_usage": 33091584,
                 "started_threads": 12,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 4,
-                "exe_name": "SearchProtocolHost.exe",
-                "pid": 13960,
-                "priority_class": 64,
-                "process_affinity": 1048575,
-                "product_name": "Windows® Search",
-                "ram_usage": 9527296,
-                "started_threads": 6,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Windows\\System32\\SearchProtocolHost.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "msvsmon.exe",
-                "pid": 32124,
+                "pid": 31168,
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft® Visual Studio®",
-                "ram_usage": 54128640,
-                "started_threads": 25,
+                "ram_usage": 52641792,
+                "started_threads": 13,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\Remote Debugger\\x64\\msvsmon.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "vcpkgsrv.exe",
+                "pid": 29972,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft® Visual Studio®",
+                "ram_usage": 279441408,
+                "started_threads": 10,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\VC\\vcpackages\\x86\\vcpkgsrv.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417422,
+            "system_start": 1750515242,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "msedgewebview2.exe",
-                "pid": 33876,
+                "pid": 32624,
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 112144384,
-                "started_threads": 60,
+                "ram_usage": 109637632,
+                "started_threads": 59,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417422,
+            "system_start": 1750515242,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "msedgewebview2.exe",
-                "pid": 3768,
+                "pid": 26032,
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 8663040,
+                "ram_usage": 8912896,
                 "started_threads": 10,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417422,
+            "system_start": 1750515242,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 10,
                 "exe_name": "msedgewebview2.exe",
-                "pid": 24192,
+                "pid": 34088,
                 "priority_class": 32768,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 69885952,
-                "started_threads": 52,
+                "ram_usage": 70160384,
+                "started_threads": 51,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417422,
+            "system_start": 1750515242,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "msedgewebview2.exe",
-                "pid": 20956,
+                "pid": 18516,
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 34144256,
-                "started_threads": 26,
+                "ram_usage": 33923072,
+                "started_threads": 25,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417422,
+            "system_start": 1750515242,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "msedgewebview2.exe",
-                "pid": 17540,
+                "pid": 14604,
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 20054016,
+                "ram_usage": 20013056,
                 "started_threads": 7,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417422,
+            "system_start": 1750515242,
             "was_updated": false
         },
         {
-            "cpu_usage": null,
+            "cpu_usage": 0.0,
             "data": {
                 "base_priority": 8,
                 "exe_name": "msedgewebview2.exe",
-                "pid": 30084,
+                "pid": 11436,
                 "priority_class": 32,
                 "process_affinity": 1048575,
                 "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 86175744,
-                "started_threads": 16,
-                "system_affinity": 1048575
-            },
-            "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
-            "is_active": true,
-            "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
-            "was_updated": false
-        },
-        {
-            "cpu_usage": null,
-            "data": {
-                "base_priority": 8,
-                "exe_name": "msedgewebview2.exe",
-                "pid": 8016,
-                "priority_class": 32,
-                "process_affinity": 1048575,
-                "product_name": "Microsoft Edge WebView2",
-                "ram_usage": 68231168,
+                "ram_usage": 65953792,
                 "started_threads": 14,
                 "system_affinity": 1048575
             },
             "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
             "is_active": true,
             "is_tracked": false,
-            "steady_start": 408095,
-            "system_start": 1750505916,
+            "steady_start": 417422,
+            "system_start": 1750515242,
+            "was_updated": false
+        },
+        {
+            "cpu_usage": 0.3571428656578064,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "msedgewebview2.exe",
+                "pid": 4664,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Microsoft Edge WebView2",
+                "ram_usage": 87212032,
+                "started_threads": 16,
+                "system_affinity": 1048575
+            },
+            "exe_path": "C:\\Program Files (x86)\\Microsoft\\EdgeWebView\\Application\\137.0.3296.93\\msedgewebview2.exe",
+            "is_active": true,
+            "is_tracked": false,
+            "steady_start": 417422,
+            "system_start": 1750515242,
             "was_updated": false
         }
     ],
     "tracked": [
         {
-            "cpu_usage": null,
-            "data": null,
+            "cpu_usage": 0.0,
+            "data": {
+                "base_priority": 8,
+                "exe_name": "Telegram.exe",
+                "pid": 29672,
+                "priority_class": 32,
+                "process_affinity": 1048575,
+                "product_name": "Telegram Desktop",
+                "ram_usage": 304906240,
+                "started_threads": 165,
+                "system_affinity": 1048575
+            },
             "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-            "is_active": false,
+            "is_active": true,
             "is_tracked": true,
-            "steady_start": null,
-            "system_start": null,
+            "steady_start": 417421,
+            "system_start": 1750515241,
             "was_updated": false
         },
         {

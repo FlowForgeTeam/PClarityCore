@@ -72,7 +72,7 @@ namespace G_state {
 	extern G_state::Error set_up_on_startup();
 	extern G_state::Error update_state();
 
-	extern G_state::Error add_process_to_track(string *path);
+	extern G_state::Error add_process_to_track     (string *path);
 	extern G_state::Error remove_process_from_track(string *path);
 
 	// ===========================================================

@@ -13,7 +13,7 @@
 
 namespace fs = std::filesystem;
 
-const std::string default_icon_path = "icons\\";
+const std::string default_icon_path = "Process_icons\\"; // TODO(damian): move into constants.
 
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
@@ -23,7 +23,7 @@ static bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buff
 static bool get_process_times       (HANDLE process_handle, Win32_process_data* data);
 static bool store_process_icon_image(Win32_process_data* data);
 
- 
+
 // TODO(damian): check parameters for the win32 string functions.
 void wchar_to_utf8(WCHAR* wstr, string* str) {
     if (!wstr) *str = "";
@@ -31,8 +31,8 @@ void wchar_to_utf8(WCHAR* wstr, string* str) {
     int size = WideCharToMultiByte(CP_UTF8, 0, wstr, -1, nullptr, 0, nullptr, nullptr);
     if (size <= 0) *str = "";
 
-    str->resize(size); // size to include the null terminator
-    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, str->data(), size, nullptr, nullptr);
+    str->resize(size - 1); // size to include the null terminator
+    WideCharToMultiByte(CP_UTF8, 0, wstr, -1, &(str->operator[](0)), size, nullptr, nullptr);
 }
 
 std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
