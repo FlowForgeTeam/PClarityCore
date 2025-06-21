@@ -49,8 +49,6 @@ std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
         }
     }
 
-
-
     // Take a snapshot of all processes in the system.
     HANDLE process_shapshot_handle;
     PROCESSENTRY32 pe32;
