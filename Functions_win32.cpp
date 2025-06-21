@@ -36,6 +36,21 @@ void wchar_to_utf8(WCHAR* wstr, string* str) {
 }
 
 std::pair<vector<Win32_process_data>, Win32_error> win32_get_process_data() {
+    std::error_code err_code_0;
+    bool exists = std::filesystem::exists(default_icon_path, err_code_0);
+    if (err_code_0) {
+        assert(false);
+    }
+    if (!exists) {
+        std::error_code err_code_dir;
+        std::filesystem::create_directories(default_icon_path, err_code_dir);
+        if(err_code_dir) {
+            assert(false);
+        }
+    }
+
+
+
     // Take a snapshot of all processes in the system.
     HANDLE process_shapshot_handle;
     PROCESSENTRY32 pe32;
