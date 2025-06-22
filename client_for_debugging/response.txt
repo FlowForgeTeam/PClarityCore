@@ -5,20 +5,40 @@
                 "cpu_usage": 0.0,
                 "data": {
                     "base_priority": 8,
+                    "exe_name": "Telegram.exe",
+                    "pid": 17352,
+                    "priority_class": 32,
+                    "process_affinity": 1048575,
+                    "product_name": "Telegram Desktop",
+                    "ram_usage": 391237632,
+                    "started_threads": 131,
+                    "system_affinity": 1048575
+                },
+                "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
+                "is_active": true,
+                "is_tracked": false,
+                "steady_start": 493695,
+                "system_start": 1750591514,
+                "was_updated": false
+            },
+            {
+                "cpu_usage": 0.0,
+                "data": {
+                    "base_priority": 8,
                     "exe_name": "Code.exe",
-                    "pid": 33444,
+                    "pid": 21068,
                     "priority_class": 32,
                     "process_affinity": 1048575,
                     "product_name": "Visual Studio Code",
-                    "ram_usage": 158711808,
-                    "started_threads": 52,
+                    "ram_usage": 162529280,
+                    "started_threads": 50,
                     "system_affinity": 1048575
                 },
                 "exe_path": "C:\\Users\\Admin\\AppData\\Local\\Programs\\Microsoft VS Code\\Code.exe",
                 "is_active": true,
                 "is_tracked": false,
-                "steady_start": 445416,
-                "system_start": 1750543237,
+                "steady_start": 493695,
+                "system_start": 1750591514,
                 "was_updated": false
             },
             {
@@ -26,99 +46,19 @@
                 "data": {
                     "base_priority": 8,
                     "exe_name": "devenv.exe",
-                    "pid": 30688,
+                    "pid": 14784,
                     "priority_class": 32,
                     "process_affinity": 1048575,
                     "product_name": "Microsoft® Visual Studio®",
-                    "ram_usage": 1567883264,
-                    "started_threads": 190,
+                    "ram_usage": 948338688,
+                    "started_threads": 106,
                     "system_affinity": 1048575
                 },
                 "exe_path": "C:\\Program Files\\Microsoft Visual Studio\\2022\\Community\\Common7\\IDE\\devenv.exe",
                 "is_active": true,
                 "is_tracked": false,
-                "steady_start": 445416,
-                "system_start": 1750543237,
-                "was_updated": false
-            },
-            {
-                "cpu_usage": 0.0,
-                "data": {
-                    "base_priority": 8,
-                    "exe_name": "notepad++.exe",
-                    "pid": 7252,
-                    "priority_class": 32,
-                    "process_affinity": 1048575,
-                    "product_name": "Notepad++",
-                    "ram_usage": 38612992,
-                    "started_threads": 16,
-                    "system_affinity": 1048575
-                },
-                "exe_path": "C:\\Program Files\\Notepad++\\notepad++.exe",
-                "is_active": true,
-                "is_tracked": false,
-                "steady_start": 445416,
-                "system_start": 1750543237,
-                "was_updated": false
-            },
-            {
-                "cpu_usage": 0.0,
-                "data": {
-                    "base_priority": 8,
-                    "exe_name": "ms-teams.exe",
-                    "pid": 17836,
-                    "priority_class": 32,
-                    "process_affinity": 1048575,
-                    "product_name": "Microsoft Teams",
-                    "ram_usage": 45117440,
-                    "started_threads": 107,
-                    "system_affinity": 1048575
-                },
-                "exe_path": "C:\\Program Files\\WindowsApps\\MSTeams_25153.1010.3727.5483_x64__8wekyb3d8bbwe\\ms-teams.exe",
-                "is_active": true,
-                "is_tracked": false,
-                "steady_start": 445416,
-                "system_start": 1750543237,
-                "was_updated": false
-            },
-            {
-                "cpu_usage": 0.0,
-                "data": {
-                    "base_priority": 8,
-                    "exe_name": "steam.exe",
-                    "pid": 29880,
-                    "priority_class": 32,
-                    "process_affinity": 1048575,
-                    "product_name": "Steam",
-                    "ram_usage": 117579776,
-                    "started_threads": 39,
-                    "system_affinity": 1048575
-                },
-                "exe_path": "C:\\Program Files (x86)\\Steam\\steam.exe",
-                "is_active": true,
-                "is_tracked": false,
-                "steady_start": 445416,
-                "system_start": 1750543237,
-                "was_updated": false
-            },
-            {
-                "cpu_usage": 0.0,
-                "data": {
-                    "base_priority": 8,
-                    "exe_name": "Telegram.exe",
-                    "pid": 29116,
-                    "priority_class": 32,
-                    "process_affinity": 1048575,
-                    "product_name": "Telegram Desktop",
-                    "ram_usage": 358981632,
-                    "started_threads": 124,
-                    "system_affinity": 1048575
-                },
-                "exe_path": "C:\\Users\\Admin\\AppData\\Roaming\\Telegram Desktop\\Telegram.exe",
-                "is_active": true,
-                "is_tracked": false,
-                "steady_start": 445416,
-                "system_start": 1750543237,
+                "steady_start": 493695,
+                "system_start": 1750591514,
                 "was_updated": false
             }
         ],
@@ -128,22 +68,23 @@
                 "data": {
                     "base_priority": 8,
                     "exe_name": "chrome.exe",
-                    "pid": 25168,
+                    "pid": 30824,
                     "priority_class": 32,
                     "process_affinity": 1048575,
                     "product_name": "Google Chrome",
-                    "ram_usage": 228573184,
-                    "started_threads": 43,
+                    "ram_usage": 403472384,
+                    "started_threads": 42,
                     "system_affinity": 1048575
                 },
                 "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
                 "is_active": true,
                 "is_tracked": true,
-                "steady_start": 445416,
-                "system_start": 1750543237,
+                "steady_start": 493695,
+                "system_start": 1750591514,
                 "was_updated": false
             }
         ]
     },
-    "err_code": 1
-}
+    "err_code": 1,
+    "messege": ""
+}<< END_OF_MESSAGE >>

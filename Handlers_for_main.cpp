@@ -171,21 +171,11 @@ namespace Client {
     }
 
     static void create_responce(G_state::Error* err, json* data, json* responce) {
-        if (err->type == G_state::Error_type::ok) {
-            (*responce)["err_code"] = G_state::Error_type::ok;
-            (*responce)["data"]     = *data; // TODO(damian): move this bitch.  
-        }
-        else if ((int) err->type < 100) {
-            (*responce)["err_code"] = err->type;
-            (*responce)["data"]     = *data; // TODO(damian): move this bitch.
-            (*responce)["warning"]  = err->message;
-        }
-        else {
-            (*responce)["err_code"] = err->type;
-            (*responce)["message"]  = err->message;
+        (*responce)["err_code"] = G_state::Error_type::ok;
+        (*responce)["data"]     = *data; // TODO(damian): move this bitch.  
+        (*responce)["messege"]  = err->message;
 
-            // TODO(damian): take care of not starting the loop again if a fatal one occurs.
-        }
+        // TODO(damian): take care of not starting the loop again if a fatal one occurs.
     }
 
     void handle_report(Report_request* report) {
@@ -218,7 +208,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4);
+        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -228,24 +218,36 @@ namespace Client {
     }
 
     void handle_quit(Quit_request* quit) {
-        string message = "Client disconnected.";
-        
-        int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
+        json j_data = json::object();
+
+        G_state::Error err = maybe_error.value_or(G_state::Error{ G_state::Error_type::ok });
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
-            Client::handle_socker_error();                
+            Client::handle_socker_error();
         }
 
         // TODO(damian): make sure new messages dont come in.
         
         closesocket(Client::client_socket);
 
-        std::cout << "Message handling: " << message << "\n" << std::endl;
-
         Client::need_new_client = true;
     }
 
     void handle_shutdown(Shutdown_request* shutdown) {
-        string message = "Stopped traking.";
+        json j_data = json::object();
+
+        G_state::Error err = maybe_error.value_or(G_state::Error{ G_state::Error_type::ok });
+        json responce;
+        create_responce(&err, &j_data, &responce);
+        Client::maybe_error.reset();
+
+        std::string message = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
         int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -278,7 +280,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4);
+        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
         int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
             Client::handle_socker_error(); 
@@ -303,7 +305,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4);
+        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
         int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
             Client::handle_socker_error(); 
@@ -346,7 +348,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-         std::string message_as_str = responce.dump(4);
+         std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -378,7 +380,7 @@ namespace Client {
         create_responce(&err, &system_json, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4);
+        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -443,7 +445,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4);
+        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
