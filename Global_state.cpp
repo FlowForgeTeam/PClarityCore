@@ -547,7 +547,10 @@ namespace G_state {
             if(handle_error(&err)) { return err; }
         }
 
-        G_state::tracked_processes.erase(p_to_tracked);
+        // TODO(damian): habdle better.
+        if (is_tracked) { // NOTE(damian): the above if might not return if warning.
+            G_state::tracked_processes.erase(p_to_tracked);
+        }
 
         // Need to rewrite the file that stores processes tracked
         std::error_code err_code_1;
