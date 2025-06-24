@@ -31,7 +31,7 @@ public:
     optional<Win32_snapshot_data>  snapshot;
     optional<string>               product_name;
     optional<DWORD>                priority_class;
-    optional<Win32_process_times> process_times;
+    optional<Win32_process_times>  process_times;
     optional<Win32_affinities>     affinities;
     optional<SIZE_T>               ram_usage;
     bool                           has_image;

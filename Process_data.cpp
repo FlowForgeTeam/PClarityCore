@@ -211,6 +211,13 @@ void convert_to_json(Process_data* process_data, json* j) {
         (*j)["system_start"] = nullptr; 
     }
 
+    if (process_data->product_name.has_value()) {
+        (*j)["product_name"] = process_data->product_name.value();
+    }
+    else {
+        (*j)["product_name"] = nullptr;
+    }
+
     if (process_data->snapshot.has_value()) {
     (*j)["pid"] = process_data->snapshot.value().pid;
     (*j)["started_threads"] = process_data->snapshot.value().started_threads;
