@@ -18,13 +18,18 @@
 // NOTE(damian): bool represent wheather the command has alredy been handled.
 // TOOD(damian): maybe add this to the global state.
 
-static void handle_global_err(G_state::Error* err);
-
-static G_state::Error g_err(G_state::Error_type::ok);
 
 int main() {
-	g_err = G_state::set_up_on_startup();
-	
+	G_state::Error set_up_error = G_state::set_up_on_startup();
+	if ((int) set_up_error.type > 100) { // Fatal
+		assert(Client::data_thread_error_queue.size() <= 1);
+		
+		Client::Data_thread_error_status new_status = {false, set_up_error};
+		Client::data_thread_error_queue.push_back(new_status);
+		
+		exit(1);
+	}
+
 	G_state::update_state();
 	std::cout << "Done setting up. \n" << std::endl;
 
@@ -39,7 +44,8 @@ int main() {
 
 		G_state::Error err = G_state::update_state();
 		if (err.type != G_state::Error_type::ok) {
-			handle_global_err(&err);
+			assert(false); 
+			// NOTE(damian): at this moment (June 24 2025), there are no fatal erros that might take place at datathread runtime.
 		}
 
 		// Getting the first command has not yet been handled
@@ -74,11 +80,6 @@ int main() {
 	return 0;
 }
 
-void handle_global_err(G_state::Error* err) {
-
-
-
-}
 
 
 

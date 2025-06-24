@@ -15,13 +15,18 @@ namespace Client {
     SOCKET client_socket   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
     bool   need_new_client = true;
 
+    list<Data_thread_error_status> data_thread_error_queue;
+    
     static json create_json_from_tree_node(Process_node* root);
 
     static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
     static void free_process_tree  (vector<Process_node*>* roots);
     static void free_tree_memory   (Process_node* root);
 
-    static std::optional<G_state::Error> maybe_error = std::nullopt;
+    static Data_thread_error_status* error_request_p = nullptr;
+
+    static void create_responce(G_state::Error* err, json* data, json* responce);
+    static void create_responce_for_invalid(json* responce); // TODO(damian): dont like this, 1 func should be able to handle both valid and invalid commands.
 
     void client_thread() {
         while (running) {
@@ -56,9 +61,8 @@ namespace Client {
             auto p_to_error    = Client::data_thread_error_queue.begin(); 
             for (; p_to_error != Client::data_thread_error_queue.end(); ) {
                 if (!p_to_error->handled) {
-                    maybe_error = p_to_error->error; // TODO: maybe move here
-                    p_to_error->handled = true; // TODO(damian): hate it here, but fine.
-                    ++p_to_error; 
+                    error_request_p = &(*p_to_error); // TODO: maybe move here
+                    break;
                 }
                 else {
                     p_to_error = Client::data_thread_error_queue.erase(p_to_error);
@@ -85,9 +89,13 @@ namespace Client {
             // Parsing the request.
             std::pair<Request, bool> result = request_from_json(receive_buffer);
             if (!result.second) {
-                // TODO(damian): handle the invalid command responce better.
-                const char* message = "Invalid request";
-                int send_err_code   = send(client_socket, message, strlen(message), NULL);
+                
+                json responce;
+                create_responce_for_invalid(&responce);
+
+                string messege = std::move(responce.dump(4));
+
+                int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
                 if (send_err_code == SOCKET_ERROR) {
                     Client::handle_socker_error();
                 }
@@ -109,7 +117,8 @@ namespace Client {
                     Client::handle_quit(quit);
                 }
                 else if (shutdown != nullptr) {
-                    Client::handle_shutdown(shutdown);
+                    assert(false);
+                    // Client::handle_shutdown(shutdown);
                 } 
                 else if (track != nullptr) {
                     Client::handle_track(track);
@@ -132,8 +141,10 @@ namespace Client {
 
             }
 
-
-            Client::maybe_error.reset();
+            if (error_request_p) {
+                error_request_p->handled = true;
+                error_request_p          = nullptr;
+            }
 
             // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
         }
@@ -153,6 +164,14 @@ namespace Client {
         std::cout << "err_code: " << WSAGetLastError() << std::endl;
         closesocket(Client::client_socket);
         Client::need_new_client = true;
+    }
+
+    static void create_responce_for_invalid(json* responce) {
+        (*responce)["err_code"] = -1;
+        (*responce)["data"]     = json::object(); // TODO(damian): move this bitch.  
+        (*responce)["messege"]  = "";
+
+        // TODO(damian): take care of not starting the loop again if a fatal one occurs.
     }
 
     static void create_responce(G_state::Error* err, json* data, json* responce) {
@@ -188,7 +207,7 @@ namespace Client {
         j_data["tracked"]          = j_tracked;
         j_data["currently_active"] = j_cur_active;
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &j_data, &responce);
 
@@ -204,7 +223,7 @@ namespace Client {
     void handle_quit(Quit_request* quit) {
         json j_data = json::object();
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{ G_state::Error_type::ok });
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &j_data, &responce);
 
@@ -222,28 +241,29 @@ namespace Client {
         Client::need_new_client = true;
     }
 
-    void handle_shutdown(Shutdown_request* shutdown) {
-        json j_data = json::object();
+    // NOTE(damian): dont know if we even need this.
+    //void handle_shutdown(Shutdown_request* shutdown) {
+    //    json j_data = json::object();
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{ G_state::Error_type::ok });
-        json responce;
-        create_responce(&err, &j_data, &responce);
+    //    G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
+    //    json responce;
+    //    create_responce(&err, &j_data, &responce);
 
-        std::string message = responce.dump(4);
+    //    std::string message = responce.dump(4);
 
-        int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
-        if (send_err_code == SOCKET_ERROR) {
-            Client::handle_socker_error(); 
-        }
+    //    int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
+    //    if (send_err_code == SOCKET_ERROR) {
+    //        Client::handle_socker_error(); 
+    //    }
 
-        closesocket(Client::client_socket);
+    //    closesocket(Client::client_socket);
 
-        // TODO(damian): make sure new messages dont come in.
+    //    // TODO(damian): make sure new messages dont come in.
 
-        std::cout << "Message handling: " << message << "\n" << std::endl;
-        
-        Client::running = false;
-    }
+    //    std::cout << "Message handling: " << message << "\n" << std::endl;
+    //    
+    //    Client::running = false;
+    //}
 
     void handle_track(Track_request* track) {
         Request request = {};
@@ -257,7 +277,7 @@ namespace Client {
 
         json j_data; // Nothing inside data json part for this request.
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &j_data, &responce);
 
@@ -281,7 +301,7 @@ namespace Client {
 
         json j_data; // Nothing inside data json part for this request.
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &j_data, &responce);
 
@@ -321,7 +341,7 @@ namespace Client {
        j_data["tracked"] = j_tracked;
        j_data["active"]  = j_roots;
 
-       G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+       G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
        json responce;
        create_responce(&err, &j_data, &responce);
 
@@ -352,7 +372,7 @@ namespace Client {
            
 		G_state::System_info::up_time = sys_time;
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &system_json, &responce);
 
@@ -419,7 +439,7 @@ namespace Client {
         j_data["tracked"] = j_tracked;
         j_data["apps"]    = j_apps;
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &j_data, &responce);
 

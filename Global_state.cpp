@@ -20,7 +20,7 @@ namespace Client {
         bool handled;
         G_state::Error error;
     };
-    std::list<Data_thread_error_status> data_thread_error_queue;
+    extern std::list<Data_thread_error_status> data_thread_error_queue;
 }
 
 

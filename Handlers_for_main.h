@@ -38,7 +38,7 @@ namespace Client {
 
     extern void handle_report          (Report_request*           request);
     extern void handle_quit            (Quit_request*             request);
-    extern void handle_shutdown        (Shutdown_request*         request);
+    //extern void handle_shutdown        (Shutdown_request*         request);
     extern void handle_track           (Track_request*            request);
     extern void handle_untrack         (Untrack_request*          request);
     extern void handle_grouped_report  (Grouped_report_request*   request);
