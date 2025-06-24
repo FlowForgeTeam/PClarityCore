@@ -14,7 +14,6 @@ namespace Client {
     bool   running         = true;
     SOCKET client_socket   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
     bool   need_new_client = true;
-    string error_message   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
 
     static json create_json_from_tree_node(Process_node* root);
 
@@ -133,7 +132,8 @@ namespace Client {
 
             }
 
-            assert(!maybe_error.has_value());
+
+            Client::maybe_error.reset();
 
             // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
         }
@@ -191,7 +191,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
         json responce;
         create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
 
@@ -208,7 +207,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{ G_state::Error_type::ok });
         json responce;
         create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
 
@@ -230,7 +228,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{ G_state::Error_type::ok });
         json responce;
         create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
 
         std::string message = responce.dump(4);
 
@@ -263,7 +260,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
         json responce;
         create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
         int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
@@ -288,7 +284,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
         json responce;
         create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
         int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
@@ -329,7 +324,6 @@ namespace Client {
        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
        json responce;
        create_responce(&err, &j_data, &responce);
-       Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
 
@@ -361,7 +355,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
         json responce;
         create_responce(&err, &system_json, &responce);
-        Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
 
@@ -429,7 +422,6 @@ namespace Client {
         G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
         json responce;
         create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
 
         std::string message_as_str = responce.dump(4);
 

@@ -185,6 +185,7 @@ namespace G_state {
             return false;
         }
         else {
+
             return true;
             // Nothing to do here, everything is all fucked up alredy.
             // This will be handled up above by main thread.
