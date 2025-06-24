@@ -5,6 +5,7 @@
 // NOTE(damian): std::wstring is used here insted a regular UTF-8 std::string, 
 //               since in c++ std::wstring is mosly used for compatability with legacy code, like WindowsOS.
 
+// TODO(damian): this is not yet used at all, remove if not used.
 void get_all_files_for_path(vector<wstring>* list, fs::path& path, const char* extention) {
     std::error_code error_code;
     for (auto dir_entry : fs::directory_iterator(path, error_code)) {

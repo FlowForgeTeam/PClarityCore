@@ -20,7 +20,7 @@ namespace Client {
 
     static json create_json_from_tree_node(Process_node* root);
 
-    static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
+    //static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
     static void free_process_tree  (vector<Process_node*>* roots);
     static void free_tree_memory   (Process_node* root);
 
@@ -134,13 +134,16 @@ namespace Client {
                     Client::handle_untrack(untrack);
                 }
                 else if (grouped_report != nullptr) {
-                    Client::handle_grouped_report(grouped_report);
+                    assert(false);
+                    //Client::handle_grouped_report(grouped_report);
                 }
                 else if (pc_time != nullptr) {
-                    Client::handle_pc_time(pc_time);
+                    assert(false);
+                    //Client::handle_pc_time(pc_time);
                 }
                 else if (apps_only != nullptr) {
-                    Client::handle_report_apps_only(apps_only);
+                    assert(false);
+                    //Client::handle_report_apps_only(apps_only);
                 }
                 else {
                     assert(false);
@@ -208,7 +211,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+        std::string message_as_str = responce.dump(4);
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -225,7 +228,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+        std::string message_as_str = responce.dump(4);
 
         int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -247,7 +250,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message = responce.dump(4) + "<< END_OF_MESSAGE >>";
+        std::string message = responce.dump(4);
 
         int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
@@ -280,7 +283,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+        std::string message_as_str = responce.dump(4);
         int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
             Client::handle_socker_error(); 
@@ -305,7 +308,7 @@ namespace Client {
         create_responce(&err, &j_data, &responce);
         Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+        std::string message_as_str = responce.dump(4);
         int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
         if (send_err_code == SOCKET_ERROR) {
             Client::handle_socker_error(); 
@@ -313,52 +316,52 @@ namespace Client {
 
     }
 
-    void handle_grouped_report(Grouped_report_request* report) {
-        assert(!G_state::Client_data::need_data);            
+    //void handle_grouped_report(Grouped_report_request* report) {
+    //    assert(!G_state::Client_data::need_data);            
 
-        G_state::Client_data::need_data = true;
+    //    G_state::Client_data::need_data = true;
 
-        while(G_state::Client_data::need_data);    
+    //    while(G_state::Client_data::need_data);    
 
-        assert(G_state::Client_data::maybe_data.has_value());
+    //    assert(G_state::Client_data::maybe_data.has_value());
 
-        G_state::Client_data::Data* data = &G_state::Client_data::maybe_data.value();
+    //    G_state::Client_data::Data* data = &G_state::Client_data::maybe_data.value();
 
-        vector<json> j_tracked;
-        for (Process_data& data : data->copy_tracked_processes) {
-            json j_data;
-            convert_to_json(&data, &j_data);
-            j_tracked.push_back(j_data);
-        }
+    //    vector<json> j_tracked;
+    //    for (Process_data& data : data->copy_tracked_processes) {
+    //        json j_data;
+    //        convert_to_json(&data, &j_data);
+    //        j_tracked.push_back(j_data);
+    //    }
 
-        vector<Process_node*> roots;
-        create_process_tree(&roots, &data->copy_currently_active_processes);
+    //    vector<Process_node*> roots;
+    //    create_process_tree(&roots, &data->copy_currently_active_processes);
 
-        vector<json> j_roots;
-        for (Process_node* root : roots) { 
-            j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
-        }
+    //    vector<json> j_roots;
+    //    for (Process_node* root : roots) { 
+    //        j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
+    //    }
 
-        json j_data;
-        j_data["tracked"] = j_tracked;
-        j_data["active"]  = j_roots;
+    //    json j_data;
+    //    j_data["tracked"] = j_tracked;
+    //    j_data["active"]  = j_roots;
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
-        json responce;
-        create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
+    //    G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+    //    json responce;
+    //    create_responce(&err, &j_data, &responce);
+    //    Client::maybe_error.reset();
 
-         std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+    //     std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
-        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
-        if (send_err_code == SOCKET_ERROR) {
-            Client::handle_socker_error(); 
-        }
+    //    int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+    //    if (send_err_code == SOCKET_ERROR) {
+    //        Client::handle_socker_error(); 
+    //    }
 
-        free_process_tree(&roots);
-    }
+    //    free_process_tree(&roots);
+    //}
 
-    void handle_pc_time(Pc_time_request* request) {
+    /*void handle_pc_time(Pc_time_request* request) {
         json system_json;
         long long sys_time = GetTickCount64();
 
@@ -387,124 +390,124 @@ namespace Client {
             Client::handle_socker_error();                
         }
 
-    }
+    }*/
 
-    void handle_report_apps_only(Report_apps_only_request* report_apps_only) {
-        assert(!G_state::Client_data::need_data);
+    //void handle_report_apps_only(Report_apps_only_request* report_apps_only) {
+    //    assert(!G_state::Client_data::need_data);
 
-        // Telling the data thread to produce a copy of thread safe data for us to use 
-        G_state::Client_data::need_data = true;
-        while(G_state::Client_data::need_data);         
+    //    // Telling the data thread to produce a copy of thread safe data for us to use 
+    //    G_state::Client_data::need_data = true;
+    //    while(G_state::Client_data::need_data);         
 
-        vector<json> j_tracked;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
-            json temp;
-            convert_to_json(&data, &temp);
-            j_tracked.push_back(temp);
-        }
+    //    vector<json> j_tracked;
+    //    for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+    //        json temp;
+    //        convert_to_json(&data, &temp);
+    //        j_tracked.push_back(temp);
+    //    }
 
-        bool is_set = false;
-        DWORD explorer_pid = 0;
-        
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
-            if (!data.data.has_value()) continue;
-            if (data.data.value().exe_name == "explorer.exe") {
-                explorer_pid = data.data.value().pid;
-                is_set = true;
-                break;
-            }
-        }
+    //    bool is_set = false;
+    //    DWORD explorer_pid = 0;
+    //    
+    //    for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+    //        if (!data.data.has_value()) continue;
+    //        if (data.data.value().exe_name == "explorer.exe") {
+    //            explorer_pid = data.data.value().pid;
+    //            is_set = true;
+    //            break;
+    //        }
+    //    }
 
-        if (!is_set) {
-            for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
-                if (!data.data.has_value()) continue;
-                if (data.data.value().exe_name == "explorer.exe") {
-                    explorer_pid = data.data.value().pid;
-                    is_set = true;
-                    break;
-                }
-            }
-        }
+    //    if (!is_set) {
+    //        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+    //            if (!data.data.has_value()) continue;
+    //            if (data.data.value().exe_name == "explorer.exe") {
+    //                explorer_pid = data.data.value().pid;
+    //                is_set = true;
+    //                break;
+    //            }
+    //        }
+    //    }
 
-        vector<json> j_apps;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
-            if (!data.data.has_value()) continue;
-            if (data.data.value().ppid == explorer_pid) {
-                json temp;
-                convert_to_json(&data, &temp);
-                j_apps.push_back(temp);
-            }
-        }
+    //    vector<json> j_apps;
+    //    for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+    //        if (!data.data.has_value()) continue;
+    //        if (data.data.value().ppid == explorer_pid) {
+    //            json temp;
+    //            convert_to_json(&data, &temp);
+    //            j_apps.push_back(temp);
+    //        }
+    //    }
 
-        json j_data;
-        j_data["tracked"] = j_tracked;
-        j_data["apps"]    = j_apps;
+    //    json j_data;
+    //    j_data["tracked"] = j_tracked;
+    //    j_data["apps"]    = j_apps;
 
-        G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
-        json responce;
-        create_responce(&err, &j_data, &responce);
-        Client::maybe_error.reset();
+    //    G_state::Error err = maybe_error.value_or(G_state::Error{G_state::Error_type::ok});
+    //    json responce;
+    //    create_responce(&err, &j_data, &responce);
+    //    Client::maybe_error.reset();
 
-        std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
+    //    std::string message_as_str = responce.dump(4) + "<< END_OF_MESSAGE >>";
 
-        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
-        if (send_err_code == SOCKET_ERROR) {
-            Client::handle_socker_error();                
-        }
+    //    int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+    //    if (send_err_code == SOCKET_ERROR) {
+    //        Client::handle_socker_error();                
+    //    }
 
-    }
+    //}
 
 
     // == Helpers ========================================================
 
-    static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data) {
-        // NOTE(damian): only handling active processes, since they have a hierarchy.
-        //               tracked once are provided by the data thread, 
-        //               but will be jsoned inside the client thread into a single json list.  
+    //static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data) {
+    //    // NOTE(damian): only handling active processes, since they have a hierarchy.
+    //    //               tracked once are provided by the data thread, 
+    //    //               but will be jsoned inside the client thread into a single json list.  
 
-        unordered_map<DWORD, Process_node*> tree;
+    //    unordered_map<DWORD, Process_node*> tree;
 
-        // TODO(damian): dont like .value() here inside the loops. It also might throw.
+    //    // TODO(damian): dont like .value() here inside the loops. It also might throw.
 
-        for (Process_data& process : *data) {
-            Process_node* new_node = new Process_node{ &process, vector<Process_node*>() };
-            if (new_node == NULL) {
-                // TODO(damian): handle better.
-                assert(false);
-            }
+    //    for (Process_data& process : *data) {
+    //        Process_node* new_node = new Process_node{ &process, vector<Process_node*>() };
+    //        if (new_node == NULL) {
+    //            // TODO(damian): handle better.
+    //            assert(false);
+    //        }
 
-            if (!process.data.has_value()) {
-               assert(false);
-            }
-            tree[process.data.value().pid] = new_node;
-        }
+    //        if (!process.data.has_value()) {
+    //           assert(false);
+    //        }
+    //        tree[process.data.value().pid] = new_node;
+    //    }
 
-        // Fill the tree up with current data
-        for (Process_data& process : *data) {
-            auto process_node = tree.find(process.data.value().pid);
-            if (process_node == tree.end()) {
-                // TODO(damian): handle better.
-                assert(false); // This cant happend.
-            };
+    //    // Fill the tree up with current data
+    //    for (Process_data& process : *data) {
+    //        auto process_node = tree.find(process.data.value().pid);
+    //        if (process_node == tree.end()) {
+    //            // TODO(damian): handle better.
+    //            assert(false); // This cant happend.
+    //        };
 
-            auto parent_node = tree.find(process.data.value().ppid);
-            if (parent_node == tree.end()) continue;
-            // Its ok, some processes dont have parents. 
+    //        auto parent_node = tree.find(process.data.value().ppid);
+    //        if (parent_node == tree.end()) continue;
+    //        // Its ok, some processes dont have parents. 
 
-            parent_node->second->child_processes_nodes.push_back(process_node->second);
-        }
+    //        parent_node->second->child_processes_nodes.push_back(process_node->second);
+    //    }
 
-        // Finding root processes
-        for (auto& pair : tree) {
-            Process_node* node = pair.second;
-            DWORD ppid = node->process->data.value().ppid;
+    //    // Finding root processes
+    //    for (auto& pair : tree) {
+    //        Process_node* node = pair.second;
+    //        DWORD ppid = node->process->data.value().ppid;
 
-            auto it = tree.find(ppid);
-            if (it == tree.end()) { // Not found
-                roots->push_back(node);
-            }
-        }
-    }
+    //        auto it = tree.find(ppid);
+    //        if (it == tree.end()) { // Not found
+    //            roots->push_back(node);
+    //        }
+    //    }
+    //}
 
     static void free_process_tree(vector<Process_node*>* roots) {
         // Freeing the dyn allocated memory

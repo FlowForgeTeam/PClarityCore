@@ -5,74 +5,63 @@
 #include <utility>
 #include <string>
 #include <vector>
+#include <optional>
+#include <filesystem>
 #include <nlohmann/json.hpp>
 
-using std::pair, std::tuple;
+#include "Get_process_exe_icon.h"
+
+using std::tuple;
 using std::string, std::vector;
+using std::optional;
 using json = nlohmann::json;
 
-// TODO(damian): see is any of these are not used, if so, remove them.
-enum class Win32_error {
-    ok,
+namespace fs = std::filesystem;
 
-    EnumProcess_buffer_too_small,
-    EnumProcesses_failed,
-    OpenProcess_failed,
-    EnumProcessModules_failed,
-    GetModuleFileNameExW_failed,
-    GetModuleFileNameExW_buffer_too_small,
-    QueryFullProcessImageNameW,
+struct Win32_snapshot_data {
+    DWORD   pid;
+    DWORD   started_threads;
+    DWORD   ppid;
+    LONG    base_priority;
+    string  exe_name;
+};
 
-    CreateToolhelp32Snapshot_failed,
-    Process32First_failed,
-    Module32First_failed,
+struct Win32_process_times {
+    ULONGLONG creation_time;  
+    ULONGLONG exit_time;          
+    ULONGLONG kernel_time;    
+    ULONGLONG user_time;
+};
 
-    win32_GetRam_failed,
+struct Win32_system_times {
+    ULONGLONG idle_time;
+    ULONGLONG kernel_time;
+    ULONGLONG user_time;
+};
+
+struct Win32_affinities {
+    SIZE_T process_affinity;
+    SIZE_T system_affinity;
 };
 
 struct Win32_process_data {
-    DWORD      pid;
-    DWORD      started_threads;
-    DWORD      ppid;
-    LONG       base_priority;
-    string     exe_name;
-
-    string exe_path;
-
-    string product_name;
-
-    DWORD priority_class;
-
-    ULONGLONG process_creation_time;  
-    ULONGLONG process_exit_time;          
-    ULONGLONG process_kernel_time;    
-    ULONGLONG process_user_time;    
-
-    ULONGLONG system_idle_time;
-    ULONGLONG system_kernel_time;
-    ULONGLONG system_user_time;
-
-    SIZE_T process_affinity;
-    SIZE_T system_affinity;
-
-    SIZE_T ram_usage;
-
-    bool has_image;
-
+    Win32_snapshot_data             snapshot;
+    string                          exe_path;
+    optional<string>                product_name;
+    optional<DWORD>                 priority_class;
+    Win32_process_times             process_times;
+    optional<Win32_affinities>      affinities;
+    optional<SIZE_T>                ram_usage;
+    bool                            has_image;
 };
+
+
+tuple<vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data();
 
 void wchar_to_utf8(WCHAR* wstr, string* str);
 
-pair<vector<Win32_process_data>, Win32_error> win32_get_process_data();
-
-tuple<WCHAR*, bool, DWORD, Win32_error>win32_get_path_for_process(HANDLE process_handle, 
-                                                                  WCHAR* stack_buffer, 
-                                                                  size_t stack_buffer_len);
-
 bool SaveIconToPath(PBYTE icon, DWORD buf, string* output_path);
 bool FileExists    (string* path);
-
-bool win32_is_process_an_app(HANDLE process_handle, Win32_process_data* data);
 
 // =============================================================================================
 

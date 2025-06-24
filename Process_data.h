@@ -15,33 +15,6 @@ using std::optional;
 
 struct Session;
 
-struct Times {
-    ULONGLONG process_creation_time;
-    ULONGLONG process_exit_time;
-    ULONGLONG process_kernel_time;
-    ULONGLONG process_user_time;
-    
-    ULONGLONG system_idle_time;
-    ULONGLONG system_kernel_time;
-    ULONGLONG system_user_time;
-};
-
-struct Regular_data {
-    DWORD     pid;
-    DWORD     started_threads;
-    DWORD     ppid;
-    LONG      base_priority;
-    string    exe_name;
-    string    product_name;
-
-    DWORD     priority_class;
-    
-    SIZE_T    process_affinity;
-    SIZE_T    system_affinity;
-    
-    SIZE_T    ram_usage;
-};
-
 class Process_data {
 
 public:
@@ -54,13 +27,19 @@ public:
     optional<std::chrono::steady_clock::time_point> steady_start;
     optional<std::chrono::system_clock::time_point> system_start;
 
-    // Data
-    optional<Regular_data> data;
+    // Regular data
+    optional<Win32_snapshot_data>  snapshot;
+    optional<string>               product_name;
+    optional<DWORD>                priority_class;
+    optional<Win32_process_times> process_times;
+    optional<Win32_affinities>     affinities;
+    optional<SIZE_T>               ram_usage;
+    bool                           has_image;
 
     // Special data, might have different update patterns and stuff
-    string          exe_path;
-    optional<Times> times;
-    optional<float> cpu_usage;
+    string                         exe_path;
+    optional<Win32_process_times> times;
+    optional<float>                cpu_usage;
 
     Process_data(string exe_path);
     Process_data(Win32_process_data* win32_data);

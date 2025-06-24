@@ -35,13 +35,14 @@ namespace G_state {
 		trying_to_untrack_a_non_tracked_process         = 13,					 
 		no_csv_file_for_tracked_process                 = 14, 			
 		err_logs_file_was_not_present                   = 15, 
+		folder_for_process_icons_doesnt_exist 			= 16,
 
 		// Startup
 		startup_json_tracked_processes_file_parsing_failed    = 100,    
 		startup_json_tracked_processes_file_invalid_structure = 101, 
 
 		// TODO(damian): remove
-		// Network
+		// Network`
 		tcp_initialisation_failed, // Not on the data thread
 
 		// File system
@@ -80,6 +81,8 @@ namespace G_state {
 
 	// ===========================================================
 
+	// This is the data, created by update state, for the client to use thread safely. 
+	// The data is only created when it is requested via need_data bool flag.
 	namespace Client_data {
 		extern bool need_data;
 		struct Data {
@@ -89,6 +92,7 @@ namespace G_state {
 		extern optional<Data> maybe_data;
 	}
 
+	// This is global system data. 
 	namespace System_info {
 		extern long long up_time;
 		extern SYSTEMTIME system_time;

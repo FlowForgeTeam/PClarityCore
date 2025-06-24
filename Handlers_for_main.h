@@ -41,9 +41,9 @@ namespace Client {
     extern void handle_shutdown      (Shutdown_request* request);
     extern void handle_track         (Track_request*    request);
     extern void handle_untrack       (Untrack_request*  request);
-    extern void handle_grouped_report(Grouped_report_request* request);
-    extern void handle_pc_time       (Pc_time_request* request);
-    extern void handle_report_apps_only(Report_apps_only_request* request);
+    //extern void handle_grouped_report(Grouped_report_request* request);
+    //extern void handle_pc_time       (Pc_time_request* request);
+    //extern void handle_report_apps_only(Report_apps_only_request* request);
 
 }
 

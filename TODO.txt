@@ -1,7 +1,15 @@
--- Need optinals for Process_data.
--- Need a better code strcture and runtime ifs that would make sure 
-      if the expected data to be created 
-      for the client is actually created by the data thread.
+1. 
+-- Refactor
+-- DONE | Need optionalsd for Win32_process_data
+-- Need better handles for file creations on warning, to maku sure that there are less edge cases than needed
+-- Test if commands work
+-- Store icons folder name as const inside G_state
+-- Maybe ad a namesapce for G_state for constants
+-- See if the way client is forward declared inside G_state is the way to go
+
+2. 
+-- Better Session storage and calculations. 
+-- Handle untrack better, create tracked file if it is not present, also aff the curent tr5adkdin tehre 
 
 
 

@@ -1,3 +1,5 @@
 {
-    "process_paths_to_track": []
+    "process_paths_to_track": [
+        "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe"
+    ]
 }

@@ -32,7 +32,7 @@ int main() {
 
 	int n = 1;
 	while (Client::running) {
-		std::chrono::milliseconds sleep_length(500);
+		std::chrono::seconds sleep_length(2);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;

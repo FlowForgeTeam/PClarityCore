@@ -2,4 +2,4 @@
     "data": null,
     "err_code": 1,
     "messege": ""
-}<< END_OF_MESSAGE >>
+}
