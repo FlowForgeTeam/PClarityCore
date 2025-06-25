@@ -21,22 +21,6 @@ Process_data::Process_data(string exe_path) {
     this->cpu_usage    = std::nullopt;
 }
 
-// static void win32_data_to_regular_data(Win32_process_data* win32_data, Regular_data* reg_data) {
-//     reg_data->pid                  = win32_data->pid;
-//     reg_data->started_threads      = win32_data->started_threads;
-//     reg_data->ppid                 = win32_data->ppid;
-//     reg_data->base_priority        = win32_data->base_priority;
-//     reg_data->exe_name             = win32_data->exe_name;
-//     reg_data->product_name         = win32_data->product_name;
-
-//     reg_data->priority_class       = win32_data->priority_class;
-
-//     reg_data->process_affinity     = win32_data->process_affinity;
-//     reg_data->system_affinity      = win32_data->system_affinity;
-
-//     reg_data->ram_usage            = win32_data->ram_usage;
-// }
-
 Process_data::Process_data(Win32_process_data* win32_data) {
     this->is_tracked   = false;
     this->is_active    = false;

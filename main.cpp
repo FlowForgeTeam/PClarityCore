@@ -21,7 +21,7 @@
 
 int main() {
 	G_state::Error set_up_error = G_state::set_up_on_startup();
-	if ((int) set_up_error.type > 100) { // Fatal
+	if ((int) set_up_error.type >= 100) { // Fatal
 		assert(Client::data_thread_error_queue.size() <= 1);
 		
 		Client::Data_thread_error_status new_status = {false, set_up_error};

@@ -1,5 +1,5 @@
 {
-    "data": {},
-    "err_code": -1,
+    "data": null,
+    "err_code": 10,
     "messege": ""
 }

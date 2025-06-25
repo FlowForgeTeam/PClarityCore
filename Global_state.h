@@ -29,25 +29,33 @@ namespace G_state {
 		tracked_and_current_process_vectors_share_data, // NOTE(damian): Ttis is used with asserts right now
 
 		// State
-		file_with_tracked_processes_doesnt_exist        = 10,			
-		sessions_data_folder_doesnt_exist               = 11,					
-		trying_to_track_the_same_process_more_than_once = 12,	
-		trying_to_untrack_a_non_tracked_process         = 13,					 
-		no_csv_file_for_tracked_process                 = 14, 			
-		err_logs_file_was_not_present                   = 15, 
-		folder_for_process_icons_doesnt_exist 			= 16,
+		startup_file_with_tracked_processes_doesnt_exist        = 10,			
+		startup_sessions_folder_doesnt_exist                    = 11,					
+		trying_to_track_the_same_process_more_than_once         = 12,	
+		trying_to_untrack_a_non_tracked_process                 = 13,
 
+		startup_no_dir_for_specific_tracked_process				= 14,
+		startup_no_overall_csv_file_for_tracked_process			= 15,
+		startup_no_current_session_csv_file_for_tracked_process = 16,
+
+		startup_err_logs_file_was_not_present                   = 17, 
+		
+		folder_for_process_icons_doesnt_exist 			        = 18,
+
+		startup_invalid_values_inside_json					    = 19,
+
+		
 		// Startup
-		startup_json_tracked_processes_file_parsing_failed    = 100,    
-		startup_json_tracked_processes_file_invalid_structure = 101, 
+		startup_json_tracked_processes_file_parsing_failed      = 100,    
+		startup_json_tracked_processes_file_invalid_structure   = 101, 
+		
+		runtime_filesystem_is_all_fucked_up = 102,
+		
+		os_error = 103,
 
 		// TODO(damian): remove
 		// Network`
 		tcp_initialisation_failed, // Not on the data thread
-
-		// File system
-		error_reading_a_file, // TODO(damian): what do we do with this?
-		filesystem_error,	  // TODO(damian): what do we do with this?
 	};
 
 	struct Error {
@@ -59,13 +67,18 @@ namespace G_state {
 		~Error() = default;
 	};
 	
-	extern Error err;
+	//extern Error err;
 
 	// TODO(damian): move this out of here into their own separate namespace.
 	// == Constants =============================================
 	extern const char* path_file_error_logs;
 	extern const char* path_file_tracked_processes;
 	extern const char* path_dir_sessions;
+
+	extern const char* process_session_csv_file_heade;
+
+	extern const char* csv_file_name_for_overall_sessions_for_process;
+	extern const char* csv_file_name_for_current_session_for_process;
 	// ===========================================================
 
 	// == Data data ==============================================
