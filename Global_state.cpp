@@ -54,6 +54,116 @@ namespace G_state {
     
     static void convert_path_to_windows_filename(string* path_to_be_changed);
     
+    static Error write_new_session_to_csv(Session* session, Process_data* process) {
+        string process_path_copy = process->exe_path;
+        convert_path_to_windows_filename(&process_path_copy);
+
+        fs::path process_sessions_dir_path;
+        process_sessions_dir_path.append(G_state::path_dir_sessions);
+        process_sessions_dir_path.append(process_path_copy);
+
+        // Creating a file for history of sessions.
+        fs::path path_csv_overall = process_sessions_dir_path;
+        path_csv_overall.append(G_state::csv_file_name_for_overall_sessions_for_process);
+        path_csv_overall.replace_extension(".csv");
+
+        std::error_code err_1;
+        bool overall_exists = fs::exists(path_csv_overall, err_1);
+        if (err_1) { return Error(Error_type::os_error); }
+        if (!overall_exists) {
+            return Error(Error_type::startup_no_overall_csv_file_for_tracked_process);
+        }
+
+        std::fstream csv_overall_file(path_csv_overall, std::ios::app);
+        if (!csv_overall_file.is_open()) { return Error(Error_type::os_error); }
+        csv_overall_file <<
+            session->duration_sec.count() << ", " <<
+            session->system_start_time_in_seconds.count() << ", " <<
+            session->system_end_time_in_seconds.count() <<
+            '\n';
+        csv_overall_file.close();
+    } 
+
+    static Error handle_files_for_add_tracked(json* j_tracked, Process_data* process) {
+        // Checking if runtime file tree is ok
+        std::error_code err_1;
+        bool exists = fs::exists(G_state::path_file_tracked_processes, err_1);
+        if (err_1) { return Error(Error_type::os_error); }
+        if (!exists) {
+            return Error(Error_type::startup_file_with_tracked_processes_doesnt_exist);
+        }
+
+        std::fstream file_tracked(G_state::path_file_tracked_processes, std::ios::out);
+        if (file_tracked.is_open()) {
+            file_tracked << j_tracked->dump(4);
+            file_tracked.close();
+        } 
+        else { return Error(Error_type::os_error); }
+
+        // Creating a sessions folder for this process
+        string process_path_copy = process->exe_path;
+        convert_path_to_windows_filename(&process_path_copy);
+
+        fs::path path;
+        path.append(G_state::path_dir_sessions);
+
+        // Checking sessions dir
+        std::error_code err_2;
+        bool sessions_dir_exists = fs::exists(path, err_2);
+        if (err_2) { return Error(Error_type::os_error); }
+        if (!sessions_dir_exists) { return Error(Error_type::runtime_filesystem_is_all_fucked_up); } 
+
+        // Checking process specific sessions folder
+        path.append(std::move(process_path_copy));
+        std::error_code err_3;
+        bool new_process_specific_dir = fs::create_directories(path, err_3);
+        if (err_3) { return Error(Error_type::os_error); }
+
+        fs::path path_overall = path;
+        path_overall.append(G_state::csv_file_name_for_overall_sessions_for_process);
+        path_overall.replace_extension(".csv");
+
+        fs::path path_current = path;
+        path_current.append(G_state::csv_file_name_for_current_session_for_process);
+        path_current.replace_extension(".csv");
+
+        if (new_process_specific_dir) { 
+            // Creating history csv file
+            std::fstream file_overall(path_overall, std::ios::out);
+            if (file_overall.is_open()) {
+                file_overall << G_state::process_session_csv_file_header;
+                file_overall.close();
+            }
+            else { return Error(Error_type::os_error); }
+
+            // Creation current session csv file
+            std::fstream file_current(path_current, std::ios::out);
+            if (file_current.is_open()) {
+                file_current << G_state::process_session_csv_file_header;
+                file_current.close();
+            }
+            else { return Error(Error_type::os_error); }
+        }
+        else {
+            // Checking existance of history csv file.
+            std::error_code err_overall;
+            bool exists_overall = fs::exists(path_overall, err_overall);
+            if (err_overall) {return Error(Error_type::os_error); }
+            if (!exists_overall) {
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            }
+            
+            // Checking existance of current session csv file.
+            std::error_code err_current;
+            bool exists_current = fs::exists(path_current, err_current);
+            if (err_current) {return Error(Error_type::os_error); }
+            if (!exists_current) {
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            }
+
+        } 
+    }
+
     G_state::Error set_up_on_startup() {
         // Preparing string for error log file.
         // auto   now  = std::chrono::system_clock::now();
@@ -420,83 +530,7 @@ namespace G_state {
             }
             j_tracked["process_paths_to_track"] = paths;
 
-            // Checking if runtime file tree is ok
-            std::error_code err_1;
-            bool exists = fs::exists(G_state::path_file_tracked_processes, err_1);
-            if (err_1) { return Error(Error_type::os_error); }
-            if (!exists) {
-                return Error(Error_type::startup_file_with_tracked_processes_doesnt_exist);
-            }
-
-            std::fstream file_tracked(G_state::path_file_tracked_processes, std::ios::out);
-            if (file_tracked.is_open()) {
-                file_tracked << j_tracked.dump(4);
-                file_tracked.close();
-            } 
-            else { return Error(Error_type::os_error); }
-
-            // Creating a sessions folder for this process
-            string process_path_copy = new_process.exe_path;
-            convert_path_to_windows_filename(&process_path_copy);
-
-            fs::path path;
-            path.append(G_state::path_dir_sessions);
-            
-            // Checking sessions dir
-            std::error_code err_2;
-            bool sessions_dir_exists = fs::exists(path, err_2);
-            if (err_2) { return Error(Error_type::os_error); }
-            if (!sessions_dir_exists) { return Error(Error_type::runtime_filesystem_is_all_fucked_up); } 
-
-            // Checking process specific sessions folder
-            path.append(std::move(process_path_copy));
-            std::error_code err_3;
-            bool new_process_specific_dir = fs::create_directories(path, err_3);
-            if (err_3) { return Error(Error_type::os_error); }
-
-            fs::path path_overall = path;
-            path_overall.append(G_state::csv_file_name_for_overall_sessions_for_process);
-            path_overall.replace_extension(".csv");
-
-            fs::path path_current = path;
-            path_current.append(G_state::csv_file_name_for_current_session_for_process);
-            path_current.replace_extension(".csv");
-
-            if (new_process_specific_dir) { 
-                // Creating history csv file
-                std::fstream file_overall(path_overall, std::ios::out);
-                if (file_overall.is_open()) {
-                    file_overall << G_state::process_session_csv_file_header;
-                    file_overall.close();
-                }
-                else { return Error(Error_type::os_error); }
-
-                // Creation current session csv file
-                std::fstream file_current(path_current, std::ios::out);
-                if (file_current.is_open()) {
-                    file_current << G_state::process_session_csv_file_header;
-                    file_current.close();
-                }
-                else { return Error(Error_type::os_error); }
-            }
-            else {
-                // Checking existance of history csv file.
-                std::error_code err_overall;
-                bool exists_overall = fs::exists(path_overall, err_overall);
-                if (err_overall) {return Error(Error_type::os_error); }
-                if (!exists_overall) {
-                    return Error(Error_type::runtime_filesystem_is_all_fucked_up);
-                }
-                
-                // Checking existance of current session csv file.
-                std::error_code err_current;
-                bool exists_current = fs::exists(path_current, err_current);
-                if (err_current) {return Error(Error_type::os_error); }
-                if (!exists_current) {
-                    return Error(Error_type::runtime_filesystem_is_all_fucked_up);
-                }
-
-            } 
+            handle_files_for_add_tracked(&j_tracked, &new_process);
 
         } 
 
