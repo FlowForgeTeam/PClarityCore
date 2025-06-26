@@ -19,6 +19,7 @@ enum class Request_type {
     pc_time     = 6,
     report_apps_only = 7,
     tracked_only = 8,
+    change_update_time = 9,
 };
 
 struct Report_request {};
@@ -29,7 +30,7 @@ struct Shutdown_request {};
 
 struct Track_request { string path; };
 
-struct Untrack_request { string path;};
+struct Untrack_request { string path; };
 
 struct Grouped_report_request {};
 
@@ -38,6 +39,8 @@ struct Pc_time_request {};
 struct Report_apps_only_request {};
 
 struct Report_tracked_only {};
+
+struct Change_update_time { uint32_t duration_in_sec;  };
 
 struct Request {
     variant<Report_request,
@@ -48,7 +51,8 @@ struct Request {
             Grouped_report_request,
             Pc_time_request,
             Report_apps_only_request,
-            Report_tracked_only> variant; 
+            Report_tracked_only,
+            Change_update_time> variant; 
 };
 
 pair<Request_type, bool> request_type_from_int(int id);
@@ -62,6 +66,8 @@ pair<Request, bool> grouped_report(json* j);
 pair<Request, bool> pc_time       (json* j);
 pair<Request, bool> report_apps_only(json* j);
 pair<Request, bool> report_tracked_only(json* j);
+pair<Request, bool> change_update_time(json* j);
+
 
 
 

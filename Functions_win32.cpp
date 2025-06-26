@@ -7,10 +7,9 @@
 #include <cwchar>
 
 #include "Functions_win32.h"
+#include "Global_state.h"
 
 namespace fs = std::filesystem;
-
-const std::string default_icon_path = "Process_icons\\"; // TODO(damian): move into constants.
 
 // TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
 //               but if they dont, we would be better of getting some public info for the process, 
@@ -24,20 +23,19 @@ static tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE proces
                                                                           WCHAR* stack_buffer,
                                                                           size_t stack_buffer_len);
 
-tuple<vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data() {
+tuple<G_state::Error, vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data() {
     // TODO(damian): create a file and report that the file was not present via G_state responce.
     std::error_code err_code_0;
-    bool exists = std::filesystem::exists(default_icon_path, err_code_0);
+    bool exists = std::filesystem::exists(G_state::path_dir_process_icons, err_code_0);
     if (err_code_0) {
-        assert(false);
+        return tuple(G_state::Error(G_state::Error_type::os_error),
+            vector<Win32_process_data>(),
+            optional<Win32_system_times>());
     }
     if (!exists) {
-        assert(false);
-        /*std::error_code err_code_dir;
-        std::filesystem::create_directories(default_icon_path, err_code_dir);
-        if(err_code_dir) {
-            return tuple(vector<Win32_process_data>(), Win32_system_times{}, Error(Error_type::folder_for_process_icons_doesnt_exist));
-        }*/
+        return tuple(G_state::Error(G_state::Error_type::runtime_filesystem_is_all_fucked_up),
+            vector<Win32_process_data>(),
+            optional<Win32_system_times>());
     }
 
     // Take a snapshot of all processes in the system.
@@ -174,7 +172,7 @@ tuple<vector<Win32_process_data>, optional<Win32_system_times>> win32_get_proces
 
     optional<Win32_system_times> system_times = get_system_times();
 
-    return tuple(process_data_vec, system_times);
+    return tuple(G_state::Error(G_state::Error_type::ok), process_data_vec, system_times);
 }
 
 
@@ -224,8 +222,6 @@ bool FileExists(std::string& path) {
         !(fileAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-
-   
 // =============================================================================================
 
 tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE process_handle,
@@ -443,9 +439,18 @@ bool store_process_icon_image(Win32_process_data* data) {
     // NOTE(andrii): default_icon_path - the path to which the icons are saved.
     // The directory "icons" in the same directory by default
     if (!data->has_image) {
-        std::string icon_path = default_icon_path + data->snapshot.exe_name + ".ico";
+        fs::path icon_path;
+        icon_path.append(G_state::path_dir_process_icons);
+        
+        string process_path_copy = data->exe_path;
+        G_state::convert_path_to_windows_filename(&process_path_copy);
 
-        if (!FileExists(icon_path)) {
+        icon_path.append(process_path_copy);
+        icon_path.replace_extension(".ico");
+
+        string icon_path_as_str = icon_path.string();
+
+        if (!FileExists(icon_path_as_str)) {
             DWORD bufLen = 0;
             PBYTE icon = get_exe_icon_from_file_utf8(data->exe_path.c_str(), TRUE, &bufLen);
 
@@ -455,7 +460,7 @@ bool store_process_icon_image(Win32_process_data* data) {
             // }
 
             if (icon) {
-                if (!SaveIconToPath(icon, bufLen, icon_path)) {
+                if (!SaveIconToPath(icon, bufLen, icon_path_as_str)) {
                     //std::cerr << "Failed to save icon to path: " << icon_path << std::endl;
                 }
                 else {

@@ -40,17 +40,23 @@ namespace G_state {
 
 		startup_err_logs_file_was_not_present                   = 17, 
 		
-		folder_for_process_icons_doesnt_exist 			        = 18,
+		startup_folder_for_process_icons_doesnt_exist 			= 18,
 
 		startup_invalid_values_inside_json					    = 19,
+
+		startup_setting_file_doesnt_exists 						= 20,
 		
 		// Startup
 		startup_json_tracked_processes_file_parsing_failed      = 100,    
-		startup_json_tracked_processes_file_invalid_structure   = 101, 
+		startup_json_tracked_processes_file_invalid_structure   = 101,
 		
-		runtime_filesystem_is_all_fucked_up = 102,
+		startup_json_settings_file_parsing_failed      = 102,    
+		startup_json_settings_file_invalid_structure   = 103,
 		
-		os_error = 103,
+		startup_filesystem_is_all_fucked_up = 104,
+		runtime_filesystem_is_all_fucked_up = 105,
+		
+		os_error = 106,
 
 		// TODO(damian): remove
 		// Network`
@@ -73,8 +79,10 @@ namespace G_state {
 	extern const char* path_file_error_logs;
 	extern const char* path_file_tracked_processes;
 	extern const char* path_dir_sessions;
-
-	extern const char* process_session_csv_file_heade;
+	extern const char* path_dir_process_icons;
+	extern const char* path_file_settings; 
+	
+	extern const char* process_session_csv_file_header;
 
 	extern const char* csv_file_name_for_overall_sessions_for_process;
 	extern const char* csv_file_name_for_current_session_for_process;
@@ -90,6 +98,10 @@ namespace G_state {
 
 	extern G_state::Error add_process_to_track     (string *path);
 	extern G_state::Error remove_process_from_track(string *path);
+
+	extern G_state::Error update_settings_file(uint32_t n_sec);
+
+	extern void convert_path_to_windows_filename(string* path_to_be_changed);
 
 	// ===========================================================
 
@@ -112,6 +124,11 @@ namespace G_state {
 	namespace Dynamic_system_info {
 		extern long long up_time;
 		extern SYSTEMTIME system_time;
+	}
+
+	namespace Settings {
+		extern const uint32_t default_n_sec_between_updates;
+		extern       uint32_t n_sec_between_updates;
 	}
 
 }

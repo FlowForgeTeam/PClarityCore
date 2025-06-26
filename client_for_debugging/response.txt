@@ -1,26 +1,5 @@
 {
-    "data": {
-        "tracked": [
-            {
-                "base_priority": 8,
-                "cpu_usage": null,
-                "creation_time": 133953987926515572,
-                "exe_name": "chrome.exe",
-                "exe_path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-                "exit_time": 0,
-                "is_active": true,
-                "is_tracked": true,
-                "kernel_time": 110625000,
-                "pid": 9492,
-                "product_name": "Google Chrome",
-                "started_threads": 43,
-                "steady_start": 6371,
-                "system_start": 1750927847,
-                "user_time": 104218750,
-                "was_updated": false
-            }
-        ]
-    },
+    "data": null,
     "err_code": 1,
     "messege": ""
 }

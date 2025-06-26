@@ -37,7 +37,7 @@ int main() {
 
 	int n = 1;
 	while (Client::running) {
-		std::chrono::seconds sleep_length(2);
+		std::chrono::seconds sleep_length(G_state::Settings::n_sec_between_updates);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;
@@ -60,14 +60,19 @@ int main() {
 
 		// TODO(damian): why the fuck does main add new processes, g_state should be doing it when it updates its state. 
 		if (unhandled_found) {
-			Track_request*   track   = std::get_if<Track_request>  (&p_to_request->request.variant);
-			Untrack_request* untrack = std::get_if<Untrack_request>(&p_to_request->request.variant);
+			Track_request*      track       = std::get_if<Track_request>  (&p_to_request->request.variant);
+			Untrack_request*    untrack     = std::get_if<Untrack_request>(&p_to_request->request.variant);
+			Change_update_time* change_time = std::get_if<Change_update_time>(&p_to_request->request.variant);
+
 
 			if (track != nullptr) {
 				G_state::add_process_to_track(&track->path);
 			}
 			else if (untrack != nullptr) {
 				G_state::remove_process_from_track(&untrack->path);
+			}
+			else if (change_time != nullptr) {
+				G_state::update_settings_file(change_time->duration_in_sec);
 			}
 			else {
 				assert(false);

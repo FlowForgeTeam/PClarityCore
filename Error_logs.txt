@@ -1,1 +1,14 @@
-2025 June 26 (Thursday), (11:40) File for error logs didnt exists as was expected.
+2025 June 26 (Thursday), (13:12) File for error logs didnt exists as was expected.
+2025 June 26 (Thursday), (13:12) Folder with icons for processes wasnt present when was expected. New one was created.
+2025 June 26 (Thursday), (13:12) A folder for sessions was not pressesnt on startup, a new one was created.
+2025 June 26 (Thursday), (13:12) Sessions directory for a specific tracked process was not present at startup. New one was created.
+2025 June 26 (Thursday), (13:12) No sessions history csv file for a process was found on startup. New one was created.
+2025 June 26 (Thursday), (13:12) No current session csv file for a process was found on startup. New one was created.
+2025 June 26 (Thursday), (13:41) File with runtime settings was not present on startup. New one was created, default settings were used.
+2025 June 26 (Thursday), (13:43) A folder for sessions was not pressesnt on startup, a new one was created.
+2025 June 26 (Thursday), (13:43) Sessions directory for a specific tracked process was not present at startup. New one was created.
+2025 June 26 (Thursday), (13:43) No sessions history csv file for a process was found on startup. New one was created.
+2025 June 26 (Thursday), (13:43) No current session csv file for a process was found on startup. New one was created.
+2025 June 26 (Thursday), (13:45) File with runtime settings was not present on startup. New one was created, default settings were used.
+2025 June 26 (Thursday), (13:46) File with runtime settings was not present on startup. New one was created, default settings were used.
+2025 June 26 (Thursday), (14:08) File with runtime settings was not present on startup. New one was created, default settings were used.

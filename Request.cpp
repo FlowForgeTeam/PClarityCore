@@ -14,6 +14,7 @@ pair<Request_type, bool> request_type_from_int(int id) {
         case 6:  return pair(Request_type::pc_time,        true);
         case 7:  return pair(Request_type::report_apps_only, true);
         case 8:  return pair(Request_type::tracked_only, true);
+        case 9:  return pair(Request_type::change_update_time, true);
 
         default: return pair(Request_type::report,         false);
     }
@@ -38,6 +39,7 @@ pair<Request, bool> request_from_json(const char* json_as_c_str) {
         case Request_type::pc_time:          return pc_time(&j);
         case Request_type::report_apps_only: return report_apps_only(&j);
         case Request_type::tracked_only:     return report_tracked_only(&j);
+        case Request_type::change_update_time: return change_update_time(&j);
 
         default:                             return pair(Request(), false);
     }
@@ -116,6 +118,20 @@ pair<Request, bool> report_apps_only(json* j) {
 pair<Request, bool> report_tracked_only(json* j) {
     Request request = {};
     request.variant = Report_tracked_only{};
+
+    return pair(request, true);
+}
+
+pair<Request, bool> change_update_time(json* j) {
+    if (!j->contains("extra") || !(*j)["extra"].contains("update_time_sec") || !(*j)["extra"]["update_time_sec"].is_number_unsigned()) {
+        return pair(Request(), false);
+    }
+
+    Change_update_time change_time = {};
+    change_time.duration_in_sec = (*j)["extra"]["update_time_sec"];
+
+    Request request = {};
+    request.variant = change_time;
 
     return pair(request, true);
 }

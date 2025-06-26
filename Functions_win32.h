@@ -18,6 +18,11 @@ using json = nlohmann::json;
 
 namespace fs = std::filesystem;
 
+// Forward decl for a part of G_state namespace
+namespace G_state {
+    struct Error; 
+}
+
 struct Win32_snapshot_data {
     DWORD   pid;
     DWORD   started_threads;
@@ -55,13 +60,9 @@ struct Win32_process_data {
     bool                            has_image;
 };
 
-
-tuple<vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data();
+tuple<G_state::Error, vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data();
 
 void wchar_to_utf8(WCHAR* wstr, string* str);
-
-bool SaveIconToPath(PBYTE icon, DWORD buf, string* output_path);
-bool FileExists    (string* path);
 
 // =============================================================================================
 

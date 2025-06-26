@@ -72,6 +72,7 @@ namespace Client {
             const size_t receive_buffer_size = 512;
             char receive_buffer[receive_buffer_size];
 
+            // TODO(damian): see if this is not bad for performance.
             int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
             if (n_bytes_returned == SOCKET_ERROR) {
                 Client::handle_socker_error();
@@ -110,6 +111,7 @@ namespace Client {
                 Pc_time_request*          pc_time        = std::get_if<Pc_time_request>         (&result.first.variant);
                 Report_apps_only_request* apps_only      = std::get_if<Report_apps_only_request>(&result.first.variant);
                 Report_tracked_only*      tracked_only   = std::get_if<Report_tracked_only>(&result.first.variant);
+                Change_update_time*       change_time    = std::get_if<Change_update_time>(&result.first.variant);
 
                 if (report != nullptr) {
                     Client::handle_report(report);
@@ -138,6 +140,9 @@ namespace Client {
                 }
                 else if (tracked_only != nullptr) {
                     Client::handle_report_tracked_only(tracked_only);
+                }
+                else if (change_time != nullptr) {
+                    Client::handle_change_update_time(change_time);
                 }
                 else {
                     assert(false);
@@ -481,6 +486,31 @@ namespace Client {
             Client::handle_socker_error();
         }
     }
+
+    void handle_change_update_time(Change_update_time* update_time) {
+        Request request = {};
+        request.variant = *update_time;
+
+        Request_status status;
+        status.handled = false;
+        status.request = request;
+
+        Client::request_queue.push_back(status);
+
+        json j_data; // Nothing inside data json part for this request.
+
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{ G_state::Error_type::ok };
+        json responce;
+        create_responce(&err, &j_data, &responce);
+
+        std::string message_as_str = responce.dump(4);
+        int send_err_code = send(Client::client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error();
+        }
+    
+    }
+
 
 
     // == Helpers ========================================================

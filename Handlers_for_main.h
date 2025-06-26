@@ -45,6 +45,8 @@ namespace Client {
     extern void handle_pc_time         (Pc_time_request*          request);
     extern void handle_report_apps_only(Report_apps_only_request* request);
     extern void handle_report_tracked_only(Report_tracked_only* request);
+    extern void handle_change_update_time (Change_update_time* request);
+
 
       
 }
