@@ -58,6 +58,7 @@ int main() {
 			}
 		}
 
+		// TODO(damian): why the fuck does main add new processes, g_state should be doing it when it updates its state. 
 		if (unhandled_found) {
 			Track_request*   track   = std::get_if<Track_request>  (&p_to_request->request.variant);
 			Untrack_request* untrack = std::get_if<Untrack_request>(&p_to_request->request.variant);

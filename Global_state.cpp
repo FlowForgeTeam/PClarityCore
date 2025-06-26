@@ -84,6 +84,66 @@ namespace G_state {
         csv_overall_file.close();
     } 
 
+    static Error write_current_session_to_csv(Session* session, Process_data* process) {
+        string process_path_copy = process->exe_path;
+        convert_path_to_windows_filename(&process_path_copy);
+
+        fs::path process_sessions_dir_path;
+        process_sessions_dir_path.append(G_state::path_dir_sessions);
+        process_sessions_dir_path.append(process_path_copy);
+
+        // Creating a file for history of sessions.
+        fs::path path_csv_current = process_sessions_dir_path;
+        path_csv_current.append(G_state::csv_file_name_for_current_session_for_process);
+        path_csv_current.replace_extension(".csv");
+
+        std::error_code err_1;
+        bool current_exists = fs::exists(path_csv_current, err_1);
+        if (err_1) { return Error(Error_type::os_error); }
+        if (!current_exists) {
+            return Error(Error_type::startup_no_overall_csv_file_for_tracked_process);
+        }
+
+        std::fstream csv_current_file(path_csv_current, std::ios::out | std::ios::trunc);
+        if (!csv_current_file.is_open()) { return Error(Error_type::os_error); }
+        csv_current_file << G_state::process_session_csv_file_header;
+        csv_current_file <<
+            session->duration_sec.count() << ", " <<
+            session->system_start_time_in_seconds.count() << ", " <<
+            session->system_end_time_in_seconds.count() <<
+            '\n';
+        csv_current_file.close();
+
+        return Error(Error_type::ok);
+    }
+
+    static Error clear_current_session_csv(Process_data* process) {
+        string process_path_copy = process->exe_path;
+        convert_path_to_windows_filename(&process_path_copy);
+
+        fs::path process_sessions_dir_path;
+        process_sessions_dir_path.append(G_state::path_dir_sessions);
+        process_sessions_dir_path.append(process_path_copy);
+
+        // Creating a file for history of sessions.
+        fs::path path_csv_current = process_sessions_dir_path;
+        path_csv_current.append(G_state::csv_file_name_for_current_session_for_process);
+        path_csv_current.replace_extension(".csv");
+
+        std::error_code err_1;
+        bool current_exists = fs::exists(path_csv_current, err_1);
+        if (err_1) { return Error(Error_type::os_error); }
+        if (!current_exists) {
+            return Error(Error_type::startup_no_overall_csv_file_for_tracked_process);
+        }
+
+        std::fstream csv_current_file(path_csv_current, std::ios::out | std::ios::trunc);
+        if (!csv_current_file.is_open()) { return Error(Error_type::os_error); }
+        csv_current_file.close();
+
+        return Error(Error_type::ok);
+    }
+
     static Error handle_files_for_add_tracked(json* j_tracked, Process_data* process) {
         // Checking if runtime file tree is ok
         std::error_code err_1;
@@ -162,6 +222,7 @@ namespace G_state {
             }
 
         } 
+        return Error(Error_type::ok);
     }
 
     G_state::Error set_up_on_startup() {
@@ -248,7 +309,7 @@ namespace G_state {
         std::error_code err_3;
         bool newly_created = fs::create_directories(G_state::path_dir_sessions, err_3);
         if (err_3) { return Error(Error_type::os_error); }
-        if (!newly_created) {
+        if (newly_created) {
             // TODO(damian): white to logs.
             Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_sessions_folder_doesnt_exist)};
             Client::data_thread_error_queue.push_back(new_err_status);
@@ -267,7 +328,7 @@ namespace G_state {
             std::error_code err_4;
             bool newly_created = fs::create_directories(path, err_4);
             if (err_4) { return Error(Error_type::os_error); }
-            if (!newly_created) {
+            if (newly_created) {
                 // TODO(damian): white to logs.
                 Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_dir_for_specific_tracked_process)};
                 Client::data_thread_error_queue.push_back(new_err_status);
@@ -317,11 +378,13 @@ namespace G_state {
 
         }
 
+        // Setting up static system data
+        // ...
+
         return Error(Error_type::ok);
     }
 
     G_state::Error update_state() {
-
         tuple< vector<Win32_process_data>, 
                optional<Win32_system_times> > result = win32_get_process_data();
         vector<Win32_process_data>   processes    = std::get<0>(result);
@@ -353,7 +416,11 @@ namespace G_state {
                 if (!g_state_data.was_updated && g_state_data.compare_as_tracked(&win32_data)) {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
 
-                    g_state_data.update_active();
+                    std::pair<bool, Session> maybe_current_session = g_state_data.update_active();
+                    if (maybe_current_session.first) {
+                        write_current_session_to_csv(&maybe_current_session.second, &g_state_data);
+                    }
+
                     g_state_data.update_data(&win32_data);
                     is_tracked = true;
 
@@ -438,6 +505,8 @@ namespace G_state {
                     new_session.system_end_time_in_seconds.count() <<
                     '\n';
                 csv_overall_file.close();
+
+                clear_current_session_csv(&process_data);
             }
         }
 
@@ -448,8 +517,12 @@ namespace G_state {
         for (Process_data& process_data : G_state::tracked_processes) {
             process_data.was_updated = false;
         }
+
+        // Getting dynamic sysetem data
+        G_state::Dynamic_system_info::up_time = GetTickCount64();
+        GetSystemTime(&G_state::Dynamic_system_info::system_time);
     
-        // Creating data for the clint.
+        // Creating data for the client.
         if (G_state::Client_data::need_data) {
 
             G_state::Client_data::Data data = {};
@@ -530,7 +603,8 @@ namespace G_state {
             }
             j_tracked["process_paths_to_track"] = paths;
 
-            handle_files_for_add_tracked(&j_tracked, &new_process);
+            Error err = handle_files_for_add_tracked(&j_tracked, &new_process);
+            if (err.type != Error_type::ok) { return err;  }
 
         } 
 
@@ -601,7 +675,11 @@ namespace G_state {
 		optional<Data> maybe_data;
     }
 
-    namespace System_info {
+    namespace Static_system_info {
+        
+    }
+
+    namespace Dynamic_system_info {
         long long up_time      = 0;
         SYSTEMTIME system_time = {0};
     }

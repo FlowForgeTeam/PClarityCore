@@ -9,6 +9,8 @@ Process_data::Process_data(string exe_path) {
     this->steady_start = std::nullopt;
     this->system_start = std::nullopt;
 
+    this->last_time_session_was_created = std::nullopt;
+
     this->snapshot       = std::nullopt;
     this->product_name   = std::nullopt;
     this->priority_class = std::nullopt;
@@ -29,6 +31,8 @@ Process_data::Process_data(Win32_process_data* win32_data) {
     this->steady_start = std::nullopt;
     this->system_start = std::nullopt;
 
+    this->last_time_session_was_created = std::nullopt;
+
     this->snapshot       = win32_data->snapshot;
     this->product_name   = win32_data->product_name;
     this->priority_class = win32_data->priority_class;
@@ -42,22 +46,60 @@ Process_data::Process_data(Win32_process_data* win32_data) {
     this->cpu_usage = std::nullopt;
 }
 
+static Session create_session(Process_data* process) {
+    if (   !process->steady_start.has_value()
+        || !process->system_start.has_value()
+    ) {
+        assert(false);
+    }
+
+    std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - process->steady_start.value();
+    auto duration_sec = std::chrono::duration_cast<std::chrono::seconds>(duration);
+
+    auto start_time_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(process->system_start.value().time_since_epoch());
+    auto end_time_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
+
+    Session session(duration_sec, start_time_in_seconds, end_time_in_seconds);
+
+    return session;
+}
+
 // Updating a process as if its new state is active
-void Process_data::update_active() {
+std::pair<bool, Session> Process_data::update_active() {
+    this->was_updated = true;
+
     if (this->is_active == false) {
         this->is_active    = true;
         this->steady_start = std::chrono::steady_clock::now();
         this->system_start = std::chrono::system_clock::now();
+
+        this->last_time_session_was_created = std::chrono::steady_clock::now();
+
+        if (this->is_tracked) {
+            Session session = create_session(this);
+            return std::pair(true, session);
+        }
     } 
     else {
-        // Nothing here
-    }
+        if (this->last_time_session_was_created.has_value()) {
+            auto duration_ns = std::chrono::steady_clock::now().time_since_epoch() - this->last_time_session_was_created.value().time_since_epoch();
+            auto duration_s  = std::chrono::duration_cast<std::chrono::seconds>(duration_ns);
 
-    this->was_updated = true;
+            if (this->is_tracked && duration_s.count() > 10) {
+                this->last_time_session_was_created = std::chrono::steady_clock::now();
+
+                Session session = create_session(this);
+                return std::pair(true, session);
+            }
+        }
+    }
+    return std::pair(false, Session());
 }
 
 // Updating a process as if its new state is inactive
 std::pair<bool, Session> Process_data::update_inactive() {
+    this->was_updated = true;
+    
     if (this->is_active == true) {
         this->is_active = false;
         
@@ -68,23 +110,16 @@ std::pair<bool, Session> Process_data::update_inactive() {
                 assert(false);
             }
 
-            std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - this->steady_start.value();
-            auto duration_sec                 = std::chrono::duration_cast<std::chrono::seconds>(duration);
-
-            auto start_time_in_seconds = std::chrono::duration_cast<std::chrono::seconds>(this->system_start.value().time_since_epoch());
-            auto end_time_in_seconds   = std::chrono::duration_cast<std::chrono::seconds>(std::chrono::system_clock::now().time_since_epoch());
-
-            Session session(duration_sec, start_time_in_seconds, end_time_in_seconds);
+            Session session = create_session(this);
 
             return std::pair(true, session);
         }
     }
     else {
-        // Update nothing here
-        return std::pair(false, Session());
+        // Nothing here
     }
 
-    this->was_updated = true;
+    return std::pair(false, Session());
 }
 
 void Process_data::update_data(Win32_process_data* new_win32_data) {

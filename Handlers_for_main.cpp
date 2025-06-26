@@ -357,21 +357,18 @@ namespace Client {
 
     void handle_pc_time(Pc_time_request* request) {
         json system_json;
-        long long sys_time = GetTickCount64();
+        system_json["up_time_ms"] = G_state::Dynamic_system_info::up_time;
 
-        system_json["up_time"] = sys_time;
+        json j_time_utc;
+		j_time_utc["year"]   = G_state::Dynamic_system_info::system_time.wYear;
+        j_time_utc["month"]  = G_state::Dynamic_system_info::system_time.wMonth;
+        j_time_utc["day"]    = G_state::Dynamic_system_info::system_time.wDay;
+        j_time_utc["hour"]   = G_state::Dynamic_system_info::system_time.wHour;
+        j_time_utc["minute"] = G_state::Dynamic_system_info::system_time.wMinute;
+        j_time_utc["second"] = G_state::Dynamic_system_info::system_time.wSecond;
 
-        GetSystemTime(&G_state::System_info::system_time);
-
-		system_json["year"]     = G_state::System_info::system_time.wYear;
-        system_json["month"]    = G_state::System_info::system_time.wMonth;
-        system_json["day"]      = G_state::System_info::system_time.wDay;
-        system_json["hour"]     = G_state::System_info::system_time.wHour;
-        system_json["minute"]   = G_state::System_info::system_time.wMinute;
-        system_json["second"]   = G_state::System_info::system_time.wSecond;
+        system_json["system_time_utc"] = j_time_utc;
            
-		G_state::System_info::up_time = sys_time;
-
         G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
         json responce;
         create_responce(&err, &system_json, &responce);

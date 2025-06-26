@@ -1,5 +1,15 @@
 {
-    "data": null,
-    "err_code": 10,
+    "data": {
+        "system_time_utc": {
+            "day": 26,
+            "hour": 8,
+            "minute": 15,
+            "month": 6,
+            "second": 25,
+            "year": 2025
+        },
+        "up_time_ms": 4249125
+    },
+    "err_code": 1,
     "messege": ""
 }

@@ -27,6 +27,8 @@ public:
     optional<std::chrono::steady_clock::time_point> steady_start;
     optional<std::chrono::system_clock::time_point> system_start;
 
+    optional<std::chrono::steady_clock::time_point> last_time_session_was_created;
+
     // Regular data
     optional<Win32_snapshot_data>  snapshot;
     optional<string>               product_name;
@@ -44,7 +46,7 @@ public:
     Process_data(string exe_path);
     Process_data(Win32_process_data* win32_data);
 
-    void update_active();
+    std::pair<bool, Session> update_active();
     std::pair<bool, Session> update_inactive();
     void update_data(Win32_process_data* new_win32_data);
 

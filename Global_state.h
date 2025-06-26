@@ -106,7 +106,11 @@ namespace G_state {
 	}
 
 	// This is global system data. 
-	namespace System_info {
+	namespace Static_system_info {
+		
+	}
+
+	namespace Dynamic_system_info {
 		extern long long up_time;
 		extern SYSTEMTIME system_time;
 	}

@@ -6,9 +6,7 @@
     But since there might be other requests in the queue, need a way to prioritise the fatal one first.
 
 2. 
--- Better Session storage and calculations. 
--- Handle untrack better, create tracked file if it is not present, also aff the curent tr5adkdin tehre 
--- Global static data (System start time, overall ram ...)
+-- Global static data  (System start time, overall ram ...)
 -- Global dynamic data (Current cpu overall, current ram overall ...)
 -- Calculate cpu again for processes
 
