@@ -1,0 +1,1 @@
+2025 June 26 (Thursday), (11:40) File for error logs didnt exists as was expected.

@@ -13,6 +13,7 @@ pair<Request_type, bool> request_type_from_int(int id) {
         case 5:  return pair(Request_type::grouped_report, true);
         case 6:  return pair(Request_type::pc_time,        true);
         case 7:  return pair(Request_type::report_apps_only, true);
+        case 8:  return pair(Request_type::tracked_only, true);
 
         default: return pair(Request_type::report,         false);
     }
@@ -36,6 +37,8 @@ pair<Request, bool> request_from_json(const char* json_as_c_str) {
         case Request_type::grouped_report:   return grouped_report(&j);
         case Request_type::pc_time:          return pc_time(&j);
         case Request_type::report_apps_only: return report_apps_only(&j);
+        case Request_type::tracked_only:     return report_tracked_only(&j);
+
         default:                             return pair(Request(), false);
     }
 }
@@ -107,6 +110,13 @@ pair<Request, bool> report_apps_only(json* j) {
     Request request = {};
     request.variant = Report_apps_only_request{};
     
+    return pair(request, true);
+}
+
+pair<Request, bool> report_tracked_only(json* j) {
+    Request request = {};
+    request.variant = Report_tracked_only{};
+
     return pair(request, true);
 }
 

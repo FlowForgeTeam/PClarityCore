@@ -43,7 +43,6 @@ namespace G_state {
 		folder_for_process_icons_doesnt_exist 			        = 18,
 
 		startup_invalid_values_inside_json					    = 19,
-
 		
 		// Startup
 		startup_json_tracked_processes_file_parsing_failed      = 100,    

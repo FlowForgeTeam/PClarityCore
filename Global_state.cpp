@@ -225,14 +225,12 @@ namespace G_state {
         return Error(Error_type::ok);
     }
 
-    G_state::Error set_up_on_startup() {
-        // Preparing string for error log file.
-        // auto   now  = std::chrono::system_clock::now();
-        // time_t time = std::chrono::system_clock::to_time_t(now);
-        // tm     tm;
-        // int err_time = localtime_s(&tm, &time); 
-        // const char* log_message = (err_time == 0 ? "" : "");
-        // std::put_time(&tm, "%Y %B %d (%A), (%H:%M)");
+    static Error log_error(const char* err_message) {
+        // Getting time for the log message.
+        auto   now  = std::chrono::system_clock::now();
+        time_t time = std::chrono::system_clock::to_time_t(now);
+        tm     tm;
+        int err_time = localtime_s(&tm, &time); 
 
         // Checking if the error logs file exists.
         std::error_code err_1;
@@ -243,13 +241,26 @@ namespace G_state {
             if (!file.is_open()) {
                 return Error(Error_type::os_error);
             }
-            else {
-                // TODO(damian): white to logs.
-                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_err_logs_file_was_not_present)};
-                Client::data_thread_error_queue.push_back(new_err_status);
-            }
+            file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M) ") 
+                 << "File for error logs didnt exists as was expected."
+                 << "\n";
+            file.close();
         }
+        else {
+            std::fstream file(G_state::path_file_error_logs, std::ios::out | std::ios::app);
+            if (!file.is_open()) {
+                return Error(Error_type::os_error);
+            }
+            file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M) ") 
+                 << err_message
+                 << "\n";
+            file.close();
+        }
+    
+        return Error(Error_type::ok);
+    }
 
+    G_state::Error set_up_on_startup() {
         // Checking if the file with tracked processes exists.
         std::error_code err_2;
         bool tracked_exist = fs::exists(G_state::path_file_tracked_processes, err_2);
@@ -265,7 +276,9 @@ namespace G_state {
                 file << j.dump(4);
                 file.close();
 
-                // TODO(damian): white to logs.
+                Error err_on_log = log_error("File with a list of tracked processes didnt exists on startup. A new empty one was created.");
+                if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
                 Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_file_with_tracked_processes_doesnt_exist)};
                 Client::data_thread_error_queue.push_back(new_err_status);
             }
@@ -280,6 +293,9 @@ namespace G_state {
         json data_as_json;
         try { data_as_json = json::parse(text); }
         catch (...) {
+            Error err_on_log = log_error("Error when parsiong json file with tracked processes on startup. GG. App cant run if this is the case.");
+            if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
             Error err(Error_type::startup_json_tracked_processes_file_parsing_failed, text.c_str());
             return err;
         }
@@ -287,12 +303,18 @@ namespace G_state {
         vector<json> vector_of_j_tracked;
         try { vector_of_j_tracked = data_as_json["process_paths_to_track"]; }
         catch (...) { 
+            Error err_on_log = log_error("Error when reading tracked processes json, its structure was invalid. GG. App cant run if this is the case.");
+            if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
             Error err(Error_type::startup_json_tracked_processes_file_invalid_structure);
             return err;
         }
 
         for (json& j_path : vector_of_j_tracked) {
             if (!j_path.is_string()) {
+                Error err_on_log = log_error("Error when reading tracked processes json, its value were of a different type from ones that were expected. GG. App cant run if this is the case.");
+                if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
                 Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_invalid_values_inside_json)};
                 Client::data_thread_error_queue.push_back(new_err_status);
             }
@@ -310,7 +332,9 @@ namespace G_state {
         bool newly_created = fs::create_directories(G_state::path_dir_sessions, err_3);
         if (err_3) { return Error(Error_type::os_error); }
         if (newly_created) {
-            // TODO(damian): white to logs.
+            Error err_on_log = log_error("A folder for sessions was not pressesnt on startup, a new one was created.");
+            if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
             Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_sessions_folder_doesnt_exist)};
             Client::data_thread_error_queue.push_back(new_err_status);
         }
@@ -329,7 +353,9 @@ namespace G_state {
             bool newly_created = fs::create_directories(path, err_4);
             if (err_4) { return Error(Error_type::os_error); }
             if (newly_created) {
-                // TODO(damian): white to logs.
+                Error err_on_log = log_error("Sessions directory for a specific tracked process was not present at startup. New one was created.");
+                if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
                 Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_dir_for_specific_tracked_process)};
                 Client::data_thread_error_queue.push_back(new_err_status);
             }
@@ -349,7 +375,9 @@ namespace G_state {
                     file << G_state::process_session_csv_file_header;
                     file.close();
 
-                    // TODO(damian): white to logs.
+                    Error err_on_log = log_error("No sessions history csv file for a process was found on startup. New one was created.");
+                    if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
                     Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_overall_csv_file_for_tracked_process)};
                     Client::data_thread_error_queue.push_back(new_err_status);
                 }
@@ -370,7 +398,9 @@ namespace G_state {
                     file << G_state::process_session_csv_file_header;
                     file.close();
 
-                    // TODO(damian): white to logs.
+                    Error err_on_log = log_error("No current session csv file for a process was found on startup. New one was created.");
+                    if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
                     Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_current_session_csv_file_for_tracked_process)};
                     Client::data_thread_error_queue.push_back(new_err_status);
                 }
@@ -418,7 +448,8 @@ namespace G_state {
 
                     std::pair<bool, Session> maybe_current_session = g_state_data.update_active();
                     if (maybe_current_session.first) {
-                        write_current_session_to_csv(&maybe_current_session.second, &g_state_data);
+                        Error err = write_current_session_to_csv(&maybe_current_session.second, &g_state_data);
+                        if (err.type != Error_type::ok) { return err; }
                     }
 
                     g_state_data.update_data(&win32_data);
@@ -478,35 +509,11 @@ namespace G_state {
 
                 Session new_session = maybe_new_session.second;
 
-                string process_path_copy = process_data.exe_path;
-                convert_path_to_windows_filename(&process_path_copy);
+                Error err_1 = write_new_session_to_csv(&new_session, &process_data);
+                if (err_1.type != Error_type::ok) { return err_1; }
 
-                fs::path process_sessions_dir_path;
-                process_sessions_dir_path.append(G_state::path_dir_sessions);
-                process_sessions_dir_path.append(process_path_copy);
-
-                // Creating a file for history of sessions.
-                fs::path path_csv_overall = process_sessions_dir_path;
-                path_csv_overall.append(G_state::csv_file_name_for_overall_sessions_for_process);
-                path_csv_overall.replace_extension(".csv");
-
-                std::error_code err_1;
-                bool overall_exists = fs::exists(path_csv_overall, err_1);
-                if (err_1) { return Error(Error_type::os_error); }
-                if (!overall_exists) {
-                    return Error(Error_type::startup_no_overall_csv_file_for_tracked_process);
-                }
-
-                std::fstream csv_overall_file(path_csv_overall, std::ios::app);
-                if (!csv_overall_file.is_open()) { return Error(Error_type::os_error); }
-                csv_overall_file <<
-                    new_session.duration_sec.count() << ", " <<
-                    new_session.system_start_time_in_seconds.count() << ", " <<
-                    new_session.system_end_time_in_seconds.count() <<
-                    '\n';
-                csv_overall_file.close();
-
-                clear_current_session_csv(&process_data);
+                Error err_2 = clear_current_session_csv(&process_data);
+                if (err_2.type != Error_type::ok) { return err_2; }
             }
         }
 

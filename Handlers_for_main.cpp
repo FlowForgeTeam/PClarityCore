@@ -109,6 +109,7 @@ namespace Client {
                 Grouped_report_request*   grouped_report = std::get_if<Grouped_report_request>  (&result.first.variant);
                 Pc_time_request*          pc_time        = std::get_if<Pc_time_request>         (&result.first.variant);
                 Report_apps_only_request* apps_only      = std::get_if<Report_apps_only_request>(&result.first.variant);
+                Report_tracked_only*      tracked_only   = std::get_if<Report_tracked_only>(&result.first.variant);
 
                 if (report != nullptr) {
                     Client::handle_report(report);
@@ -134,6 +135,9 @@ namespace Client {
                 }
                 else if (apps_only != nullptr) {
                     Client::handle_report_apps_only(apps_only);
+                }
+                else if (tracked_only != nullptr) {
+                    Client::handle_report_tracked_only(tracked_only);
                 }
                 else {
                     assert(false);
@@ -447,6 +451,35 @@ namespace Client {
             Client::handle_socker_error();                
         }
 
+    }
+
+    void handle_report_tracked_only(Report_tracked_only* request) {
+        assert(!G_state::Client_data::need_data);
+
+        // Telling the data thread to produce a copy of thread safe data for us to use 
+        G_state::Client_data::need_data = true;
+        while (G_state::Client_data::need_data);
+
+        vector<json> j_tracked;
+        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+            json temp;
+            convert_to_json(&data, &temp);
+            j_tracked.push_back(temp);
+        }
+
+        json j_data;
+        j_data["tracked"] = j_tracked;
+
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{ G_state::Error_type::ok };
+        json responce;
+        create_responce(&err, &j_data, &responce);
+
+        std::string message_as_str = responce.dump(4);
+
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error();
+        }
     }
 
 
