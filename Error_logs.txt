@@ -3,3 +3,6 @@
 2025 June 27 (Friday), (10:51) Error when parsing json file with tracked processes on startup. GG. App cant run if this is the case.
 2025 June 27 (Friday), (10:51) Error when parsing json file with tracked processes on startup. GG. App cant run if this is the case.
 2025 June 27 (Friday), (10:59) A folder for sessions was not pressesnt on startup, a new one was created.
+2025 June 27 (Friday), (17:33) Error when reading tracked processes json, its structure was invalid. GG. App cant run if this is the case.
+2025 June 27 (Friday), (17:34) Error when reading tracked processes json, its structure was invalid. GG. App cant run if this is the case.
+2025 June 27 (Friday), (17:34) Error when reading tracked processes json, its structure was invalid. GG. App cant run if this is the case.

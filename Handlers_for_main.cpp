@@ -1,6 +1,6 @@
 #include "Handlers_for_main.h"
-//#include "Global_state.h"
 #include <fstream>
+#include <thread>
 
 // This is file private
 struct Process_node {
@@ -12,6 +12,10 @@ namespace Client {
 
     list<Request_status> request_queue; 
     bool   running         = true;
+
+    bool   client_running  = true;
+    optional<G_state::Error> fatal_error;
+    
     SOCKET client_socket   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
     bool   need_new_client = true;
 
@@ -23,13 +27,13 @@ namespace Client {
     static void free_process_tree  (vector<Process_node*>* roots);
     static void free_tree_memory   (Process_node* root);
 
-    static Data_thread_error_status* error_request_p = nullptr;
+    static Data_thread_error_status* error_request_p = nullptr; // NOTE(damian): hate it here.
 
     static void create_responce(G_state::Error* err, json* data, json* responce);
     static void create_responce_for_invalid(json* responce); // TODO(damian): dont like this, 1 func should be able to handle both valid and invalid commands.
 
     void client_thread() {
-        while (running) {
+        while (client_running) {
             if (need_new_client) {
                 Client::wait_for_client_to_connect();
                 need_new_client = false;
@@ -42,6 +46,8 @@ namespace Client {
                 else
                     ++it;
             }
+
+            // TODO(damian): stupid to have sigle message handeling at one time but multiple message deletion each iteration. 
 
             // =======================================================================================
             // TODO(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
@@ -87,75 +93,93 @@ namespace Client {
             std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
             std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
-            // Parsing the request.
-            std::pair<Request, bool> result = request_from_json(receive_buffer);
-            if (!result.second) {
-                
+            if (fatal_error.has_value()) {
                 json responce;
-                create_responce_for_invalid(&responce);
+                create_responce(&fatal_error.value(), nullptr, &responce);
 
-                string messege = std::move(responce.dump(4));
+                string responce_as_str = responce.dump(4);
+                std::cout << "Message --> " << responce_as_str << std::endl;
 
-                int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
+                int send_err_code = send(client_socket, responce_as_str.c_str(), responce_as_str.size(), NULL);
                 if (send_err_code == SOCKET_ERROR) {
-                    Client::handle_socker_error();
+                    Client::handle_socker_error();                
                 }
+
+                closesocket(client_socket);
+                Client::client_running = false;
             }
             else {
-                Report_request*           report         = std::get_if<Report_request>          (&result.first.variant);
-                Quit_request*             quit           = std::get_if<Quit_request>            (&result.first.variant);
-                Shutdown_request*         shutdown       = std::get_if<Shutdown_request>        (&result.first.variant);
-                Track_request*            track          = std::get_if<Track_request>           (&result.first.variant);
-                Untrack_request*          untrack        = std::get_if<Untrack_request>         (&result.first.variant);
-                Grouped_report_request*   grouped_report = std::get_if<Grouped_report_request>  (&result.first.variant);
-                Pc_time_request*          pc_time        = std::get_if<Pc_time_request>         (&result.first.variant);
-                Report_apps_only_request* apps_only      = std::get_if<Report_apps_only_request>(&result.first.variant);
-                Report_tracked_only*      tracked_only   = std::get_if<Report_tracked_only>(&result.first.variant);
-                Change_update_time*       change_time    = std::get_if<Change_update_time>(&result.first.variant);
+                // Parsing the request.
+                std::pair<Request, bool> result = request_from_json(receive_buffer);
+                if (!result.second) {
+                    
+                    json responce;
+                    create_responce_for_invalid(&responce);
 
-                if (report != nullptr) {
-                    Client::handle_report(report);
-                } 
-                else if (quit != nullptr) {
-                    Client::handle_quit(quit);
-                }
-                else if (shutdown != nullptr) {
-                    assert(false);
-                    // Client::handle_shutdown(shutdown);
-                } 
-                else if (track != nullptr) {
-                    Client::handle_track(track);
-                }
-                else if (untrack != nullptr) {
-                    Client::handle_untrack(untrack);
-                }
-                else if (grouped_report != nullptr) {
-                    Client::handle_grouped_report(grouped_report);
-                }
-                else if (pc_time != nullptr) {
-                    Client::handle_pc_time(pc_time);
-                }
-                else if (apps_only != nullptr) {
-                    Client::handle_report_apps_only(apps_only);
-                }
-                else if (tracked_only != nullptr) {
-                    Client::handle_report_tracked_only(tracked_only);
-                }
-                else if (change_time != nullptr) {
-                    Client::handle_change_update_time(change_time);
+                    string messege = std::move(responce.dump(4));
+
+                    int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
+                    if (send_err_code == SOCKET_ERROR) {
+                        Client::handle_socker_error();
+                    }
                 }
                 else {
-                    assert(false);
+                    Report_request*           report         = std::get_if<Report_request>          (&result.first.variant);
+                    Quit_request*             quit           = std::get_if<Quit_request>            (&result.first.variant);
+                    Shutdown_request*         shutdown       = std::get_if<Shutdown_request>        (&result.first.variant);
+                    Track_request*            track          = std::get_if<Track_request>           (&result.first.variant);
+                    Untrack_request*          untrack        = std::get_if<Untrack_request>         (&result.first.variant);
+                    Grouped_report_request*   grouped_report = std::get_if<Grouped_report_request>  (&result.first.variant);
+                    Pc_time_request*          pc_time        = std::get_if<Pc_time_request>         (&result.first.variant);
+                    Report_apps_only_request* apps_only      = std::get_if<Report_apps_only_request>(&result.first.variant);
+                    Report_tracked_only*      tracked_only   = std::get_if<Report_tracked_only>(&result.first.variant);
+                    Change_update_time*       change_time    = std::get_if<Change_update_time>(&result.first.variant);
+
+                    if (report != nullptr) {
+                        Client::handle_report(report);
+                    } 
+                    else if (quit != nullptr) {
+                        Client::handle_quit(quit);
+                    }
+                    else if (shutdown != nullptr) {
+                        assert(false);
+                        // Client::handle_shutdown(shutdown);
+                    } 
+                    else if (track != nullptr) {
+                        Client::handle_track(track);
+                    }
+                    else if (untrack != nullptr) {
+                        Client::handle_untrack(untrack);
+                    }
+                    else if (grouped_report != nullptr) {
+                        Client::handle_grouped_report(grouped_report);
+                    }
+                    else if (pc_time != nullptr) {
+                        Client::handle_pc_time(pc_time);
+                    }
+                    else if (apps_only != nullptr) {
+                        Client::handle_report_apps_only(apps_only);
+                    }
+                    else if (tracked_only != nullptr) {
+                        Client::handle_report_tracked_only(tracked_only);
+                    }
+                    else if (change_time != nullptr) {
+                        Client::handle_change_update_time(change_time);
+                    }
+                    else {
+                        assert(false);
+                    }
+
                 }
 
-            }
+                if (error_request_p) {
+                    error_request_p->handled = true;
+                    error_request_p          = nullptr;
+                }
 
-            if (error_request_p) {
-                error_request_p->handled = true;
-                error_request_p          = nullptr;
+                // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
             }
-
-            // NOTE(damian): clinet should not me managinf data (files). The main process has to be doing it.
+            
         }
     }
 
@@ -179,16 +203,12 @@ namespace Client {
         (*responce)["err_code"] = -1;
         (*responce)["data"]     = json::object(); // TODO(damian): move this bitch.  
         (*responce)["messege"]  = "";
-
-        // TODO(damian): take care of not starting the loop again if a fatal one occurs.
     }
 
     static void create_responce(G_state::Error* err, json* data, json* responce) {
         (*responce)["err_code"] = err->type;
-        (*responce)["data"]     = *data; // TODO(damian): move this bitch.  
+        (*responce)["data"]     = (data == nullptr ? nullptr : *data); // TODO(damian): move this bitch.  
         (*responce)["messege"]  = err->message;
-
-        // TODO(damian): take care of not starting the loop again if a fatal one occurs.
     }
 
     void handle_report(Report_request* report) {

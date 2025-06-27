@@ -28,12 +28,17 @@ namespace Client {
     extern list<Request_status> request_queue; 
 
     extern bool   running;        
+    extern bool   client_running;       
+
+    extern optional<G_state::Error> fatal_error;
+
     extern SOCKET client_socket;  
     extern bool   need_new_client;
     extern string error_message;   
 
     extern void client_thread();
     extern void wait_for_client_to_connect();
+    
     extern void handle_socker_error();
 
     extern void handle_report          (Report_request*           request);

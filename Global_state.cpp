@@ -90,7 +90,9 @@ namespace G_state {
                 << err_message
                 << "\n";
         file.close();
-        
+
+        Client::Data_thread_error_status new_err_status = {false, Error(Error_type::err_logs_file_was_not_present)};
+        Client::data_thread_error_queue.push_back(new_err_status);
     
         return Error(Error_type::ok);
     }
@@ -118,8 +120,15 @@ namespace G_state {
             if (!tracked_exist) {
                 std::fstream file(G_state::path_file_tracked_processes, std::ios::out);
                 file.close();
+
                 Error err = write_tracked_to_json_file();
                 if (err.type != Error_type::ok) { return err; }
+
+                Error err_on_log = log_error("File with tracked processes was not present on startup. New one was created.");
+                if (err_on_log.type != Error_type::ok) { return err_on_log; }
+    
+                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_file_with_tracked_processes_doesnt_exist)};
+                Client::data_thread_error_queue.push_back(new_err_status);
             }
         }
 

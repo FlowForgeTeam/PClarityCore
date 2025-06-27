@@ -36,7 +36,7 @@ namespace G_state {
 		startup_no_overall_csv_file_for_tracked_process			= 15,
 		startup_no_current_session_csv_file_for_tracked_process = 16,
 		
-		startup_err_logs_file_was_not_present                   = 17, 
+		err_logs_file_was_not_present                   = 17, 
 		
 		startup_folder_for_process_icons_doesnt_exist 			= 18,
 		

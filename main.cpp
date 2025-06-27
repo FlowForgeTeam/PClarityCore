@@ -13,45 +13,52 @@
 #include "Functions_win32.h"
 #include "Global_state.h"
 #include "Request.h"
-#include "Handlers_for_main.h"7
+#include "Handlers_for_main.h"
 
 // NOTE(damian): bool represent wheather the command has alredy been handled.
 // TOOD(damian): maybe add this to the global state.
 
+static bool data_thread_running = true;
+static std::thread client_thread;
+
+static void handle_fatal_error(G_state::Error* err) {
+	Client::fatal_error = *err;
+	client_thread.join();
+	data_thread_running = false;
+}
 
 int main() {
-	G_state::Error set_up_error = G_state::set_up_on_startup();
-	if ((int) set_up_error.type >= 100) { // Fatal
-		assert(Client::data_thread_error_queue.size() <= 1);
+	G_state::Error init_err(G_state::Error_type::ok);
+	
+	init_err = G_state::set_up_on_startup();
 		
-		Client::Data_thread_error_status new_status = {false, set_up_error};
-		Client::data_thread_error_queue.push_back(new_status);
-		
-		std::cout << "Startup error: " << (int) set_up_error.type << std::endl;
-		 
-		exit(1);
+	if (init_err.type == G_state::Error_type::ok) {
+		init_err = G_state::update_state();
 	}
 
-	G_state::Error update_state_err = G_state::update_state();
-	if ((int) update_state_err.type >= 100) {
-		std::cout << "Update state error: " << (int) update_state_err.type << std::endl;
-		exit(1);
-	}
-	std::cout << "Done setting up. \n" << std::endl;
+	if (init_err.type != G_state::Error_type::ok) { std::cout << "Fatal error on startup. \n" << std::endl; }
 
-	std::thread client (Client::client_thread); // This starts right away.
+	client_thread = std::thread(Client::client_thread); // This starts right away.
+
+	if (init_err.type != G_state::Error_type::ok) {
+		handle_fatal_error(&init_err);
+		std::cout << "Failed on startup. \n" << std::endl; 
+	}
+	else { std::cout << "Done setting up. \n" << std::endl; }
+	
+	// ==================================================================
 
 	int n = 1;
-	while (Client::running) {
+	while (data_thread_running) {
 		std::chrono::seconds sleep_length(G_state::Settings::n_sec_between_state_updates);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;
 
 		G_state::Error err = G_state::update_state();
-		if ((int) err.type >= 100) {
-			std::cout << "Update state error: " << (int) err.type << std::endl;
-			exit(1);
+		if (err.type != G_state::Error_type::ok) {
+			handle_fatal_error(&err);
+			break;
 		}
 
 		// Getting the first command has not yet been handled
@@ -70,7 +77,6 @@ int main() {
 			Untrack_request*    untrack     = std::get_if<Untrack_request>(&p_to_request->request.variant);
 			Change_update_time* change_time = std::get_if<Change_update_time>(&p_to_request->request.variant);
 
-
 			if (track != nullptr) {
 				G_state::add_process_to_track(&track->path);
 			}
@@ -88,6 +94,9 @@ int main() {
 		}
 
 	}
+
+	std::cout << "\n";
+	std::cout << "Finished running." << std::endl;
 
 	return 0;
 }
