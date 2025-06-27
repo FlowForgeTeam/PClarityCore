@@ -26,37 +26,39 @@ namespace G_state {
 		ok = 1,
 
 		// Temporary
-		tracked_and_current_process_vectors_share_data, // NOTE(damian): Ttis is used with asserts right now
+		tracked_and_current_process_vectors_share_data, // NOTE(damian): This used used for with asserta right now.
 
 		// State
 		startup_file_with_tracked_processes_doesnt_exist        = 10,			
 		startup_sessions_folder_doesnt_exist                    = 11,					
-		trying_to_track_the_same_process_more_than_once         = 12,	
-		trying_to_untrack_a_non_tracked_process                 = 13,
-
+		
 		startup_no_dir_for_specific_tracked_process				= 14,
 		startup_no_overall_csv_file_for_tracked_process			= 15,
 		startup_no_current_session_csv_file_for_tracked_process = 16,
-
+		
 		startup_err_logs_file_was_not_present                   = 17, 
 		
 		startup_folder_for_process_icons_doesnt_exist 			= 18,
-
+		
 		startup_invalid_values_inside_json					    = 19,
-
+		
 		startup_setting_file_doesnt_exists 						= 20,
 		
-		// Startup
 		startup_json_tracked_processes_file_parsing_failed      = 100,    
 		startup_json_tracked_processes_file_invalid_structure   = 101,
 		
 		startup_json_settings_file_parsing_failed      = 102,    
 		startup_json_settings_file_invalid_structure   = 103,
 		
+		process_current_csv_file_contains_more_than_1_record = 114,
+
 		startup_filesystem_is_all_fucked_up = 104,
 		runtime_filesystem_is_all_fucked_up = 105,
 		
-		os_error = 106,
+		trying_to_track_the_same_process_more_than_once         = 12,	
+		trying_to_untrack_a_non_tracked_process                 = 13,
+		
+		os_error = 123,
 
 		// TODO(damian): remove
 		// Network`
@@ -127,8 +129,11 @@ namespace G_state {
 	}
 
 	namespace Settings {
-		extern const uint32_t default_n_sec_between_updates;
-		extern       uint32_t n_sec_between_updates;
+		extern const uint32_t default_n_sec_between_state_updates;
+		extern       uint32_t n_sec_between_state_updates;
+
+		extern const uint32_t default_n_sec_between_csv_updates;
+		extern       uint32_t n_sec_between_csv_updates; 
 	}
 
 }

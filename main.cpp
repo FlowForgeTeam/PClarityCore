@@ -13,7 +13,7 @@
 #include "Functions_win32.h"
 #include "Global_state.h"
 #include "Request.h"
-#include "Handlers_for_main.h"
+#include "Handlers_for_main.h"7
 
 // NOTE(damian): bool represent wheather the command has alredy been handled.
 // TOOD(damian): maybe add this to the global state.
@@ -27,25 +27,31 @@ int main() {
 		Client::Data_thread_error_status new_status = {false, set_up_error};
 		Client::data_thread_error_queue.push_back(new_status);
 		
+		std::cout << "Startup error: " << (int) set_up_error.type << std::endl;
+		 
 		exit(1);
 	}
 
-	G_state::update_state();
+	G_state::Error update_state_err = G_state::update_state();
+	if ((int) update_state_err.type >= 100) {
+		std::cout << "Update state error: " << (int) update_state_err.type << std::endl;
+		exit(1);
+	}
 	std::cout << "Done setting up. \n" << std::endl;
 
 	std::thread client (Client::client_thread); // This starts right away.
 
 	int n = 1;
 	while (Client::running) {
-		std::chrono::seconds sleep_length(G_state::Settings::n_sec_between_updates);
+		std::chrono::seconds sleep_length(G_state::Settings::n_sec_between_state_updates);
 		std::this_thread::sleep_for(sleep_length);
 		
 		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;
 
 		G_state::Error err = G_state::update_state();
-		if (err.type != G_state::Error_type::ok) {
-			assert(false); 
-			// NOTE(damian): at this moment (June 24 2025), there are no fatal erros that might take place at datathread runtime.
+		if ((int) err.type >= 100) {
+			std::cout << "Update state error: " << (int) err.type << std::endl;
+			exit(1);
 		}
 
 		// Getting the first command has not yet been handled

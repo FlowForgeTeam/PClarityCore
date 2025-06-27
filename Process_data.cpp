@@ -1,6 +1,8 @@
 #include "Process_data.h"
 #include "Functions_win32.h"     // For Win32_process_data definition
 
+#include "Global_state.h"
+
 Process_data::Process_data(string exe_path) {
     this->is_active    = false;    
     this->is_tracked   = false;   
@@ -85,7 +87,7 @@ std::pair<bool, Session> Process_data::update_active() {
             auto duration_ns = std::chrono::steady_clock::now().time_since_epoch() - this->last_time_session_was_created.value().time_since_epoch();
             auto duration_s  = std::chrono::duration_cast<std::chrono::seconds>(duration_ns);
 
-            if (this->is_tracked && duration_s.count() > 10) {
+            if (this->is_tracked && duration_s.count() > G_state::Settings::n_sec_between_csv_updates) {
                 this->last_time_session_was_created = std::chrono::steady_clock::now();
 
                 Session session = create_session(this);
