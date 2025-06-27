@@ -354,14 +354,16 @@ namespace G_state {
     }
 
     G_state::Error update_state() {
-        tuple< G_state::Error,
-               vector<Win32_process_data>, 
-               optional<Win32_system_times> > result = win32_get_process_data();
-        G_state::Error               error        = std::get<0>(result);
-        vector<Win32_process_data>   processes    = std::get<1>(result);
-        optional<Win32_system_times> system_times = std::get<2>(result);
-
+        auto result = win32_get_process_data();
+        G_state::Error               error         = std::get<0>(result);
+        vector<Win32_process_data>   processes     = std::get<1>(result);
+        optional<Win32_system_times> new_sys_times = std::get<2>(result);
+        Dynamic_system_info::up_time               = std::get<3>(result);
+        Dynamic_system_info::system_time           = std::get<4>(result);
         if (error.type != Error_type::ok) { return error; }
+
+        G_state::Dynamic_system_info::prev_system_times = G_state::Dynamic_system_info::new_system_times;
+        G_state::Dynamic_system_info::new_system_times  = new_sys_times;
 
         // NOTE(damian): for code clarity.
         for (Process_data& data : G_state::tracked_processes) {
@@ -390,7 +392,9 @@ namespace G_state {
                     assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
 
                     std::pair<bool, Session> maybe_current_session = g_state_data.update_active();
-                    if (maybe_current_session.first) {
+                    if (   maybe_current_session.first 
+                        && maybe_current_session.second.duration_sec.count() > 0
+                    ) {
                         Error err = write_current_session_to_csv(&maybe_current_session.second, &g_state_data);
                         if (err.type != Error_type::ok) { return err; }
                     }
@@ -468,10 +472,6 @@ namespace G_state {
             process_data.was_updated = false;
         }
 
-        // Getting dynamic sysetem data
-        G_state::Dynamic_system_info::up_time = GetTickCount64();
-        GetSystemTime(&G_state::Dynamic_system_info::system_time);
-    
         // Creating data for the client.
         if (G_state::Client_data::need_data) {
 
@@ -813,6 +813,9 @@ namespace G_state {
     namespace Dynamic_system_info {
         long long up_time      = 0;
         SYSTEMTIME system_time = {0};
+
+        optional<Win32_system_times> prev_system_times;
+        optional<Win32_system_times> new_system_times;
     }
 
     namespace Settings {

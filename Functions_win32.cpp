@@ -23,19 +23,28 @@ static tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE proces
                                                                           WCHAR* stack_buffer,
                                                                           size_t stack_buffer_len);
 
-tuple<G_state::Error, vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data() {
+tuple< G_state::Error, 
+       vector<Win32_process_data>, 
+       optional<Win32_system_times>,
+       ULONGLONG,
+       SYSTEMTIME > win32_get_process_data() {
+
     // TODO(damian): create a file and report that the file was not present via G_state responce.
     std::error_code err_code_0;
     bool exists = std::filesystem::exists(G_state::path_dir_process_icons, err_code_0);
     if (err_code_0) {
         return tuple(G_state::Error(G_state::Error_type::os_error),
             vector<Win32_process_data>(),
-            optional<Win32_system_times>());
+            optional<Win32_system_times>(),
+            0,
+            SYSTEMTIME{0});
     }
     if (!exists) {
         return tuple(G_state::Error(G_state::Error_type::runtime_filesystem_is_all_fucked_up),
             vector<Win32_process_data>(),
-            optional<Win32_system_times>());
+            optional<Win32_system_times>(),
+            0,
+            SYSTEMTIME{0});
     }
 
     // Take a snapshot of all processes in the system.
@@ -167,12 +176,20 @@ tuple<G_state::Error, vector<Win32_process_data>, optional<Win32_system_times>> 
         CloseHandle(process_handle);
 
     } while (Process32Next(process_shapshot_handle, &pe32));
-
     CloseHandle(process_shapshot_handle);
 
     optional<Win32_system_times> system_times = get_system_times();
 
-    return tuple(G_state::Error(G_state::Error_type::ok), process_data_vec, system_times);
+    ULONGLONG pc_up_time = GetTickCount64();
+
+    SYSTEMTIME sys_time = {};
+    GetSystemTime(&sys_time);
+
+    return tuple(G_state::Error(G_state::Error_type::ok), 
+                 process_data_vec, 
+                 system_times,
+                 pc_up_time,
+                 sys_time);
 }
 
 

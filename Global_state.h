@@ -126,6 +126,9 @@ namespace G_state {
 	namespace Dynamic_system_info {
 		extern long long up_time;
 		extern SYSTEMTIME system_time;
+
+		extern optional<Win32_system_times> prev_system_times;
+		extern optional<Win32_system_times> new_system_times;
 	}
 
 	namespace Settings {

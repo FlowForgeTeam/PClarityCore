@@ -33,7 +33,7 @@ public:
     optional<Win32_snapshot_data>  snapshot;
     optional<string>               product_name;
     optional<DWORD>                priority_class;
-    optional<Win32_process_times>  process_times;
+    Win32_process_times            process_times;   // NOTE(damian): to know why this is not optional like other fields, read NOTE inside Win32_functions.h
     optional<Win32_affinities>     affinities;
     optional<SIZE_T>               ram_usage;
     bool                           has_image;

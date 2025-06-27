@@ -54,13 +54,20 @@ struct Win32_process_data {
     string                          exe_path;
     optional<string>                product_name;
     optional<DWORD>                 priority_class;
-    Win32_process_times             process_times;
+    Win32_process_times             process_times;   
     optional<Win32_affinities>      affinities;
     optional<SIZE_T>                ram_usage;
     bool                            has_image;
 };
+// NOTE(damian): 
+//      Process_times are not optional, even tho they might be for the same reason that exe_path isnt optional.
+//      We use them to identidy processes. Because of that, we cant have them be null.
 
-tuple<G_state::Error, vector<Win32_process_data>, optional<Win32_system_times>> win32_get_process_data();
+tuple< G_state::Error, 
+       vector<Win32_process_data>, 
+       optional<Win32_system_times>,
+       ULONGLONG,
+       SYSTEMTIME > win32_get_process_data();
 
 void wchar_to_utf8(WCHAR* wstr, string* str);
 

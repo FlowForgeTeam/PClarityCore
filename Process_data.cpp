@@ -16,6 +16,7 @@ Process_data::Process_data(string exe_path) {
     this->snapshot       = std::nullopt;
     this->product_name   = std::nullopt;
     this->priority_class = std::nullopt;
+    this->process_times  = {0};             // TODO(damian): maybe make this null also, but win32 data cant have it as null. This being null with be great for inactive tracked processes.
     this->affinities     = std::nullopt;
     this->ram_usage      = std::nullopt;
     this->has_image      = false;
@@ -135,33 +136,35 @@ void Process_data::update_data(Win32_process_data* new_win32_data) {
     this->ram_usage      = new_win32_data->ram_usage;
     this->has_image      = new_win32_data->has_image;
 
-    assert(this->exe_path == new_win32_data->exe_path);
     this->exe_path = new_win32_data->exe_path;
     
-    // if (this->times.has_value()) {
-    //     ULONGLONG prev_process_time    = this->times.value().process_kernel_time + this->times.value().process_user_time;
-    //     ULONGLONG current_process_time = new_win32_data->process_kernel_time + new_win32_data->process_user_time;
-    //     ULONGLONG delta_process_time   = current_process_time - prev_process_time;
+    // Getting CPU.
+    namespace dyn_inf = G_state::Dynamic_system_info;
+    if (   this->times.has_value()
+        // && new_win32_data->process_times.has_value()
+        && dyn_inf::prev_system_times.has_value()
+        && dyn_inf::new_system_times.has_value()
+    ) {
+        ULONGLONG prev_process_time    = this->times.value().kernel_time + this->times.value().user_time;
+        ULONGLONG current_process_time = new_win32_data->process_times.kernel_time + new_win32_data->process_times.user_time;
+        ULONGLONG delta_process_time   = current_process_time - prev_process_time;
         
-    //     // NOTE(damian): idle time is included into kernel for system times, so have to remove it.
-    //     ULONGLONG prev_system_time    = (this->times.value().system_kernel_time - this->times.value().system_idle_time) + this->times.value().system_user_time;
-    //     ULONGLONG current_system_time = (new_win32_data->system_kernel_time - new_win32_data->system_idle_time) + new_win32_data->system_user_time;
-    //     ULONGLONG delta_system_time   = current_system_time - prev_system_time;
-        
-    //     if (delta_system_time == 0) {
-    //         assert(false);
-    //     }
-        
-    //     SYSTEM_INFO sys_info;
-    //     GetSystemInfo(&sys_info);
-    //     DWORD n_cores = sys_info.dwNumberOfProcessors;
-        
-    //     this->cpu_usage = ((double) delta_process_time / (delta_system_time * n_cores)) * 100;
-    // }
+        // NOTE(damian): idle time is included into kernel for system times, so have to remove it.
+        ULONGLONG prev_system_time    = (dyn_inf::prev_system_times.value().kernel_time - dyn_inf::prev_system_times.value().idle_time) + dyn_inf::prev_system_times.value().user_time;
+        ULONGLONG current_system_time = (dyn_inf::new_system_times.value().kernel_time - dyn_inf::new_system_times.value().idle_time) + dyn_inf::new_system_times.value().user_time;
+        ULONGLONG delta_system_time   = current_system_time - prev_system_time;
 
-    // if (this->data.value().exe_name == "FortniteClient-Win64-Shipping.exe" && this->cpu_usage.value_or(-1) == 0.0   ) {
-    //     int x = 2;
-    // }
+        if (delta_system_time == 0) {
+            assert(false); // TODO(damian): deal with this.
+        }
+        
+        SYSTEM_INFO sys_info;
+        GetSystemInfo(&sys_info);
+        DWORD n_cores = sys_info.dwNumberOfProcessors; // TODO(damian): store this inside static system data.
+        
+        this->cpu_usage = ((double) delta_process_time / (delta_system_time * n_cores)) * 100;
+    }
+    // ====
     
     this->times = new_win32_data->process_times;
 }
@@ -184,6 +187,7 @@ bool Process_data::compare(Win32_process_data* data) {
         assert(false);
     }
 
+    // THIS IS WHY, NOTE IT FOR THE FUTURE
     return (   this->exe_path == data->exe_path 
             && this->times.value().creation_time == data->process_times.creation_time
            ); 
@@ -240,36 +244,43 @@ void convert_to_json(Process_data* process_data, json* j) {
     }
 
     if (process_data->snapshot.has_value()) {
-    (*j)["pid"] = process_data->snapshot.value().pid;
-    (*j)["started_threads"] = process_data->snapshot.value().started_threads;
-    (*j)["base_priority"] = process_data->snapshot.value().base_priority;
-    (*j)["exe_name"] = process_data->snapshot.value().exe_name;
+        (*j)["pid"] = process_data->snapshot.value().pid;
+        (*j)["started_threads"] = process_data->snapshot.value().started_threads;
+        (*j)["base_priority"] = process_data->snapshot.value().base_priority;
+        (*j)["exe_name"] = process_data->snapshot.value().exe_name;
     } else {
-    (*j)["pid"] = nullptr;
-    (*j)["started_threads"] = nullptr;
-    (*j)["base_priority"] = nullptr;
-    (*j)["exe_name"] = nullptr;
+        (*j)["pid"] = nullptr;
+        (*j)["started_threads"] = nullptr;
+        (*j)["base_priority"] = nullptr;
+        (*j)["exe_name"] = nullptr;
     }
 
     (*j)["exe_path"] = process_data->exe_path;
 
     // Times data
     if (process_data->times.has_value()) {
-    (*j)["creation_time"] = process_data->times.value().creation_time;
-    (*j)["exit_time"] = process_data->times.value().exit_time;
-    (*j)["kernel_time"] = process_data->times.value().kernel_time;
-    (*j)["user_time"] = process_data->times.value().user_time;
+        (*j)["creation_time"] = process_data->times.value().creation_time;
+        (*j)["exit_time"] = process_data->times.value().exit_time;
+        (*j)["kernel_time"] = process_data->times.value().kernel_time;
+        (*j)["user_time"] = process_data->times.value().user_time;
     } else {
-    (*j)["creation_time"] = nullptr;
-    (*j)["exit_time"] = nullptr;
-    (*j)["kernel_time"] = nullptr;
-    (*j)["user_time"] = nullptr;
+        (*j)["creation_time"] = nullptr;
+        (*j)["exit_time"] = nullptr;
+        (*j)["kernel_time"] = nullptr;
+        (*j)["user_time"] = nullptr;
+    }
+
+    // RAM usage
+    if (process_data->ram_usage.has_value()) {
+        (*j)["ram_usage"] = process_data->ram_usage.value();
+    } else {
+        (*j)["ram_usage"] = nullptr;
     }
 
     // CPU usage
     if (process_data->cpu_usage.has_value()) {
-    (*j)["cpu_usage"] = process_data->cpu_usage.value();
+        (*j)["cpu_usage"] = process_data->cpu_usage.value();
     } else {
-    (*j)["cpu_usage"] = nullptr;
+        (*j)["cpu_usage"] = nullptr;
     }
 }
