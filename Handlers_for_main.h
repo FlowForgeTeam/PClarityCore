@@ -27,7 +27,6 @@ namespace Client {
     // TODO(damian): maybe this has to be on the data thread side, move this into the G_state.
     extern list<Request_status> request_queue; 
 
-    extern bool   running;        
     extern bool   client_running;       
 
     extern optional<G_state::Error> fatal_error;

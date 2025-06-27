@@ -11,7 +11,6 @@ struct Process_node {
 namespace Client {
 
     list<Request_status> request_queue; 
-    bool   running         = true;
 
     bool   client_running  = true;
     optional<G_state::Error> fatal_error;
@@ -93,7 +92,7 @@ namespace Client {
             std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
             std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
-            if (fatal_error.has_value()) {
+            if (fatal_error.has_value()) { 
                 json responce;
                 create_responce(&fatal_error.value(), nullptr, &responce);
 

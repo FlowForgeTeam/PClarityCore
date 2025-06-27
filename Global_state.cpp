@@ -115,30 +115,38 @@ namespace G_state {
         // == Checking if the file with tracked processes exists.
         {
             std::error_code err_code;
-            bool tracked_exist = fs::is_regular_file(G_state::path_file_tracked_processes, err_code); // ISFILE
-            if (err_code) { return Error(Error_type::os_error); }
+            bool tracked_exist = fs::is_regular_file(G_state::path_file_tracked_processes, err_code); 
             if (!tracked_exist) {
-                std::fstream file(G_state::path_file_tracked_processes, std::ios::out);
-                file.close();
-
-                Error err = write_tracked_to_json_file();
-                if (err.type != Error_type::ok) { return err; }
-
-                Error err_on_log = log_error("File with tracked processes was not present on startup. New one was created.");
-                if (err_on_log.type != Error_type::ok) { return err_on_log; }
-    
-                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_file_with_tracked_processes_doesnt_exist)};
-                Client::data_thread_error_queue.push_back(new_err_status);
+                if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+                else { 
+                    std::fstream file(G_state::path_file_tracked_processes, std::ios::out);
+                    file.close();
+                    
+                    Error err = write_tracked_to_json_file();
+                    if (err.type != Error_type::ok) { return err; }
+                    
+                    Error err_on_log = log_error("File with tracked processes was not present on startup. New one was created.");
+                    if (err_on_log.type != Error_type::ok) { return err_on_log; }
+                    
+                    Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_file_with_tracked_processes_doesnt_exist)};
+                    Client::data_thread_error_queue.push_back(new_err_status);
+                }
             }
+            
         }
 
         // == Storing data from tracked processes file.
         {
             std::error_code err_code;
             bool exists = fs::is_regular_file(G_state::path_file_tracked_processes, err_code);
-            if (err_code) { return Error(Error_type::os_error); }
-            if (!exists)  { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
-            
+            if (!exists)  { 
+                if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }    
+                else { 
+                    return Error(Error_type::startup_filesystem_is_all_fucked_up); 
+                    // NOTE(damian): this is the case, since we were supposed to create this file before this.
+                }
+            } 
+
             std::fstream file(G_state::path_file_tracked_processes, std::ios::in);
             if (!file.is_open()) { return Error(Error_type::os_error); };
             
@@ -147,6 +155,8 @@ namespace G_state {
                 text.append(line);
             }   
             file.close();
+
+            // TODO(damian): the way i check for invalid types inside json is wrong. Do it like i do it for settings a little lower in this file. 
 
             json data_as_json;
             try { data_as_json = json::parse(text); }
@@ -172,9 +182,6 @@ namespace G_state {
                 if (!j_path.is_string()) {
                     Error err_on_log = log_error("Error when reading tracked processes json, its value were of a different type from ones that were expected. GG. App cant run if this is the case.");
                     if (err_on_log.type != Error_type::ok) { return err_on_log; }
-
-                    Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_invalid_values_inside_json)};
-                    Client::data_thread_error_queue.push_back(new_err_status);
 
                     Error err(Error_type::startup_invalid_values_inside_json);
                     return err;
@@ -228,20 +235,22 @@ namespace G_state {
                 overall_sessions_path.append(G_state::csv_file_name_for_overall_sessions_for_process);
                 
                 std::error_code err_3;
-                bool overall_exists = fs::exists(overall_sessions_path, err_3);
-                if (err_3) { return Error(Error_type::os_error); }
+                bool overall_exists = fs::is_regular_file(overall_sessions_path, err_3);
                 if (!overall_exists) {
-                    std::fstream file(overall_sessions_path, std::ios::out);
-                    if (!file.is_open()) { return Error(Error_type::os_error); }
+                    if (err_3 != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
                     else {
-                        file << G_state::process_session_csv_file_header;
-                        file.close();
+                        std::fstream file(overall_sessions_path, std::ios::out);
+                        if (!file.is_open()) { return Error(Error_type::os_error); }
+                        else {
+                            file << G_state::process_session_csv_file_header;
+                            file.close();
 
-                        Error err_on_log = log_error("No sessions history csv file for a process was found on startup. New one was created.");
-                        if (err_on_log.type != Error_type::ok) { return err_on_log; }
+                            Error err_on_log = log_error("No sessions history csv file for a process was found on startup. New one was created.");
+                            if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                        Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_overall_csv_file_for_tracked_process)};
-                        Client::data_thread_error_queue.push_back(new_err_status);
+                            Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_overall_csv_file_for_tracked_process)};
+                            Client::data_thread_error_queue.push_back(new_err_status);
+                        }
                     }
                 }
 
@@ -250,20 +259,22 @@ namespace G_state {
                 current_sessions_path.append(G_state::csv_file_name_for_current_session_for_process);
                 
                 std::error_code err_4;
-                bool current_exists = fs::exists(current_sessions_path, err_4);
-                if (err_4) { return Error(Error_type::os_error); }
+                bool current_exists = fs::is_regular_file(current_sessions_path, err_4);
                 if (!current_exists) {
-                    std::fstream file(current_sessions_path, std::ios::out);
-                    if (!file.is_open()) { return Error(Error_type::os_error); }
+                    if (err_4 != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
                     else {
-                        file << G_state::process_session_csv_file_header;
-                        file.close();
+                        std::fstream file(current_sessions_path, std::ios::out);
+                        if (!file.is_open()) { return Error(Error_type::os_error); }
+                        else {
+                            file << G_state::process_session_csv_file_header;
+                            file.close();
 
-                        Error err_on_log = log_error("No current session csv file for a process was found on startup. New one was created.");
-                        if (err_on_log.type != Error_type::ok) { return err_on_log; }
+                            Error err_on_log = log_error("No current session csv file for a process was found on startup. New one was created.");
+                            if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                        Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_current_session_csv_file_for_tracked_process)};
-                        Client::data_thread_error_queue.push_back(new_err_status);
+                            Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_no_current_session_csv_file_for_tracked_process)};
+                            Client::data_thread_error_queue.push_back(new_err_status);
+                        }
                     }
                 }
                 else { // Current file existed, check if it has some data from prev run. If it does, write it to overall csv and clear the csv.
@@ -298,15 +309,22 @@ namespace G_state {
         {
             std::error_code err_code;
             bool settings_exist = fs::is_regular_file(G_state::path_file_settings, err_code);
-            if (err_code) { return Error(Error_type::os_error); }
             if (!settings_exist) {
-                Error err_on_log = log_error("Was not able to read settings from file on startup, even tho it was supposed to be created on startup a liitle earlier.");
-                if (err_on_log.type != Error_type::ok) {} // Ignoring this.
+                if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+                else {
+                    json j_settings;
+                    j_settings["data_thread_update_time_seconds"] = Settings::n_sec_between_state_updates;
+                    
+                    std::fstream file(G_state::path_file_settings, std::ios::out);
+                    file << j_settings.dump(4);
+                    file.close();
 
-                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_filesystem_is_all_fucked_up)};
-                Client::data_thread_error_queue.push_back(new_err_status);
+                    Error err_on_log = log_error("Was not able to read settings from file on startup. A new one was created.");
+                    if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                return Error(Error_type::startup_filesystem_is_all_fucked_up);
+                    Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_setting_file_doesnt_exists)};
+                    Client::data_thread_error_queue.push_back(new_err_status);
+                }
             }
 
             std::fstream file(G_state::path_file_settings, std::ios::in);
@@ -324,18 +342,12 @@ namespace G_state {
                 Error err_on_log = log_error("Error when parsing json file with settings on startup. GG. App cant run if this is the case.");
                 if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_json_settings_file_parsing_failed)};
-                Client::data_thread_error_queue.push_back(new_err_status);
-
                 return Error(Error_type::startup_json_tracked_processes_file_parsing_failed);
             }
 
             if (!j_settings.contains("data_thread_update_time_seconds")) {
                 Error err_on_log = log_error("Invalid structure for settings file on startup. GG. App cant run if this is the case.");
                 if (err_on_log.type != Error_type::ok) { return err_on_log; }
-
-                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_json_settings_file_invalid_structure)};
-                Client::data_thread_error_queue.push_back(new_err_status);
 
                 Error err(Error_type::startup_json_settings_file_invalid_structure);
                 return err;
@@ -347,9 +359,6 @@ namespace G_state {
             else {
                 Error err_on_log = log_error("Error when reading settings json, its values were of invalid type. GG. App cant run if this is the case.");
                 if (err_on_log.type != Error_type::ok) { return err_on_log; }
-
-                Client::Data_thread_error_status new_err_status = {false, Error(Error_type::startup_invalid_values_inside_json)};
-                Client::data_thread_error_queue.push_back(new_err_status);
 
                 Error err(Error_type::startup_invalid_values_inside_json);
                 return err;
@@ -545,9 +554,12 @@ namespace G_state {
             // TODO(damian): this is here now for clarity, move somewhere else.
             for (Process_data& tracked : G_state::tracked_processes) {
                 for (Process_data& current : G_state::currently_active_processes) {
-                    if (tracked.compare(&current)) {
+                    if (   tracked.times.has_value() // NOTE(damian): might be bull if process is tracked and has not been active yet.
+                        && tracked.compare(&current)
+                    ) {
                         // NOTE(damian): not comaring as tracked, 
                         //               since then it would return Error for processes like chrome and vs code.
+                        assert(false); // TODO
                         return Error(Error_type::tracked_and_current_process_vectors_share_data);
                     }
                 }
@@ -600,19 +612,20 @@ namespace G_state {
         Settings::n_sec_between_state_updates = n_sec;
 
         std::error_code err_code;
-        bool exists = fs::exists(G_state::path_file_settings, err_code);
-        if (err_code) { return Error(Error_type::os_error); }
+        bool exists = fs::is_regular_file(G_state::path_file_settings, err_code);
         if (!exists) {
-            Client::Data_thread_error_status new_err_status = { false, Error(Error_type::runtime_filesystem_is_all_fucked_up) };
-            Client::data_thread_error_queue.push_back(new_err_status);
-
-            return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+            else { 
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up); 
+            }
         }
-
+        
+        // TODO(damian): use some constants for these json keys, shit is getting ridiculous.
         json j_settings;
         j_settings["data_thread_update_time_seconds"] = Settings::n_sec_between_state_updates;
         
         std::fstream file(G_state::path_file_settings, std::ios::in);
+        if (!file.is_open()) { return Error(Error_type::os_error); }
         file << j_settings.dump(4);
         file.close();
 
@@ -634,8 +647,12 @@ namespace G_state {
     static Error write_tracked_to_json_file() {
         std::error_code err_code;
         bool file_exists = fs::is_regular_file(G_state::path_file_tracked_processes, err_code);
-        if (err_code)     { return Error(Error_type::os_error); }
-        if (!file_exists) { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+        if (!file_exists) {
+            if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+            else {
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            }
+        }
         
         vector<string> j_tracked;
         for (Process_data& process : G_state::tracked_processes) {
@@ -665,11 +682,13 @@ namespace G_state {
 
         std::error_code err;
         bool overall_exists = fs::is_regular_file(path, err);
-        if (err) { return Error(Error_type::os_error); }
         if (!overall_exists) {
-            return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            if (err != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+            else {
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            }
         }
-
+        
         std::fstream csv_overall_file(path, std::ios::app);
         if (!csv_overall_file.is_open()) { return Error(Error_type::os_error); }
         
@@ -695,11 +714,13 @@ namespace G_state {
 
         std::error_code err;
         bool current_exists = fs::is_regular_file(path, err);
-        if (err) { return Error(Error_type::os_error); }
         if (!current_exists) {
-            return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            if (err != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+            else {
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            }
         }
-
+        
         std::fstream csv_current_file(path, std::ios::out | std::ios::trunc);
         if (!csv_current_file.is_open()) { return Error(Error_type::os_error); }
         

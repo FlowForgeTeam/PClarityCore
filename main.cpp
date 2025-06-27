@@ -77,21 +77,29 @@ int main() {
 			Untrack_request*    untrack     = std::get_if<Untrack_request>(&p_to_request->request.variant);
 			Change_update_time* change_time = std::get_if<Change_update_time>(&p_to_request->request.variant);
 
+			G_state::Error maybe_err(G_state::Error_type::ok);
 			if (track != nullptr) {
-				G_state::add_process_to_track(&track->path);
+				maybe_err = G_state::add_process_to_track(&track->path);
 			}
 			else if (untrack != nullptr) {
-				G_state::remove_process_from_track(&untrack->path);
+				maybe_err = G_state::remove_process_from_track(&untrack->path);
 			}
 			else if (change_time != nullptr) {
-				G_state::update_settings_file(change_time->duration_in_sec);
+				maybe_err = G_state::update_settings_file(change_time->duration_in_sec);
 			}
 			else {
 				assert(false);
 			}
 
+			if (maybe_err.type != G_state::Error_type::ok) {
+				handle_fatal_error(&maybe_err);
+				break;
+			}
+
 			p_to_request->handled = true;
 		}
+
+
 
 	}
 

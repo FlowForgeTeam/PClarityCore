@@ -29,16 +29,16 @@ namespace G_state {
 		tracked_and_current_process_vectors_share_data, // NOTE(damian): This used used for with asserta right now.
 
 		// State
-		startup_file_with_tracked_processes_doesnt_exist        = 10,			
-		startup_sessions_folder_doesnt_exist                    = 11,					
+		startup_file_with_tracked_processes_doesnt_exist        = 10,			 // W
+		startup_sessions_folder_doesnt_exist                    = 11,				  // W	
 		
-		startup_no_dir_for_specific_tracked_process				= 14,
-		startup_no_overall_csv_file_for_tracked_process			= 15,
-		startup_no_current_session_csv_file_for_tracked_process = 16,
+		startup_no_dir_for_specific_tracked_process				= 14,  // W
+		startup_no_overall_csv_file_for_tracked_process			= 15,  // W
+		startup_no_current_session_csv_file_for_tracked_process = 16,  // W
 		
-		err_logs_file_was_not_present                   = 17, 
+		err_logs_file_was_not_present                   = 17,  // W
 		
-		startup_folder_for_process_icons_doesnt_exist 			= 18,
+		startup_folder_for_process_icons_doesnt_exist 			= 18, // W
 		
 		startup_invalid_values_inside_json					    = 19,
 		
@@ -46,6 +46,7 @@ namespace G_state {
 		
 		startup_json_tracked_processes_file_parsing_failed      = 100,    
 		startup_json_tracked_processes_file_invalid_structure   = 101,
+		
 		
 		startup_json_settings_file_parsing_failed      = 102,    
 		startup_json_settings_file_invalid_structure   = 103,
