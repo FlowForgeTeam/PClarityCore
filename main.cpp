@@ -99,8 +99,6 @@ int main() {
 			p_to_request->handled = true;
 		}
 
-
-
 	}
 
 	std::cout << "\n";

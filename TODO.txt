@@ -1,14 +1,10 @@
 1. 
--- Store icons folder name as const inside G_state
 -- Maybe add a namesapce for G_state for constants
 -- See if the way client is forward declared inside G_state is the way to go
--- Fatal Error handeling. Stop the data thread. Send something to the client.
-    But since there might be other requests in the queue, need a way to prioritise the fatal one first.
 
 2. 
 -- Global static data  (System start time, overall ram ...)
 -- Global dynamic data (Current cpu overall, current ram overall ...)
--- Calculate cpu again for processes
 
 3. 
 -- Remove all the fucking TODOs.

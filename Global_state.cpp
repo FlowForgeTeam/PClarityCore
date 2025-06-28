@@ -407,20 +407,36 @@ namespace G_state {
             bool is_tracked = false;
             for (Process_data& g_state_data : G_state::tracked_processes) {
                 if (!g_state_data.was_updated && g_state_data.compare_as_tracked(&win32_data)) {
-                    assert(!is_tracked); // NOTE(damian): cant have 2 same processes stores as tracked.
+                    
+                    if (is_tracked) { // NOTE(damian): cant have 2 same processes stores as tracked.
+                        int x = 2;
+                        return Error(Error_type::runtime_logics_failed);
+                    } 
 
-                    std::pair<bool, Session> maybe_current_session = g_state_data.update_active();
-                    if (   maybe_current_session.first 
-                        && maybe_current_session.second.duration_sec.count() > 0
-                    ) {
-                        Error err = write_current_session_to_csv(&maybe_current_session.second, &g_state_data);
-                        if (err.type != Error_type::ok) { return err; }
+                    pair<Error, optional<Session>> result = g_state_data.update_active();
+                    if (result.first.type != Error_type::ok) {
+                        int x = 2;
+                        return result.first;
                     }
 
-                    g_state_data.update_data(&win32_data);
+                    if (result.second.has_value()) {
+                        if (result.second.value().duration_sec.count() > 0) {
+                            Error err = write_current_session_to_csv(&result.second.value(), &g_state_data);
+                            if (err.type != Error_type::ok) {
+                                int x = 2;
+                                return err;
+                            }
+                        }
+                    }
+
+                    Error err = g_state_data.update_data(&win32_data);
+                    if (err.type != Error_type::ok) {
+                        int x = 2;
+                        return err;
+                    }
                     is_tracked = true;
 
-                    // break; // NOTE(damian): commented out for the assert to work while developing.
+                    // break; // NOTE(damian): commented out for the error on top to work. // TODO(damian): note this better.
                 }
             }
             if (is_tracked) continue;
@@ -429,14 +445,32 @@ namespace G_state {
 
             bool was_active_before = false;
             for (Process_data& g_state_data : G_state::currently_active_processes) {
-                if (!g_state_data.was_updated && g_state_data.compare(&win32_data)) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
+
+                pair<Error, bool> result = g_state_data.compare(&win32_data);
+                if (result.first.type != Error_type::ok) {
+                    int x = 2;
+                    return result.first;
+                }
+
+
+                if (!g_state_data.was_updated && result.second) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
                     assert(!was_active_before); // NOTE(damian): cant have 2 same active processes 
                     if (was_active_before) {
                         assert(!g_state_data.was_updated); // TODO(damian): delete later.
                     }
 
-                    g_state_data.update_active();
-                    g_state_data.update_data(&win32_data);
+                    pair<Error, optional<Session>> update_result = g_state_data.update_active();
+                    if (update_result.first.type != Error_type::ok) { 
+                        int x = 2;
+                        return update_result.first; 
+                    }
+                    // Ignoring the possuble session here. Dont need it for just acrive non tracked processes.
+
+                    Error err = g_state_data.update_data(&win32_data);
+                    if (err.type != Error_type::ok) { 
+                        int x = 2;
+                        return err; 
+                    }
                     was_active_before = true;
 
                     // break; // NOTE(damian): commented out for the assert to work while developing.
@@ -466,13 +500,15 @@ namespace G_state {
         // Updating inactive tracked processes
         for (Process_data& process_data : G_state::tracked_processes) {
             if (!process_data.was_updated) {
-                std::pair<bool, Session> maybe_new_session = process_data.update_inactive();
+                pair<Error, optional<Session>> result = process_data.update_inactive();
+                if (result.first.type != Error_type::ok) { return result.first; }
 
-                if (!maybe_new_session.first) { // No session was created after the update. (The process didnt just become inactive)
-                    continue;
-                }
+                if (!result.second.has_value()) {  continue; }
+                // No session was created after the update. (The process didnt just become inactive)
+                
+                process_data.reset_data();
 
-                Session new_session = maybe_new_session.second;
+                Session new_session = result.second.value();
 
                 Error err_1 = write_new_session_to_csv(&new_session, &process_data);
                 if (err_1.type != Error_type::ok) { return err_1; }
@@ -554,8 +590,11 @@ namespace G_state {
             // TODO(damian): this is here now for clarity, move somewhere else.
             for (Process_data& tracked : G_state::tracked_processes) {
                 for (Process_data& current : G_state::currently_active_processes) {
+                    pair<Error, bool> result = tracked.compare(&current);
+                    if (result.first.type != Error_type::ok) { return result.first; }
+
                     if (   tracked.times.has_value() // NOTE(damian): might be bull if process is tracked and has not been active yet.
-                        && tracked.compare(&current)
+                        && result.second
                     ) {
                         // NOTE(damian): not comaring as tracked, 
                         //               since then it would return Error for processes like chrome and vs code.

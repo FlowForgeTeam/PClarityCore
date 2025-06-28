@@ -8,6 +8,8 @@ Process_data::Process_data(string exe_path) {
     this->is_tracked   = false;   
     this->was_updated  = false;  
 
+    this->has_image    = false;
+
     this->steady_start = std::nullopt;
     this->system_start = std::nullopt;
 
@@ -16,10 +18,8 @@ Process_data::Process_data(string exe_path) {
     this->snapshot       = std::nullopt;
     this->product_name   = std::nullopt;
     this->priority_class = std::nullopt;
-    this->process_times  = {0};             // TODO(damian): maybe make this null also, but win32 data cant have it as null. This being null with be great for inactive tracked processes.
     this->affinities     = std::nullopt;
     this->ram_usage      = std::nullopt;
-    this->has_image      = false;
 
     this->exe_path     = exe_path;
     this->times        = std::nullopt;
@@ -31,6 +31,8 @@ Process_data::Process_data(Win32_process_data* win32_data) {
     this->is_active    = false;
     this->was_updated  = false;
     
+    this->has_image    = win32_data->has_image;
+
     this->steady_start = std::nullopt;
     this->system_start = std::nullopt;
 
@@ -39,21 +41,19 @@ Process_data::Process_data(Win32_process_data* win32_data) {
     this->snapshot       = win32_data->snapshot;
     this->product_name   = win32_data->product_name;
     this->priority_class = win32_data->priority_class;
-    this->process_times  = win32_data->process_times;
     this->affinities     = win32_data->affinities;
     this->ram_usage      = win32_data->ram_usage;
-    this->has_image      = win32_data->has_image;
 
     this->exe_path  = win32_data->exe_path;
     this->times     = win32_data->process_times;
     this->cpu_usage = std::nullopt;
 }
 
-static Session create_session(Process_data* process) {
+static pair<Error, Session> create_session(Process_data* process) {
     if (   !process->steady_start.has_value()
         || !process->system_start.has_value()
     ) {
-        assert(false);
+        return pair(Error(Error_type::runtime_logics_failed), Session());
     }
 
     std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - process->steady_start.value();
@@ -64,11 +64,11 @@ static Session create_session(Process_data* process) {
 
     Session session(duration_sec, start_time_in_seconds, end_time_in_seconds);
 
-    return session;
+    return pair(Error(Error_type::ok), session);
 }
 
 // Updating a process as if its new state is active
-std::pair<bool, Session> Process_data::update_active() {
+pair<Error, optional<Session>> Process_data::update_active() {
     this->was_updated = true;
 
     if (this->is_active == false) {
@@ -79,8 +79,12 @@ std::pair<bool, Session> Process_data::update_active() {
         this->last_time_session_was_created = std::chrono::steady_clock::now();
 
         if (this->is_tracked) {
-            Session session = create_session(this);
-            return std::pair(true, session);
+            pair<Error, Session> result = create_session(this);
+            if (result.first.type != Error_type::ok) { 
+                return pair(result.first, std::nullopt); 
+            }
+
+            return pair(Error(Error_type::ok), result.second);
         }
     } 
     else {
@@ -91,16 +95,20 @@ std::pair<bool, Session> Process_data::update_active() {
             if (this->is_tracked && duration_s.count() > G_state::Settings::n_sec_between_csv_updates) {
                 this->last_time_session_was_created = std::chrono::steady_clock::now();
 
-                Session session = create_session(this);
-                return std::pair(true, session);
+                pair<Error, Session> result = create_session(this);
+                if (result.first.type != Error_type::ok) { 
+                    return pair(result.first, std::nullopt); 
+                }
+
+                return pair(Error(Error_type::ok), result.second);
             }
         }
     }
-    return std::pair(false, Session());
+    return pair(Error(Error_type::ok), std::nullopt);
 }
 
 // Updating a process as if its new state is inactive
-std::pair<bool, Session> Process_data::update_inactive() {
+pair<Error, optional<Session>> Process_data::update_inactive() {
     this->was_updated = true;
     
     if (this->is_active == true) {
@@ -113,25 +121,27 @@ std::pair<bool, Session> Process_data::update_inactive() {
                 assert(false);
             }
 
-            Session session = create_session(this);
+            pair<Error, Session> result = create_session(this);
+            if (result.first.type != Error_type::ok) { 
+                return pair(result.first, std::nullopt); 
+            }
 
-            return std::pair(true, session);
+            return pair(Error(Error_type::ok), result.second);
         }
     }
     else {
         // Nothing here
     }
 
-    return std::pair(false, Session());
+    return pair(Error(Error_type::ok), std::nullopt);
 }
 
-void Process_data::update_data(Win32_process_data* new_win32_data) {
-    assert(this->exe_path == new_win32_data->exe_path);
+Error Process_data::update_data(Win32_process_data* new_win32_data) {
+    if (this->exe_path != new_win32_data->exe_path) { return Error(Error_type::runtime_logics_failed); }
     
     this->snapshot       = new_win32_data->snapshot;
     this->product_name   = new_win32_data->product_name;
     this->priority_class = new_win32_data->priority_class;
-    this->process_times  = new_win32_data->process_times;
     this->affinities     = new_win32_data->affinities;
     this->ram_usage      = new_win32_data->ram_usage;
     this->has_image      = new_win32_data->has_image;
@@ -140,8 +150,8 @@ void Process_data::update_data(Win32_process_data* new_win32_data) {
     
     // Getting CPU.
     namespace dyn_inf = G_state::Dynamic_system_info;
+
     if (   this->times.has_value()
-        // && new_win32_data->process_times.has_value()
         && dyn_inf::prev_system_times.has_value()
         && dyn_inf::new_system_times.has_value()
     ) {
@@ -154,43 +164,63 @@ void Process_data::update_data(Win32_process_data* new_win32_data) {
         ULONGLONG current_system_time = (dyn_inf::new_system_times.value().kernel_time - dyn_inf::new_system_times.value().idle_time) + dyn_inf::new_system_times.value().user_time;
         ULONGLONG delta_system_time   = current_system_time - prev_system_time;
 
-        if (delta_system_time == 0) {
-            assert(false); // TODO(damian): deal with this.
+        if (delta_system_time != 0) { 
+            SYSTEM_INFO sys_info;
+            GetSystemInfo(&sys_info);
+            DWORD n_cores = sys_info.dwNumberOfProcessors; // TODO(damian): store this inside static system data.
+        
+            this->cpu_usage = ((double) delta_process_time / (delta_system_time * n_cores)) * 100;
         }
-        
-        SYSTEM_INFO sys_info;
-        GetSystemInfo(&sys_info);
-        DWORD n_cores = sys_info.dwNumberOfProcessors; // TODO(damian): store this inside static system data.
-        
-        this->cpu_usage = ((double) delta_process_time / (delta_system_time * n_cores)) * 100;
+        else { this->cpu_usage = std::nullopt; }
+       
     }
     // ====
     
     this->times = new_win32_data->process_times;
+
+    return Error(Error_type::ok);
 }
 
-bool Process_data::compare(Process_data* other) {
+void Process_data::reset_data() {
+    this->steady_start = std::nullopt;
+    this->system_start = std::nullopt;
+    
+    this->last_time_session_was_created = std::nullopt;
+
+    this->snapshot       = std::nullopt;
+    this->product_name   = std::nullopt;
+    this->priority_class = std::nullopt;
+    this->affinities     = std::nullopt;
+    this->ram_usage      = std::nullopt;
+
+    this->times          = std::nullopt;
+    this->cpu_usage      = std::nullopt;
+}
+
+pair<Error, bool> Process_data::compare(Process_data* other) {
     if (   !this->times.has_value()
         || !other->times.has_value() 
     ) {
-        // TODO(damian): handle better.
-        assert(false);
+        return pair(Error(Error_type::runtime_logics_failed), false);
     }
 
-    return (   this->exe_path == other->exe_path 
-            && this->times.value().creation_time == other->times.value().creation_time
-           ); 
+    bool comparison = (   this->exe_path == other->exe_path 
+                       && this->times.value().creation_time == other->times.value().creation_time
+                      );   
+
+    return pair(Error(Error_type::ok), comparison); 
 }
 
-bool Process_data::compare(Win32_process_data* data) {
+pair<Error, bool> Process_data::compare(Win32_process_data* data) {
     if (!this->times.has_value()) {
-        assert(false);
+        return pair(Error(Error_type::runtime_logics_failed), false);
     }
 
-    // THIS IS WHY, NOTE IT FOR THE FUTURE
-    return (   this->exe_path == data->exe_path 
-            && this->times.value().creation_time == data->process_times.creation_time
-           ); 
+    bool comparison = (   this->exe_path == data->exe_path 
+                       && this->times.value().creation_time == data->process_times.creation_time
+                      ); 
+    
+    return pair(Error(Error_type::ok), comparison);
 }
 
 bool Process_data::compare_as_tracked(Process_data* other) {
@@ -219,8 +249,6 @@ void convert_to_json(Process_data* process_data, json* j) {
     using std::chrono::seconds;
 
     (*j)["is_active"]   = process_data->is_active;
-    (*j)["is_tracked"]  = process_data->is_tracked;
-    (*j)["was_updated"] = process_data->was_updated;
 
     if (process_data->steady_start.has_value()) {
         (*j)["steady_start"] = duration_cast<seconds>(process_data->steady_start.value().time_since_epoch()).count(); 
@@ -236,6 +264,20 @@ void convert_to_json(Process_data* process_data, json* j) {
         (*j)["system_start"] = nullptr; 
     }
 
+    if (process_data->snapshot.has_value()) {
+        (*j)["pid"]             = process_data->snapshot.value().pid;
+        (*j)["started_threads"] = process_data->snapshot.value().started_threads;
+        (*j)["ppid"]            = process_data->snapshot.value().ppid;
+        (*j)["base_priority"]   = process_data->snapshot.value().base_priority;
+        (*j)["exe_name"]        = process_data->snapshot.value().exe_name;
+    } else {
+        (*j)["pid"]             = nullptr;
+        (*j)["started_threads"] = nullptr;
+        (*j)["ppid"]            = nullptr;
+        (*j)["base_priority"]   = nullptr;
+        (*j)["exe_name"]        = nullptr;
+    }
+
     if (process_data->product_name.has_value()) {
         (*j)["product_name"] = process_data->product_name.value();
     }
@@ -243,41 +285,35 @@ void convert_to_json(Process_data* process_data, json* j) {
         (*j)["product_name"] = nullptr;
     }
 
-    if (process_data->snapshot.has_value()) {
-        (*j)["pid"] = process_data->snapshot.value().pid;
-        (*j)["started_threads"] = process_data->snapshot.value().started_threads;
-        (*j)["base_priority"] = process_data->snapshot.value().base_priority;
-        (*j)["exe_name"] = process_data->snapshot.value().exe_name;
-    } else {
-        (*j)["pid"] = nullptr;
-        (*j)["started_threads"] = nullptr;
-        (*j)["base_priority"] = nullptr;
-        (*j)["exe_name"] = nullptr;
-    }
-
     (*j)["exe_path"] = process_data->exe_path;
 
-    // Times data
     if (process_data->times.has_value()) {
         (*j)["creation_time"] = process_data->times.value().creation_time;
-        (*j)["exit_time"] = process_data->times.value().exit_time;
-        (*j)["kernel_time"] = process_data->times.value().kernel_time;
-        (*j)["user_time"] = process_data->times.value().user_time;
+        (*j)["exit_time"]     = process_data->times.value().exit_time;
+        (*j)["kernel_time"]   = process_data->times.value().kernel_time;
+        (*j)["user_time"]     = process_data->times.value().user_time;
     } else {
         (*j)["creation_time"] = nullptr;
-        (*j)["exit_time"] = nullptr;
-        (*j)["kernel_time"] = nullptr;
-        (*j)["user_time"] = nullptr;
+        (*j)["exit_time"]     = nullptr;
+        (*j)["kernel_time"]   = nullptr;
+        (*j)["user_time"]     = nullptr;
     }
 
-    // RAM usage
+    if (process_data->affinities.has_value()) {
+        (*j)["process_affinity"] = process_data->affinities.value().process_affinity;
+        (*j)["system_affinity"]  = process_data->affinities.value().system_affinity;
+    }
+    else {
+        (*j)["process_affinity"] = nullptr;
+        (*j)["system_affinity"]  = nullptr;
+    }
+
     if (process_data->ram_usage.has_value()) {
         (*j)["ram_usage"] = process_data->ram_usage.value();
     } else {
         (*j)["ram_usage"] = nullptr;
     }
 
-    // CPU usage
     if (process_data->cpu_usage.has_value()) {
         (*j)["cpu_usage"] = process_data->cpu_usage.value();
     } else {

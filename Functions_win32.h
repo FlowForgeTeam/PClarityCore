@@ -60,8 +60,8 @@ struct Win32_process_data {
     bool                            has_image;
 };
 // NOTE(damian): 
-//      Process_times are not optional, even tho they might be for the same reason that exe_path isnt optional.
-//      We use them to identidy processes. Because of that, we cant have them be null.
+//      Process_times are not optional, even tho they might be. They are not the same reason that exe_path isnt optional.
+//      We use them to identidy processes. Because of that, we cant be working on active processes that dont allow us to id them correcly.
 
 tuple< G_state::Error, 
        vector<Win32_process_data>, 

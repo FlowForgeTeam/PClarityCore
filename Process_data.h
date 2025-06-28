@@ -12,6 +12,14 @@
 using nlohmann::json;
 using std::vector;
 using std::optional;
+using std::pair;
+
+// Predeclare for G_state
+namespace G_state {
+    enum class Error_type;
+    struct Error;
+}
+using G_state::Error, G_state::Error_type;
 
 struct Session;
 
@@ -23,6 +31,9 @@ public:
     bool is_tracked;   // NOTE(damian): this is used to determine, if a process has to have sessions created when declarated inactive.
     bool was_updated;  // NOTE(damian): used inside global state to simbolase if the process was updates, if not, a deleting might be performed. 
     
+    // TODO(damian): do i really need this, i guess not really, but this might be better for the client, to be able to not convert path all the time for processes with not icons. MAYBE.
+    bool has_image;
+    
     // These are used later for process creation when the process ends.
     optional<std::chrono::steady_clock::time_point> steady_start;
     optional<std::chrono::system_clock::time_point> system_start;
@@ -33,25 +44,24 @@ public:
     optional<Win32_snapshot_data>  snapshot;
     optional<string>               product_name;
     optional<DWORD>                priority_class;
-    Win32_process_times            process_times;   // NOTE(damian): to know why this is not optional like other fields, read NOTE inside Win32_functions.h
     optional<Win32_affinities>     affinities;
     optional<SIZE_T>               ram_usage;
-    bool                           has_image;
 
     // Special data, might have different update patterns and stuff
-    string                         exe_path;
+    string                        exe_path;
     optional<Win32_process_times> times;
-    optional<float>                cpu_usage;
+    optional<float>               cpu_usage;
 
     Process_data(string exe_path);
     Process_data(Win32_process_data* win32_data);
 
-    std::pair<bool, Session> update_active();
-    std::pair<bool, Session> update_inactive();
-    void update_data(Win32_process_data* new_win32_data);
+    pair<Error, optional<Session>> update_active();
+    pair<Error, optional<Session>> update_inactive();
+    Error update_data(Win32_process_data* new_win32_data);
+    void reset_data();
 
-    bool compare           (Process_data*       other);
-    bool compare           (Win32_process_data* data);
+    pair<Error, bool> compare(Process_data*        other);
+    pair<Error, bool> compare (Win32_process_data* data);
 
     bool compare_as_tracked(Process_data*       other);
     bool compare_as_tracked(Win32_process_data* data);

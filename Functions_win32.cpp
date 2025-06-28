@@ -11,14 +11,14 @@
 
 namespace fs = std::filesystem;
 
-// TODO(damian): if all these win32 function fail for the same reason then skipping this process is fine,
-//               but if they dont, we would be better of getting some public info for the process, 
-//               rather then getting none. (Just something to think about).
-
 static bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name);
 static bool get_process_times       (HANDLE process_handle, Win32_process_times* times);
 static optional<Win32_system_times> get_system_times();
-static bool store_process_icon_image(Win32_process_data* data);
+
+static Error store_process_icon_image(Win32_process_data* data);
+//static Error save_icon_to_path(PBYTE icon, DWORD buf, fs::path* file_path);
+
+
 static tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE process_handle,
                                                                           WCHAR* stack_buffer,
                                                                           size_t stack_buffer_len);
@@ -28,24 +28,6 @@ tuple< G_state::Error,
        optional<Win32_system_times>,
        ULONGLONG,
        SYSTEMTIME > win32_get_process_data() {
-
-    // TODO(damian): create a file and report that the file was not present via G_state responce.
-    std::error_code err_code_0;
-    bool exists = std::filesystem::exists(G_state::path_dir_process_icons, err_code_0);
-    if (err_code_0) {
-        return tuple(G_state::Error(G_state::Error_type::os_error),
-            vector<Win32_process_data>(),
-            optional<Win32_system_times>(),
-            0,
-            SYSTEMTIME{0});
-    }
-    if (!exists) {
-        return tuple(G_state::Error(G_state::Error_type::runtime_filesystem_is_all_fucked_up),
-            vector<Win32_process_data>(),
-            optional<Win32_system_times>(),
-            0,
-            SYSTEMTIME{0});
-    }
 
     // Take a snapshot of all processes in the system.
     HANDLE process_shapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -126,7 +108,6 @@ tuple< G_state::Error,
             data.priority_class = priority;
         }
 
-        // TODO: use struct for this as well, so dont have to deal with 50 optionals at the same time.
         // 5. Getting times for process
         Win32_process_times process_times = {};
         bool err_code_4 = get_process_times(process_handle, &process_times);
@@ -162,10 +143,14 @@ tuple< G_state::Error,
 
         // TODO(damian): handle witout skip.
         // 7.
-        bool err_code_7 = store_process_icon_image(&data);
-        if (!err_code_7) {
+        Error err_7 = store_process_icon_image(&data);
+        if (err_7.type != Error_type::ok) { 
             CloseHandle(process_handle);
-            continue;
+            return tuple(err_7, 
+                         vector<Win32_process_data>(), 
+                         Win32_system_times{},
+                         ULONGLONG{},
+                         SYSTEMTIME{});
         }
 
         // GPU
@@ -201,42 +186,6 @@ void wchar_to_utf8(WCHAR* wstr, string* str) {
 
     str->resize(size - 1); // size to include the null terminator
     WideCharToMultiByte(CP_UTF8, 0, wstr, -1, &(str->operator[](0)), size, nullptr, nullptr);
-}
-
-bool SaveIconToPath(PBYTE icon, DWORD buf, std::string output_path) {
-    try {
-        // Extract directory path and create it if it doesn't exist
-        fs::path filePath(output_path);
-        fs::path dirPath = filePath.parent_path();
-
-        if (!dirPath.empty() && !fs::exists(dirPath)) {
-            std::cout << "Creating directory: " << dirPath << std::endl;
-            fs::create_directories(dirPath);
-        }
-
-        std::ofstream file(output_path, std::ios::binary);
-        if (file.is_open()) {
-            file.write(reinterpret_cast<char*>(icon), buf);
-            file.close();
-            std::cout << "Icon saved to: " << output_path << std::endl;
-            return true;
-        }
-        else {
-            std::cout << "Failed to create output file: " << output_path << std::endl;
-            return false;
-        }
-    }
-    catch (const fs::filesystem_error& ex) {
-        std::cout << "Filesystem error: " << ex.what() << std::endl;
-        return false;
-    }
-}
-
-// TODO(damian): just use fs::exists()
-bool FileExists(std::string& path) {
-    DWORD fileAttr = GetFileAttributesA(path.c_str());
-    return (fileAttr != INVALID_FILE_ATTRIBUTES &&
-        !(fileAttr & FILE_ATTRIBUTE_DIRECTORY));
 }
 
 // =============================================================================================
@@ -450,11 +399,17 @@ optional<Win32_system_times> get_system_times() {
     return optional<Win32_system_times>(times);
 }
 
-// bool store_process_icon_image(Win32_process_data* data) {
-bool store_process_icon_image(Win32_process_data* data) {
-    // Creating image if none exists
-    // NOTE(andrii): default_icon_path - the path to which the icons are saved.
-    // The directory "icons" in the same directory by default
+// TODO(damian): handle with G_state runtime filesysytem error better.
+Error store_process_icon_image(Win32_process_data* data) {
+    // Checking validity of the file system.
+    std::error_code err_code;
+    bool dir_exists = fs::is_directory(G_state::path_dir_process_icons, err_code);
+    if (!dir_exists) {
+        if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+        else { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+    }
+
+    // Creating image if doesnt exist.
     if (!data->has_image) {
         fs::path icon_path;
         icon_path.append(G_state::path_dir_process_icons);
@@ -465,38 +420,34 @@ bool store_process_icon_image(Win32_process_data* data) {
         icon_path.append(process_path_copy);
         icon_path.replace_extension(".ico");
 
-        string icon_path_as_str = icon_path.string();
-
-        if (!FileExists(icon_path_as_str)) {
-            DWORD bufLen = 0;
-            PBYTE icon = get_exe_icon_from_file_utf8(data->exe_path.c_str(), TRUE, &bufLen);
-
-            // NOTE(andrii): commented code was for debugging, could implement better logging
-            // if (data.exe_name == "zen.exe") {
-            //     std::cout << "Zen icon found for: " << data.exe_name << std::endl;
-            // }
-
-            if (icon) {
-                if (!SaveIconToPath(icon, bufLen, icon_path_as_str)) {
-                    //std::cerr << "Failed to save icon to path: " << icon_path << std::endl;
-                }
-                else {
-                    data->has_image = true;
-                }
-                free(icon);
-            }
-            else {
-                //std::cerr << "Failed to get icon for process: " << data->exe_name << std::endl;
-            }
+        std::error_code file_err_code;
+        bool file_exists = fs::is_regular_file(icon_path, file_err_code);
+        if (file_exists) {
+            data->has_image = true;
         }
         else {
-            data->has_image = true;
+            if (file_err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+
+            DWORD bufLen = 0;
+            PBYTE icon = get_exe_icon_from_file_utf8(data->exe_path.c_str(), TRUE, &bufLen);
+            if (icon) { 
+                std::fstream icon_file(icon_path, std::ios::out | std::ios::binary);
+                if (!icon_file.is_open()) { return Error(Error_type::os_error); }
+                icon_file.write(reinterpret_cast<char*>(icon), bufLen); // TODO(damian): whta is this reiterpret_cast thingy in here?
+                icon_file.close();
+
+                data->has_image = true;
+            }
+            else {
+                data->has_image = false; 
+                //std::cerr << "Failed to get icon for process: " << data->exe_name << std::endl;
+            }
+            free(icon);
         }
     }
 
-    return true;
+    return Error(Error_type::ok);
 }
-
 
 
 

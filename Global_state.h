@@ -61,6 +61,8 @@ namespace G_state {
 		
 		os_error = 123,
 
+		runtime_logics_failed = 124,
+
 		// TODO(damian): remove
 		// Network`
 		tcp_initialisation_failed, // Not on the data thread
