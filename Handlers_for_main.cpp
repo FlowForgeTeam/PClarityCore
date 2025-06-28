@@ -29,7 +29,6 @@ namespace Client {
     static Data_thread_error_status* error_request_p = nullptr; // NOTE(damian): hate it here.
 
     static void create_responce(G_state::Error* err, json* data, json* responce);
-    static void create_responce_for_invalid(json* responce); // TODO(damian): dont like this, 1 func should be able to handle both valid and invalid commands.
 
     void client_thread() {
         while (client_running) {
@@ -48,20 +47,16 @@ namespace Client {
 
             // TODO(damian): its stupid to have sigle message handeling at a time but also multiple message deletion each iteration. 
 
-            // =======================================================================================
-            // TODO(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
-            //				 assert to make sure there is not mix up in the middle.
+            // NOTE(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
             bool is_handled = false;
 			for (Request_status& status : request_queue) {
                 if (status.handled && !is_handled) {
                     is_handled = true;
                 }
 				else if (!status.handled && is_handled) {
-					std::cout << "Error: command queue has a mix of handled and unhandled commands." << std::endl;
-					assert(false);
+                    assert(false); // TODO: stop client and data thread, since this is a fatal error.
 				}
             }
-            // =======================================================================================
 
             auto p_to_error    = Client::data_thread_error_queue.begin(); 
             for (; p_to_error != Client::data_thread_error_queue.end(); ) {
@@ -82,10 +77,11 @@ namespace Client {
                 Client::handle_socker_error();
                 continue;
             }
-            if (n_bytes_returned > receive_buffer_size - 1) { // Messege overflow.
-                // TODO: Add something that tells the client that the request is too long.
+            if (n_bytes_returned > 0) { // Messege overflow.
+                // TODO: err codes should not be hardcoded.
                 json responce;
-                create_responce_for_invalid(&responce);
+                Error err((Error_type) -2, "Request was too long");
+                create_responce(&err, nullptr, &responce);
 
                 string messege = std::move(responce.dump(4));
 
@@ -93,6 +89,7 @@ namespace Client {
                 if (send_err_code == SOCKET_ERROR) {
                     Client::handle_socker_error();
                 }
+                continue;
             }
             receive_buffer[n_bytes_returned] = '\0';
 
@@ -119,8 +116,10 @@ namespace Client {
                 std::pair<Request, bool> result = request_from_json(receive_buffer);
                 if (!result.second) {
                     
+                    // TODO: err codes should not be hardcoded.
                     json responce;
-                    create_responce_for_invalid(&responce);
+                    Error err((Error_type) -1, "Invalid request");
+                    create_responce(&err, nullptr, &responce);
 
                     string messege = std::move(responce.dump(4));
 
@@ -206,13 +205,6 @@ namespace Client {
         std::cout << "err_code: " << WSAGetLastError() << std::endl;
         closesocket(Client::client_socket);
         Client::need_new_client = true;
-    }
-
-    static void create_responce_for_invalid(json* responce) {
-        // TODO(damian): make -1 a constant. 
-        (*responce)["err_code"] = -1;
-        (*responce)["data"]     = json::object(); 
-        (*responce)["messege"]  = "Invalid command";
     }
 
     static void create_responce(G_state::Error* err, json* data, json* responce) {

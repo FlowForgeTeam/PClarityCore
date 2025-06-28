@@ -5,8 +5,6 @@
 
 using std::list;
 
-// TODO(damian): handle out of bounds for message_parts. 
-
 namespace Client {
     struct Request_status {
         bool    handled;
@@ -21,7 +19,7 @@ namespace Client {
     // Only data thread can add new entries here. Client thread will use them and mark as handled.
     extern list<Data_thread_error_status> data_thread_error_queue;
 
-    // TODO(damian): maybe this has to be on the data thread side, move this into the G_state.
+    // TODO(damian): maybe this beeing on the data thread side would make more sense.
     extern list<Request_status> request_queue; 
 
     extern bool   client_running;       

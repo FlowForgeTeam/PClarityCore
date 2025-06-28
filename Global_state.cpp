@@ -427,17 +427,23 @@ namespace G_state {
                     // if (is_tracked) { return Error(Error_type::runtime_logics_failed); } 
 
                     pair<Error, optional<Session>> result = g_state_data.update_active();
-                    if (result.first.type != Error_type::ok) { return result.first; }
+                    if (result.first.type != Error_type::ok) { 
+                        return result.first; 
+                    }
 
                     if (result.second.has_value()) {
                         if (result.second.value().duration_sec.count() > 0) {
                             Error err = write_current_session_to_csv(&result.second.value(), &g_state_data);
-                            if (err.type != Error_type::ok) { return err; }
+                            if (err.type != Error_type::ok) { 
+                                return err; 
+                            }
                         }
                     }
 
                     Error err = g_state_data.update_data(&win32_data);
-                    if (err.type != Error_type::ok) { return err; }
+                    if (err.type != Error_type::ok) { 
+                        return err; 
+                    }
                     
                     is_tracked = true;
                     break; 
@@ -449,7 +455,9 @@ namespace G_state {
             for (Process_data& g_state_data : G_state::currently_active_processes) {
 
                 pair<Error, bool> result = g_state_data.compare(&win32_data);
-                if (result.first.type != Error_type::ok) { return result.first; }
+                if (result.first.type != Error_type::ok) {
+                    return result.first; 
+                }
 
                 if (!g_state_data.was_updated && result.second) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
                     
@@ -457,11 +465,15 @@ namespace G_state {
                     // if (was_active_before) { return Error(Error_type::runtime_logics_failed); } 
 
                     pair<Error, optional<Session>> update_result = g_state_data.update_active();
-                    if (update_result.first.type != Error_type::ok) { return update_result.first; }
+                    if (update_result.first.type != Error_type::ok) { 
+                        return update_result.first;
+                    }
                     // Ignoring the possible session here. Dont need it for active, non tracked processes.
 
                     Error err = g_state_data.update_data(&win32_data);
-                    if (err.type != Error_type::ok) { return err; }
+                    if (err.type != Error_type::ok) { 
+                        return err; 
+                    }
                     
                     was_active_before = true;
                     break; 
@@ -471,7 +483,9 @@ namespace G_state {
 
             Process_data new_process(&win32_data);
             pair<Error, optional<Session>> update_result = new_process.update_active();
-            if (update_result.first.type != Error_type::ok) { return update_result.first; }
+            if (update_result.first.type != Error_type::ok) {
+                return update_result.first; 
+            }
             // Ignoring the possible session here. Dont need it for active, non tracked processes.
             
             G_state::currently_active_processes.push_back(new_process);
@@ -745,7 +759,7 @@ namespace G_state {
             }
         }
         
-        std::fstream csv_current_file(path, std::ios::in | std::ios::trunc);
+        std::fstream csv_current_file(path, std::ios::out | std::ios::trunc);
         if (!csv_current_file.is_open()) { return Error(Error_type::os_error); }
         
         csv_current_file << G_state::process_session_csv_file_header;
