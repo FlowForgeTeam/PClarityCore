@@ -3,6 +3,9 @@
 using G_state::Error_type;
 using G_state::Error;
 
+// NOTE(damian)(28 June 2025): i could easily not use G_state::Error here and just return optional SOCKET and a message.
+// 							   BUT its is only used once, so its fine.
+
 pair<SOCKET, G_state::Error> initialise_tcp_connection_with_client() {
 	// Getting data about windows socket implementation
 	// Using MAKEWORD(2,2) since 2.2 is the current spec version for Windows

@@ -148,7 +148,7 @@ namespace Client {
                         Client::handle_quit(quit);
                     }
                     else if (shutdown != nullptr) {
-                        assert(false);
+                        assert(false); // TODO: handle better.
                         // Client::handle_shutdown(shutdown);
                     } 
                     else if (track != nullptr) {
@@ -173,7 +173,7 @@ namespace Client {
                         Client::handle_change_update_time(change_time);
                     }
                     else {
-                        assert(false);
+                        assert(false); // TODO: handle better.
                     }
 
                 }
@@ -191,15 +191,15 @@ namespace Client {
 
     void wait_for_client_to_connect() {
         std::cout << "Waiting for a new connection with a client." << std::endl;
-        //pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
-        // if (result.second.type == G_state::Error_type::ok) {
-        //     Client::client_socket = result.first;
-        //     std::cout << "Client connected. \n" << std::endl;
-        // }
-        // else {
+        pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
+        if (result.second.type == G_state::Error_type::ok) {
+            Client::client_socket = result.first;
+            std::cout << "Client connected. \n" << std::endl;
+        }
+        else {
             std::cout << "Error trying to initialise connection with a client." << std::endl;
             fatal_error = G_state::Error(G_state::Error_type::tcp_initialisation_failed);
-        // }
+        }
     }
 
     void handle_socker_error() {
@@ -221,22 +221,22 @@ namespace Client {
         (*responce)["messege"]  = err->message;
     }
 
-    void handle_report(Report_request* report) {
-        assert(!G_state::Client_data::need_data);
+    Error handle_report(Report_request* report) {
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
         G_state::Client_data::need_data = true;
-        while(G_state::Client_data::need_data);         
-
+        while(G_state::Client_data::need_data);       
+        
         vector<json> j_tracked;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+        for (Process_data& data : G_state::Client_data::data.copy_tracked_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_tracked.push_back(temp);
         }
 
         vector<json> j_cur_active;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+        for (Process_data& data : G_state::Client_data::data.copy_currently_active_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_cur_active.push_back(temp);
@@ -257,6 +257,7 @@ namespace Client {
             Client::handle_socker_error();                
         }
 
+        return Error(Error_type::ok);
     }
 
     void handle_quit(Quit_request* quit) {
@@ -348,49 +349,52 @@ namespace Client {
 
     }
 
-    void handle_grouped_report(Grouped_report_request* report) {
-       assert(!G_state::Client_data::need_data);            
+    Error handle_grouped_report(Grouped_report_request* report) {
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
 
-       G_state::Client_data::need_data = true;
+        G_state::Client_data::need_data = true;
+        while(G_state::Client_data::need_data);
+        
+        G_state::Client_data::Data* data = &G_state::Client_data::data;
 
-       while(G_state::Client_data::need_data);    
+        vector<json> j_tracked;
+        for (Process_data& data : data->copy_tracked_processes) {
+            json j_data;
+            convert_to_json(&data, &j_data);
+            j_tracked.push_back(j_data);
+        }
 
-       G_state::Client_data::Data* data = &G_state::Client_data::maybe_data.value();
+        vector<Process_node*> roots;
+        create_process_tree(&roots, &data->copy_currently_active_processes);
 
-       vector<json> j_tracked;
-       for (Process_data& data : data->copy_tracked_processes) {
-           json j_data;
-           convert_to_json(&data, &j_data);
-           j_tracked.push_back(j_data);
-       }
+        vector<json> j_roots;
+        for (Process_node* root : roots) { 
+            j_roots.push_back(create_json_from_tree_node(root)); 
+        }
 
-       vector<Process_node*> roots;
-       create_process_tree(&roots, &data->copy_currently_active_processes);
+        json j_data;
+        j_data["tracked"] = j_tracked;
+        j_data["active"]  = j_roots;
 
-       vector<json> j_roots;
-       for (Process_node* root : roots) { 
-           j_roots.push_back(create_json_from_tree_node(root)); 
-       }
+        G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
+        json responce;
+        create_responce(&err, &j_data, &responce);
 
-       json j_data;
-       j_data["tracked"] = j_tracked;
-       j_data["active"]  = j_roots;
+            std::string message_as_str = responce.dump(4);
 
-       G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
-       json responce;
-       create_responce(&err, &j_data, &responce);
+        int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error(); 
+        }
 
-        std::string message_as_str = responce.dump(4);
+        free_process_tree(&roots);
 
-       int send_err_code = send(client_socket, message_as_str.c_str(), message_as_str.length(), NULL);
-       if (send_err_code == SOCKET_ERROR) {
-           Client::handle_socker_error(); 
-       }
-
-       free_process_tree(&roots);
+        return Error(Error_type::ok);
     }
 
     void handle_pc_time(Pc_time_request* request) {
+        // TODO: see if data request from data thread is need here.
+
         json system_json;
         system_json["up_time_ms"] = G_state::Dynamic_system_info::up_time;
 
@@ -417,15 +421,15 @@ namespace Client {
 
     }
 
-    void handle_report_apps_only(Report_apps_only_request* report_apps_only) {
-        assert(!G_state::Client_data::need_data);
+    Error handle_report_apps_only(Report_apps_only_request* report_apps_only) {
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
         G_state::Client_data::need_data = true;
-        while(G_state::Client_data::need_data);         
-
+        while(G_state::Client_data::need_data);      
+        
         vector<json> j_tracked;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+        for (Process_data& data : G_state::Client_data::data.copy_tracked_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_tracked.push_back(temp);
@@ -435,7 +439,7 @@ namespace Client {
         DWORD explorer_pid = 0;
         
         // Getting pid for explorer.exe from tracked.
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+        for (Process_data& data : G_state::Client_data::data.copy_tracked_processes) {
             if (!data.snapshot.has_value()) continue;
             if (data.snapshot.value().exe_name == "explorer.exe") {
                 explorer_pid = data.snapshot.value().pid;
@@ -446,7 +450,7 @@ namespace Client {
 
         // Getting pid for explorer.exe from ective apps.
         if (!is_set) {
-            for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+            for (Process_data& data : G_state::Client_data::data.copy_currently_active_processes) {
                 if (!data.snapshot.has_value()) continue;
                 if (data.snapshot.value().exe_name == "explorer.exe") {
                     explorer_pid = data.snapshot.value().pid;
@@ -458,7 +462,7 @@ namespace Client {
 
         // Jsoning
         vector<json> j_apps;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_currently_active_processes) {
+        for (Process_data& data : G_state::Client_data::data.copy_currently_active_processes) {
             if (!data.snapshot.has_value()) continue;
             if (data.snapshot.value().ppid == explorer_pid) {
                 json temp;
@@ -482,17 +486,18 @@ namespace Client {
             Client::handle_socker_error();                
         }
 
+        return Error(Error_type::ok);
     }
 
-    void handle_report_tracked_only(Report_tracked_only* request) {
-        assert(!G_state::Client_data::need_data);
+    Error handle_report_tracked_only(Report_tracked_only* request) {
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
         G_state::Client_data::need_data = true;
         while (G_state::Client_data::need_data);
 
         vector<json> j_tracked;
-        for (Process_data& data : G_state::Client_data::maybe_data.value().copy_tracked_processes) {
+        for (Process_data& data : G_state::Client_data::data.copy_tracked_processes) {
             json temp;
             convert_to_json(&data, &temp);
             j_tracked.push_back(temp);
@@ -511,6 +516,8 @@ namespace Client {
         if (send_err_code == SOCKET_ERROR) {
             Client::handle_socker_error();
         }
+
+        return Error(Error_type::ok);
     }
 
     void handle_change_update_time(Change_update_time* update_time) {
@@ -536,8 +543,6 @@ namespace Client {
         }
     
     }
-
-
 
     // == Helpers ========================================================
 

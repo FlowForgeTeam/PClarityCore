@@ -26,3 +26,5 @@
 2025 June 28 (Saturday), (12:33) Folder with icons for processes wasnt present when was expected. New one was created.
 2025 June 28 (Saturday), (13:16) Folder with icons for processes wasnt present when was expected. New one was created.
 2025 June 28 (Saturday), (13:23) Folder with icons for processes wasnt present when was expected. New one was created.
+2025 June 28 (Saturday), (14:40) Invalid structure for file with tracked processes on startu. GG. App cant run if this is the case.
+2025 June 28 (Saturday), (14:40) Error when reading tracked processes json, its value were of a different type from ones that were expected. GG. App cant run if this is the case.

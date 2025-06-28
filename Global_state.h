@@ -25,9 +25,6 @@ namespace G_state {
 	enum class Error_type {
 		ok = 1,
 
-		// Temporary
-		tracked_and_current_process_vectors_share_data, // NOTE(damian): This used used for with asserta right now.
-
 		// State
 		startup_file_with_tracked_processes_doesnt_exist        = 10,			 // W
 		startup_sessions_folder_doesnt_exist                    = 11,				  // W	
@@ -63,11 +60,16 @@ namespace G_state {
 
 		runtime_logics_failed = 124,
 
-		// TODO(damian): remove
-		// Network`
-		tcp_initialisation_failed, // Not on the data thread
-
+		CreateToolhelp32Snapshot_failed = 125,
+		Process32First_failed = 126,
+		
 		malloc_fail,
+
+		tracked_and_current_process_vectors_share_data,
+
+		// NOTE(damian): It would be better to remove this, but its fine.
+		tcp_initialisation_failed, 
+
 	};
 
 	struct Error {
@@ -117,7 +119,7 @@ namespace G_state {
 			vector<Process_data> copy_currently_active_processes;
 			vector<Process_data> copy_tracked_processes;	
 		};
-		extern optional<Data> maybe_data;
+		extern Data data;
 	}
 
 	// This is global system data. 

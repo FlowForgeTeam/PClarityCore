@@ -2,7 +2,6 @@
 #include <iostream>
 #include <Windows.h>
 #include <tlhelp32.h>
-#include <cassert>
 #pragma comment(lib, "version") // Linking the dll
 #include <cwchar>
 
@@ -11,8 +10,8 @@
 
 namespace fs = std::filesystem;
 
-static bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name);
-static bool get_process_times       (HANDLE process_handle, Win32_process_times* times);
+static pair<Error, bool> get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name);
+static bool get_process_times                    (HANDLE process_handle, Win32_process_times* times);
 static optional<Win32_system_times> get_system_times();
 
 static Error store_process_icon_image(Win32_process_data* data);
@@ -32,14 +31,22 @@ tuple< G_state::Error,
     // Take a snapshot of all processes in the system.
     HANDLE process_shapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (process_shapshot_handle == INVALID_HANDLE_VALUE) {
-        assert(false);
+        return tuple(Error(Error_type::CreateToolhelp32Snapshot_failed),
+                     vector<Win32_process_data>(),
+                     std::nullopt,
+                     ULONGLONG{},
+                     SYSTEMTIME{}); 
     }
     
     PROCESSENTRY32 pe32;
     pe32.dwSize = sizeof(PROCESSENTRY32);
     if (!Process32First(process_shapshot_handle, &pe32)) {
         CloseHandle(process_shapshot_handle);
-        assert(false);
+        return tuple(Error(Error_type::Process32First_failed),
+                     vector<Win32_process_data>(),
+                     std::nullopt,
+                     ULONGLONG{},
+                     SYSTEMTIME{}); 
     }
 
     vector<Win32_process_data> process_data_vec;
@@ -80,6 +87,7 @@ tuple< G_state::Error,
         if (err_2.type != Error_type::ok) { 
             if (is_buffer_heap) free(path_buffer.value());
             CloseHandle(process_handle); 
+            CloseHandle(process_shapshot_handle);
             return tuple(err_2, 
                          vector<Win32_process_data>(), 
                          Win32_system_times{},
@@ -99,17 +107,22 @@ tuple< G_state::Error,
         
         // 3. Getting process product name (ONLY IN ENGLISH)
         string temp_product_name;
-        bool err_code_3 = get_process_product_name(process_handle, path_buffer.value(), &temp_product_name);
+        pair<Error, bool> maybe_prod_name = get_process_product_name(process_handle, path_buffer.value(), &temp_product_name);
+        
+        if (is_buffer_heap) { free(path_buffer.value()); path_buffer = nullptr; }
 
-        if (is_buffer_heap) {
-            free(path_buffer.value());
-            path_buffer = nullptr;
+        if (maybe_prod_name.first.type != Error_type::ok) { 
+            CloseHandle(process_handle); 
+            CloseHandle(process_shapshot_handle);
+            return tuple(err_2, 
+                         vector<Win32_process_data>(), 
+                         Win32_system_times{},
+                         ULONGLONG{},
+                         SYSTEMTIME{}); 
         }
 
-        if (!err_code_3) 
-            data.product_name = std::nullopt;
-        else 
-            data.product_name = std::move(temp_product_name);
+        if (maybe_prod_name.second) { data.product_name = std::move(temp_product_name); } 
+        else                        { data.product_name = std::nullopt; }
 
         // 4. 
         DWORD priority = GetPriorityClass(process_handle);
@@ -157,6 +170,7 @@ tuple< G_state::Error,
         Error err_7 = store_process_icon_image(&data);
         if (err_7.type != Error_type::ok) { 
             CloseHandle(process_handle);
+            CloseHandle(process_shapshot_handle);
             return tuple(err_7, 
                          vector<Win32_process_data>(), 
                          Win32_system_times{},
@@ -245,9 +259,9 @@ tuple< optional<WCHAR*>, bool, DWORD, Error > win32_get_path_for_process(HANDLE 
 
 }
 
-bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name) {
+pair<Error, bool> get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, string* product_name) {
     DWORD file_version_size_bytes = GetFileVersionInfoSizeW(exe_path_buffer, NULL);
-    if (file_version_size_bytes == 0) { return false; }
+    if (file_version_size_bytes == 0) { return pair(Error(Error_type::ok), false); }
 
     const size_t stack_alloc_len   = 2500;
     uint8_t      stack_alloc[stack_alloc_len];
@@ -264,20 +278,17 @@ bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, str
     else {
         file_version_data = (uint8_t*) malloc(file_version_size_bytes);
         if (file_version_data == NULL) {
-            assert(false);
-            // TODO(damian): handle better.
+            return pair(Error(Error_type::malloc_fail), false);
         }
-        file_info_err           = GetFileVersionInfoW(exe_path_buffer, NULL, file_version_size_bytes, file_version_data);
         heap_used               = true;
+        file_info_err           = GetFileVersionInfoW(exe_path_buffer, NULL, file_version_size_bytes, file_version_data);
     }
 
-    // TODO: malloc more if a bigger name is needed. 
     // TODO: think about a way to not have to get product name every time maybe. Allocating every time is ridiculus.
 
     if (file_info_err == 0) {
         if (heap_used) free(file_version_data);
-        return false;        
-        // TODO(damian): handle better.
+        return pair(Error(Error_type::ok), false);        
     }
 
     WCHAR* product_name_engl = nullptr;
@@ -288,13 +299,13 @@ bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, str
                                          &product_name_len_engl);
     if (translation_err == 0) {
         if (heap_used) free(file_version_data);
-        return false;
-        // TODO(damian): handle better.
+        return pair(Error(Error_type::ok), false);        
     }  
 
     wchar_to_utf8(product_name_engl, product_name);
 
-    return true;
+    if (heap_used) free(file_version_data);
+    return pair(Error(Error_type::ok), true);        
 
     // This iterated over the langs and codepages a process supports.
     // NOTE(damian): dont know what to if the process supports more than 1 lang for the proouctname.

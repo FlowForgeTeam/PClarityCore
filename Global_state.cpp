@@ -75,9 +75,13 @@ namespace G_state {
             if (!file.is_open()) {
                 return Error(Error_type::os_error);
             }
-            file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M) ") 
-                 << "File for error logs didnt exists as was expected."
-                 << "\n";
+
+            if (err_time == 0) {
+                file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M) ");
+            } else {
+                file << "[TIME_ERROR] ";
+            }
+            file << "File for error logs didnt exists as was expected.\n";
             file.close();
         }
         
@@ -85,9 +89,12 @@ namespace G_state {
         if (!file.is_open()) {
             return Error(Error_type::os_error);
         }
-        file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M) ") 
-                << err_message
-                << "\n";
+        if (err_time == 0) {
+            file << std::put_time(&tm, "%Y %B %d (%A), (%H:%M) ");
+        } else {
+            file << "[TIME_ERROR] ";
+        }
+        file << err_message << "\n";
         file.close();
 
         Client::Data_thread_error_status new_err_status = {false, Error(Error_type::err_logs_file_was_not_present)};
@@ -95,6 +102,8 @@ namespace G_state {
     
         return Error(Error_type::ok);
     }
+
+    // TODO: do we need to log fatal errors? 
 
     G_state::Error set_up_on_startup() {
         // == Setting up the icons folder.
@@ -155,8 +164,6 @@ namespace G_state {
             }   
             file.close();
 
-            // TODO(damian): the way i check for invalid types inside json is wrong. Do it like i do it for settings a little lower in this file. 
-
             json data_as_json;
             try { data_as_json = json::parse(text); }
             catch (...) {
@@ -167,15 +174,24 @@ namespace G_state {
                 return err;
             }
 
-            vector<json> vector_of_j_tracked;
-            try { vector_of_j_tracked = data_as_json["tracked_processes_paths"]; }
-            catch (...) { 
-                Error err_on_log = log_error("Error when reading tracked processes json, its structure was invalid. GG. App cant run if this is the case.");
+            if (!data_as_json.contains("tracked_processes_paths")) {
+                Error err_on_log = log_error("Invalid structure for file with tracked processes on startu. GG. App cant run if this is the case.");
                 if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
                 Error err(Error_type::startup_json_tracked_processes_file_invalid_structure);
                 return err;
             }
+
+            if (!data_as_json["tracked_processes_paths"].is_array()) {
+                Error err_on_log = log_error("Error when reading file with tracked processes, its values were of invalid type. GG. App cant run if this is the case.");
+                if (err_on_log.type != Error_type::ok) { return err_on_log; }
+
+                Error err(Error_type::startup_invalid_values_inside_json);
+                return err;
+            }
+
+            vector<json> vector_of_j_tracked;
+            vector_of_j_tracked = data_as_json["tracked_processes_paths"];
 
             for (json& j_path : vector_of_j_tracked) {
                 if (!j_path.is_string()) {
@@ -186,7 +202,7 @@ namespace G_state {
                     return err;
                 }
                 else {
-                    Process_data new_process(j_path.get<std::string>()); // TODO: handle for invalid type getter.
+                    Process_data new_process(j_path.get<std::string>()); 
                     new_process.is_tracked = true;
         
                     G_state::tracked_processes.push_back(new_process);
@@ -382,15 +398,15 @@ namespace G_state {
         G_state::Dynamic_system_info::prev_system_times = G_state::Dynamic_system_info::new_system_times;
         G_state::Dynamic_system_info::new_system_times  = new_sys_times;
 
-        // NOTE(damian): for code clarity.
-        for (Process_data& data : G_state::tracked_processes) {
-            if (data.was_updated)
-                assert(false);
-        }
-        for (Process_data& data : G_state::currently_active_processes) {
-            if (data.was_updated)
-                assert(false);
-        }
+        // NOTE(damian): this was comented out before official first version on 28th of June 2025.
+        // for (Process_data& data : G_state::tracked_processes) {
+        //     if (data.was_updated)
+        //         assert(false);
+        // }
+        // for (Process_data& data : G_state::currently_active_processes) {
+        //     if (data.was_updated)
+        //         assert(false);
+        // }
 
         // Updating the state
         for (Win32_process_data& win32_data : processes) {
@@ -407,35 +423,24 @@ namespace G_state {
             for (Process_data& g_state_data : G_state::tracked_processes) {
                 if (!g_state_data.was_updated && g_state_data.compare_as_tracked(&win32_data)) {
                     
-                    if (is_tracked) { // NOTE(damian): cant have 2 same processes stores as tracked.
-                        int x = 2;
-                        return Error(Error_type::runtime_logics_failed);
-                    } 
+                    // NOTE(damian): cant have 2 same processes stores as tracked.
+                    // if (is_tracked) { return Error(Error_type::runtime_logics_failed); } 
 
                     pair<Error, optional<Session>> result = g_state_data.update_active();
-                    if (result.first.type != Error_type::ok) {
-                        int x = 2;
-                        return result.first;
-                    }
+                    if (result.first.type != Error_type::ok) { return result.first; }
 
                     if (result.second.has_value()) {
                         if (result.second.value().duration_sec.count() > 0) {
                             Error err = write_current_session_to_csv(&result.second.value(), &g_state_data);
-                            if (err.type != Error_type::ok) {
-                                int x = 2;
-                                return err;
-                            }
+                            if (err.type != Error_type::ok) { return err; }
                         }
                     }
 
                     Error err = g_state_data.update_data(&win32_data);
-                    if (err.type != Error_type::ok) {
-                        int x = 2;
-                        return err;
-                    }
+                    if (err.type != Error_type::ok) { return err; }
+                    
                     is_tracked = true;
-
-                    // break; // NOTE(damian): commented out for the error on top to work. // TODO(damian): note this better.
+                    break; 
                 }
             }
             if (is_tracked) continue;
@@ -444,48 +449,38 @@ namespace G_state {
             for (Process_data& g_state_data : G_state::currently_active_processes) {
 
                 pair<Error, bool> result = g_state_data.compare(&win32_data);
-                if (result.first.type != Error_type::ok) {
-                    int x = 2;
-                    return result.first;
-                }
-
+                if (result.first.type != Error_type::ok) { return result.first; }
 
                 if (!g_state_data.was_updated && result.second) { // NOTE(damian): leaving !g_state_data.was_updated, in case 2 chrome like processes have same spawn time.
-                    assert(!was_active_before); // NOTE(damian): cant have 2 same active processes 
-                    if (was_active_before) {
-                        assert(!g_state_data.was_updated); // TODO(damian): delete later.
-                    }
+                    
+                    // NOTE(damian): cant have 2 same active processes
+                    // if (was_active_before) { return Error(Error_type::runtime_logics_failed); } 
 
                     pair<Error, optional<Session>> update_result = g_state_data.update_active();
-                    if (update_result.first.type != Error_type::ok) { 
-                        int x = 2;
-                        return update_result.first; 
-                    }
-                    // Ignoring the possuble session here. Dont need it for just acrive non tracked processes.
+                    if (update_result.first.type != Error_type::ok) { return update_result.first; }
+                    // Ignoring the possible session here. Dont need it for active, non tracked processes.
 
                     Error err = g_state_data.update_data(&win32_data);
-                    if (err.type != Error_type::ok) { 
-                        int x = 2;
-                        return err; 
-                    }
+                    if (err.type != Error_type::ok) { return err; }
+                    
                     was_active_before = true;
-
-                    // break; // NOTE(damian): commented out for the assert to work while developing.
-
-                    // TODO(damian): maybe assert to make sure that there is no other exact process.
+                    break; 
                 }
             }
             if (was_active_before) continue;
 
             Process_data new_process(&win32_data);
-            new_process.update_active();
+            pair<Error, optional<Session>> update_result = new_process.update_active();
+            if (update_result.first.type != Error_type::ok) { return update_result.first; }
+            // Ignoring the possible session here. Dont need it for active, non tracked processes.
+            
             G_state::currently_active_processes.push_back(new_process);
         }
 
         // Removing the processes that are not tracked and stopped being active
         for (auto it = G_state::currently_active_processes.begin();
             it != G_state::currently_active_processes.end();
-            ) {
+        ) {
             if (!it->was_updated) {
                 it = G_state::currently_active_processes.erase(it);
             }
@@ -501,7 +496,7 @@ namespace G_state {
                 if (result.first.type != Error_type::ok) { return result.first; }
 
                 if (!result.second.has_value()) {  continue; }
-                // No session was created after the update. (The process didnt just become inactive)
+                // No session was created after the update. (The process has been inactive for a while now)
                 
                 process_data.reset_data();
 
@@ -525,14 +520,10 @@ namespace G_state {
 
         // Creating data for the client.
         if (G_state::Client_data::need_data) {
-
-            G_state::Client_data::Data data = {};
-
-            data.copy_currently_active_processes = G_state::currently_active_processes; 
-            data.copy_tracked_processes          = G_state::tracked_processes;
+            G_state::Client_data::data.copy_currently_active_processes = G_state::currently_active_processes; 
+            G_state::Client_data::data.copy_tracked_processes          = G_state::tracked_processes;
 
             // Telling the client thread that data it requested is ready
-            G_state::Client_data::maybe_data = data;
             G_state::Client_data::need_data  = false;
         }
 
@@ -545,12 +536,13 @@ namespace G_state {
 
         Process_data new_process(&win32_data);
 
-        // Checking if the process is a;redy being handled
+        // Checking if the process is alredy being handled
         bool already_tracking = false;
         for (Process_data& process : G_state::tracked_processes) {
             if (process.compare_as_tracked(&new_process)) {
-                assert(!already_tracking); // This was not suppodef to happend in the first place.
+                // if (already_tracking) { return Error(Error_type::runtime_logics_failed); }
                 already_tracking = true;
+                break;
             }
         }
 
@@ -576,7 +568,7 @@ namespace G_state {
             // Moving from cur_active to tracked
             if (found_active) {
                 p_to_active->is_tracked = true;
-                G_state::tracked_processes.push_back(std::move(*p_to_active));
+                G_state::tracked_processes.push_back(std::move(*p_to_active)); // TODO(damian): check if move actually does anything here.
                 G_state::currently_active_processes.erase(p_to_active);
             }
             else { // Just adding to tracked
@@ -584,20 +576,17 @@ namespace G_state {
                 G_state::tracked_processes.push_back(new_process);
             }
 
-            // TODO(damian): this is here now for clarity, move somewhere else.
+            // NOTE(damian): this is a sneaky way to check all processes in a O(n^2) loop. )).
+            //               its fine here, since how often will someone actually add processes. 
             for (Process_data& tracked : G_state::tracked_processes) {
                 for (Process_data& current : G_state::currently_active_processes) {
-                    pair<Error, bool> result = tracked.compare(&current);
-                    if (result.first.type != Error_type::ok) { return result.first; }
+                    if (tracked.times.has_value()) { // It might not have yet been active. And compare() needs it to have value.
+                        pair<Error, bool> result = tracked.compare(&current);
+                        if (result.first.type != Error_type::ok) { return result.first; }
 
-                    if (   tracked.times.has_value() // NOTE(damian): might be bull if process is tracked and has not been active yet.
-                        && result.second
-                    ) {
-                        // NOTE(damian): not comaring as tracked, 
-                        //               since then it would return Error for processes like chrome and vs code.
-                        assert(false); // TODO
-                        return Error(Error_type::tracked_and_current_process_vectors_share_data);
+                        if (result.second) { return Error(Error_type::tracked_and_current_process_vectors_share_data); }
                     }
+                    
                 }
             }
 
@@ -629,7 +618,6 @@ namespace G_state {
         else {
             G_state::tracked_processes.erase(p_to_tracked);
 
-            // Need to rewrite the file that stores processes tracked
             std::error_code err_code_1;
             bool data_exists = fs::exists(G_state::path_file_tracked_processes, err_code_1);
             if (err_code_1) { return Error(Error_type::os_error); }
@@ -660,7 +648,7 @@ namespace G_state {
         json j_settings;
         j_settings["data_thread_update_time_seconds"] = Settings::n_sec_between_state_updates;
         
-        std::fstream file(G_state::path_file_settings, std::ios::in);
+        std::fstream file(G_state::path_file_settings, std::ios::in | std::ios::out);
         if (!file.is_open()) { return Error(Error_type::os_error); }
         file << j_settings.dump(4);
         file.close();
@@ -698,7 +686,7 @@ namespace G_state {
         json j;
         j["tracked_processes_paths"] = j_tracked;
         
-        std::fstream file(G_state::path_file_tracked_processes, std::ios::out);
+        std::fstream file(G_state::path_file_tracked_processes, std::ios::in | std::ios::out);
         if (!file.is_open()) { return Error(Error_type::os_error); }
         file << j.dump(4);
         file.close();
@@ -757,7 +745,7 @@ namespace G_state {
             }
         }
         
-        std::fstream csv_current_file(path, std::ios::out | std::ios::trunc);
+        std::fstream csv_current_file(path, std::ios::in | std::ios::trunc);
         if (!csv_current_file.is_open()) { return Error(Error_type::os_error); }
         
         csv_current_file << G_state::process_session_csv_file_header;
@@ -782,10 +770,10 @@ namespace G_state {
         path.append(G_state::csv_file_name_for_current_session_for_process);
 
         std::error_code err;
-        bool current_exists = fs::exists(path, err);
-        if (err) { return Error(Error_type::os_error); }
+        bool current_exists = fs::is_regular_file(path, err);
         if (!current_exists) {
-            return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+            if (err != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+            else { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
         }
 
         std::fstream csv_current_file(path, std::ios::out | std::ios::trunc);
@@ -869,7 +857,7 @@ namespace G_state {
 
     namespace Client_data {
         bool need_data;
-		optional<Data> maybe_data;
+		Data data;
     }
 
     namespace Static_system_info {

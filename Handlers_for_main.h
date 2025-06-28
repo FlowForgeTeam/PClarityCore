@@ -37,16 +37,16 @@ namespace Client {
     
     extern void handle_socker_error();
 
-    extern void handle_report          (Report_request*           request);
-    extern void handle_quit            (Quit_request*             request);
-    //extern void handle_shutdown        (Shutdown_request*         request);
-    extern void handle_track           (Track_request*            request);
-    extern void handle_untrack         (Untrack_request*          request);
-    extern void handle_grouped_report  (Grouped_report_request*   request);
-    extern void handle_pc_time         (Pc_time_request*          request);
-    extern void handle_report_apps_only(Report_apps_only_request* request);
-    extern void handle_report_tracked_only(Report_tracked_only* request);
-    extern void handle_change_update_time (Change_update_time* request);
+    extern Error handle_report             (Report_request*           request);
+    extern void  handle_quit               (Quit_request*             request);
+    //extern void handle_shutdown          (Shutdown_request*         request);
+    extern void  handle_track              (Track_request*            request);
+    extern void  handle_untrack            (Untrack_request*          request);
+    extern Error handle_grouped_report     (Grouped_report_request*   request);
+    extern void  handle_pc_time            (Pc_time_request*          request);
+    extern Error handle_report_apps_only   (Report_apps_only_request* request);
+    extern Error handle_report_tracked_only(Report_tracked_only*      request);
+    extern void  handle_change_update_time (Change_update_time*       request);
 
 
       
