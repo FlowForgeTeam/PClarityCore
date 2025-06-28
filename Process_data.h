@@ -31,7 +31,6 @@ public:
     bool is_tracked;   // NOTE(damian): this is used to determine, if a process has to have sessions created when declarated inactive.
     bool was_updated;  // NOTE(damian): used inside global state to simbolase if the process was updates, if not, a deleting might be performed. 
     
-    // TODO(damian): do i really need this, i guess not really, but this might be better for the client, to be able to not convert path all the time for processes with not icons. MAYBE.
     bool has_image;
     
     // These are used later for process creation when the process ends.

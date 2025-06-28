@@ -19,9 +19,9 @@ static Error store_process_icon_image(Win32_process_data* data);
 //static Error save_icon_to_path(PBYTE icon, DWORD buf, fs::path* file_path);
 
 
-static tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE process_handle,
-                                                                          WCHAR* stack_buffer,
-                                                                          size_t stack_buffer_len);
+static tuple< optional<WCHAR*>, bool, DWORD, Error > win32_get_path_for_process(HANDLE process_handle,
+                                                                                WCHAR* stack_buffer,
+                                                                                size_t stack_buffer_len);
 
 tuple< G_state::Error, 
        vector<Win32_process_data>, 
@@ -69,35 +69,47 @@ tuple< G_state::Error,
         // 2. Getting process path
         const size_t path_stack_buffer_len = 140; 
         WCHAR path_stack_buffer[path_stack_buffer_len];
-        tuple<WCHAR*, bool, DWORD, bool> result = win32_get_path_for_process(process_handle, 
-                                                                             path_stack_buffer, 
-                                                                             path_stack_buffer_len);
-        WCHAR*      path_buffer    = std::get<0>(result); // Stack or Heap, for convinient usage
-        bool        is_buffer_heap = std::get<1>(result);
-        DWORD       buffer_len     = std::get<2>(result);
-        bool        err_code_2     = std::get<3>(result);
+        tuple<optional<WCHAR*>, bool, DWORD, Error> result = win32_get_path_for_process(process_handle, 
+                                                                                        path_stack_buffer, 
+                                                                                        path_stack_buffer_len);
+        optional<WCHAR*> path_buffer    = std::get<0>(result); // Stack or Heap, for convinient usage. nullopt if the func call failed for some win32 reasons.
+        bool             is_buffer_heap = std::get<1>(result);
+        DWORD            buffer_len     = std::get<2>(result);
+        Error            err_2          = std::get<3>(result);
         
-        if (err_code_2) { 
-            string temp_path;
-            wchar_to_utf8(path_buffer, &temp_path);
-            data.exe_path = std::move(temp_path);
-            
-            // 3. Getting process product name (ONLY IN ENGLISH)
-            string temp_product_name;
-            bool err_code_3 = get_process_product_name(process_handle, path_buffer, &temp_product_name);
-
-            if (is_buffer_heap) free(path_buffer);
-            
-            if (!err_code_3) 
-                data.product_name = std::nullopt;
-            else 
-                data.product_name = std::move(temp_product_name);
+        if (err_2.type != Error_type::ok) { 
+            if (is_buffer_heap) free(path_buffer.value());
+            CloseHandle(process_handle); 
+            return tuple(err_2, 
+                         vector<Win32_process_data>(), 
+                         Win32_system_times{},
+                         ULONGLONG{},
+                         SYSTEMTIME{}); 
         }
-        else {
-            if (is_buffer_heap) free(path_buffer);
-            CloseHandle(process_handle);
+
+        if (!path_buffer.has_value()) { 
+            if (is_buffer_heap) free(path_buffer.value());
+            CloseHandle(process_handle); 
             continue;
         }
+        
+        string temp_path;
+        wchar_to_utf8(path_buffer.value(), &temp_path);
+        data.exe_path = std::move(temp_path);
+        
+        // 3. Getting process product name (ONLY IN ENGLISH)
+        string temp_product_name;
+        bool err_code_3 = get_process_product_name(process_handle, path_buffer.value(), &temp_product_name);
+
+        if (is_buffer_heap) {
+            free(path_buffer.value());
+            path_buffer = nullptr;
+        }
+
+        if (!err_code_3) 
+            data.product_name = std::nullopt;
+        else 
+            data.product_name = std::move(temp_product_name);
 
         // 4. 
         DWORD priority = GetPriorityClass(process_handle);
@@ -141,7 +153,6 @@ tuple< G_state::Error,
             data.ram_usage = std::nullopt;
         }
 
-        // TODO(damian): handle witout skip.
         // 7.
         Error err_7 = store_process_icon_image(&data);
         if (err_7.type != Error_type::ok) { 
@@ -190,18 +201,19 @@ void wchar_to_utf8(WCHAR* wstr, string* str) {
 
 // =============================================================================================
 
-tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE process_handle,
+// Pointer to string, is_heap, string len, is_err.
+tuple< optional<WCHAR*>, bool, DWORD, Error > win32_get_path_for_process(HANDLE process_handle,
                                                             WCHAR* stack_buffer,
                                                             size_t stack_buffer_len
 ) {
     DWORD path_len = stack_buffer_len;
     BOOL  err      = QueryFullProcessImageNameW(process_handle, NULL, stack_buffer, &path_len); // Does null terminate.
 
-    if (err != NULL) {
-        return tuple(stack_buffer, false, path_len, true);
+    if (err != NULL) { // Success
+        return tuple(stack_buffer, false, path_len, Error(Error_type::ok));
     }
     else if (GetLastError() != 122) { // NOTE(damian): 122 is code for insufficient buffer size.
-        return tuple(stack_buffer, false, path_len, false);
+        return tuple(std::nullopt, false, path_len, Error(Error_type::ok));
     }
 
     // Need to use heap
@@ -217,20 +229,16 @@ tuple<WCHAR*, bool, DWORD, bool> win32_get_path_for_process(HANDLE process_handl
             heap_buffer = (WCHAR*) realloc(heap_buffer, sizeof(WCHAR) * heap_buffer_len);
         }
 
-        if (heap_buffer == NULL) {
-            assert(false);
-            // TODO(damian): handle better.
-        }
+        if (heap_buffer == NULL) { return tuple(std::nullopt, false, path_len, Error(Error_type::malloc_fail)); }
 
         DWORD path_len = heap_buffer_len;
         BOOL  err      = QueryFullProcessImageNameW(process_handle, NULL, heap_buffer, &path_len);
         
-        if (err != NULL) {
-            //free(heap_buffer);
-            return tuple(heap_buffer, true, path_len, true);
+        if (err != NULL) { // Success
+            return tuple(heap_buffer, true, path_len, Error(Error_type::ok));
         }
         else if (GetLastError() != 122) { // NOTE(damian): 122 is code for insufficient buffer size. Not it, so some other error.
-            return tuple(stack_buffer, false, path_len, false);
+            return tuple(std::nullopt, false, path_len, Error(Error_type::ok));
         }
 
     }
@@ -262,6 +270,9 @@ bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, str
         file_info_err           = GetFileVersionInfoW(exe_path_buffer, NULL, file_version_size_bytes, file_version_data);
         heap_used               = true;
     }
+
+    // TODO: malloc more if a bigger name is needed. 
+    // TODO: think about a way to not have to get product name every time maybe. Allocating every time is ridiculus.
 
     if (file_info_err == 0) {
         if (heap_used) free(file_version_data);
@@ -312,7 +323,6 @@ bool get_process_product_name(HANDLE process_handle, WCHAR* exe_path_buffer, str
     // if (translation_err == 0) {
     //     CloseHandle(process_handle); 
     //     continue;
-    //     // TODO(damian): handle better.
     // }  
     // for (int i = 0; i<lang_and_codepage_arr_size_bytes / sizeof(Lang_and_codepage); ++i) {
     //     WCHAR subBlock[256];
@@ -399,7 +409,6 @@ optional<Win32_system_times> get_system_times() {
     return optional<Win32_system_times>(times);
 }
 
-// TODO(damian): handle with G_state runtime filesysytem error better.
 Error store_process_icon_image(Win32_process_data* data) {
     // Checking validity of the file system.
     std::error_code err_code;
@@ -433,7 +442,7 @@ Error store_process_icon_image(Win32_process_data* data) {
             if (icon) { 
                 std::fstream icon_file(icon_path, std::ios::out | std::ios::binary);
                 if (!icon_file.is_open()) { return Error(Error_type::os_error); }
-                icon_file.write(reinterpret_cast<char*>(icon), bufLen); // TODO(damian): whta is this reiterpret_cast thingy in here?
+                icon_file.write((char* ) icon, bufLen); 
                 icon_file.close();
 
                 data->has_image = true;

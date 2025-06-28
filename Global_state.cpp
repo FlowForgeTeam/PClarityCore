@@ -1,4 +1,3 @@
-// TODO(damian): note why these are here for.
 #include <iostream>
 #include <fstream>
 #include <tuple>
@@ -37,7 +36,7 @@ namespace G_state {
     // ================================================
 
 	// == Constants ===================================
-    const char* path_file_error_logs        = "Error_logs.txt"; // TODO(damian): create on start up and warn if this was for some reason not created already.
+    const char* path_file_error_logs        = "Error_logs.txt"; 
     const char* path_file_tracked_processes = "tracked_processes.json";
     const char* path_dir_sessions           = "Sessions_data";
     const char* path_dir_process_icons      = "Process_icons";
@@ -187,7 +186,7 @@ namespace G_state {
                     return err;
                 }
                 else {
-                    Process_data new_process(j_path.get<std::string>()); // TODO(damian): check what happends if this is not a string.
+                    Process_data new_process(j_path.get<std::string>()); // TODO: handle for invalid type getter.
                     new_process.is_tracked = true;
         
                     G_state::tracked_processes.push_back(new_process);
@@ -441,8 +440,6 @@ namespace G_state {
             }
             if (is_tracked) continue;
             
-            // TODO(damian): since we use move for updates, cheking if it is still valid would be nice.
-
             bool was_active_before = false;
             for (Process_data& g_state_data : G_state::currently_active_processes) {
 
@@ -821,7 +818,7 @@ namespace G_state {
             path.append(G_state::path_dir_sessions);
             string process_path_copy = process->exe_path;
             convert_path_to_windows_filename(&process_path_copy);
-            path.append(std::move(process_path_copy)); // TODO(damian): check if move does anything.
+            path.append(process_path_copy); 
             
             std::error_code err_1;
             bool new_process_specific_dir = fs::create_directories(path, err_1);

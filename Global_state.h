@@ -66,6 +66,8 @@ namespace G_state {
 		// TODO(damian): remove
 		// Network`
 		tcp_initialisation_failed, // Not on the data thread
+
+		malloc_fail,
 	};
 
 	struct Error {
@@ -77,9 +79,6 @@ namespace G_state {
 		~Error() = default;
 	};
 	
-	//extern Error err;
-
-	// TODO(damian): move this out of here into their own separate namespace.
 	// == Constants =============================================
 	extern const char* path_file_error_logs;
 	extern const char* path_file_tracked_processes;

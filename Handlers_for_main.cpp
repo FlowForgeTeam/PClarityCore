@@ -46,7 +46,7 @@ namespace Client {
                     ++it;
             }
 
-            // TODO(damian): stupid to have sigle message handeling at one time but multiple message deletion each iteration. 
+            // TODO(damian): its stupid to have sigle message handeling at a time but also multiple message deletion each iteration. 
 
             // =======================================================================================
             // TODO(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
@@ -77,15 +77,22 @@ namespace Client {
             const size_t receive_buffer_size = 512;
             char receive_buffer[receive_buffer_size];
 
-            // TODO(damian): see if this is not bad for performance.
             int n_bytes_returned = recv(client_socket, receive_buffer, receive_buffer_size, NULL); // TODO(damian): add a timeout here.
             if (n_bytes_returned == SOCKET_ERROR) {
                 Client::handle_socker_error();
                 continue;
             }
-            if (n_bytes_returned > receive_buffer_size - 1) { // TODO(damian): handle this.
-                // TODO(damian): handle message overflow. Or maybe dont. 
-                assert(false);
+            if (n_bytes_returned > receive_buffer_size - 1) { // Messege overflow.
+                // TODO: Add something that tells the client that the request is too long.
+                json responce;
+                create_responce_for_invalid(&responce);
+
+                string messege = std::move(responce.dump(4));
+
+                int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
+                if (send_err_code == SOCKET_ERROR) {
+                    Client::handle_socker_error();
+                }
             }
             receive_buffer[n_bytes_returned] = '\0';
 
@@ -184,12 +191,15 @@ namespace Client {
 
     void wait_for_client_to_connect() {
         std::cout << "Waiting for a new connection with a client." << std::endl;
-        pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
-        if (result.second.type == G_state::Error_type::ok) {
-            Client::client_socket = result.first;
-        }
-        else assert(false); // TODO(damian): this fail here we might not need to handle ))
-        std::cout << "Client connected. \n" << std::endl;
+        //pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
+        // if (result.second.type == G_state::Error_type::ok) {
+        //     Client::client_socket = result.first;
+        //     std::cout << "Client connected. \n" << std::endl;
+        // }
+        // else {
+            std::cout << "Error trying to initialise connection with a client." << std::endl;
+            fatal_error = G_state::Error(G_state::Error_type::tcp_initialisation_failed);
+        // }
     }
 
     void handle_socker_error() {
@@ -199,14 +209,15 @@ namespace Client {
     }
 
     static void create_responce_for_invalid(json* responce) {
+        // TODO(damian): make -1 a constant. 
         (*responce)["err_code"] = -1;
-        (*responce)["data"]     = json::object(); // TODO(damian): move this bitch.  
-        (*responce)["messege"]  = "";
+        (*responce)["data"]     = json::object(); 
+        (*responce)["messege"]  = "Invalid command";
     }
 
     static void create_responce(G_state::Error* err, json* data, json* responce) {
         (*responce)["err_code"] = err->type;
-        (*responce)["data"]     = (data == nullptr ? nullptr : *data); // TODO(damian): move this bitch.  
+        (*responce)["data"]     = (data == nullptr ? nullptr : *data);   
         (*responce)["messege"]  = err->message;
     }
 
@@ -262,8 +273,6 @@ namespace Client {
             Client::handle_socker_error();
         }
 
-        // TODO(damian): make sure new messages dont come in.
-        
         closesocket(Client::client_socket);
 
         Client::need_new_client = true;
@@ -285,8 +294,6 @@ namespace Client {
     //    }
 
     //    closesocket(Client::client_socket);
-
-    //    // TODO(damian): make sure new messages dont come in.
 
     //    std::cout << "Message handling: " << message << "\n" << std::endl;
     //    
@@ -362,7 +369,7 @@ namespace Client {
 
        vector<json> j_roots;
        for (Process_node* root : roots) { 
-           j_roots.push_back(create_json_from_tree_node(root)); // TODO(damian): move json here insted of copy.
+           j_roots.push_back(create_json_from_tree_node(root)); 
        }
 
        json j_data;

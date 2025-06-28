@@ -15,9 +15,6 @@
 #include "Request.h"
 #include "Handlers_for_main.h"
 
-// NOTE(damian): bool represent wheather the command has alredy been handled.
-// TOOD(damian): maybe add this to the global state.
-
 static bool data_thread_running = true;
 static std::thread client_thread;
 
@@ -71,7 +68,7 @@ int main() {
 			}
 		}
 
-		// TODO(damian): why the fuck does main add new processes, g_state should be doing it when it updates its state. 
+		// TODO(damian): why the fuck does main add new processes, G_state should be doing it when it updates its state. 
 		if (unhandled_found) {
 			Track_request*      track       = std::get_if<Track_request>  (&p_to_request->request.variant);
 			Untrack_request*    untrack     = std::get_if<Untrack_request>(&p_to_request->request.variant);

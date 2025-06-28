@@ -24,3 +24,5 @@
 2025 June 27 (Friday), (19:16) Was not able to read settings from file on startup. A new one was created.
 2025 June 28 (Saturday), (12:01) Folder with icons for processes wasnt present when was expected. New one was created.
 2025 June 28 (Saturday), (12:33) Folder with icons for processes wasnt present when was expected. New one was created.
+2025 June 28 (Saturday), (13:16) Folder with icons for processes wasnt present when was expected. New one was created.
+2025 June 28 (Saturday), (13:23) Folder with icons for processes wasnt present when was expected. New one was created.

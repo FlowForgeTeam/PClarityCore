@@ -7,9 +7,6 @@ using std::list;
 
 // TODO(damian): handle out of bounds for message_parts. 
 
-// TOOD(damian): think about namespacing function for both thread,
-//				 just to be more sure, that thread use shared data as little as possible.
-
 namespace Client {
     struct Request_status {
         bool    handled;
