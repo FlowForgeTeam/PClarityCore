@@ -1,0 +1,34 @@
+LAST UPDATED: 29th of June 2025 (by Damian)
+
+1. Startup 
+    -- Files\Folders get created. Seems to be working fine.
+
+2. Requests
+    -- Report(id = 0): seems to be working fine.
+    -- Quit (id = 1): seems to be working fine.
+    -- Track (id = 2): seems to be working fine {
+        - Adds path to the json file with tracked.
+        - Creates a new sessions folder for the new process. CSV files are also created, they both have valid headers.
+        - Doesnt allow to add already tracked process. Err code is returned.
+        - New json is written to the file like expected.
+    }
+    -- Untrack (id = 3): seems to be working fine {
+        - Doesnt allow to delete a process that is not tracked. Returns an error if that happends.
+        - Writes new json to the file like expected.  
+    }
+    -- Gropued_report (id = 4): seems to be working fine.
+    -- Pc_time (id = 5): seems to be working fine.
+    -- Report_apps_only (id = 6): seems to be working fine.
+    -- Tracked_only (id = 7): seems to be working fine.
+    -- Chenge_update_time ( id = 8 ) {
+        - Writes passed in data to file like expected. 
+        - Invalid json keys result in "Invalid command"
+    }
+
+3. Edge cases
+    -- If a single current session is left after last run it gets written to overall at start up. 
+    -- When process gets untracked and if it is also active, its session will get written to overall. Current csv will get reset. 
+        There are couple of logic edge cases that were really well implemented. If they happend, runtime_logic_error is returned.
+
+
+

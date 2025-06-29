@@ -6,7 +6,6 @@
 #include <iomanip>
 
 #include "Functions_win32.h"
-#include "Functions_file_system.h"
 #include "Global_state.h"
 
 using G_state::Error;
@@ -54,10 +53,11 @@ namespace G_state {
     // ================================================
     static Error write_tracked_to_json_file();
 
-    static Error write_new_session_to_csv    (Session* session, Process_data* process);
-    static Error write_current_session_to_csv(Session* session, Process_data* process);
-    static Error clear_current_session_csv   (Process_data* process);
-    static Error handle_files_for_add_tracked(Process_data* process);
+    static Error write_new_session_to_csv                  (Session* session, Process_data* process);
+    static Error write_current_session_to_csv              (Session* session, Process_data* process);
+    static Error clear_current_session_csv                 (Process_data* process);
+    // static Error check_for_unsaved_session_write_to_overall(Process_data* process);
+    static Error handle_files_for_add_tracked              (Process_data* process);
     
     static Error log_error(const char* err_message) {
         // Getting time for the log message.
@@ -150,7 +150,7 @@ namespace G_state {
             if (!exists)  { 
                 if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }    
                 else { 
-                    return Error(Error_type::startup_filesystem_is_all_fucked_up); 
+                    return Error(Error_type::startup_filesystem_is_all_fucked_up, "File with tracked processes doesnt exist, but was supposed to at this point."); 
                     // NOTE(damian): this is the case, since we were supposed to create this file before this.
                 }
             } 
@@ -186,7 +186,7 @@ namespace G_state {
                 Error err_on_log = log_error("Error when reading file with tracked processes, its values were of invalid type. GG. App cant run if this is the case.");
                 if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                Error err(Error_type::startup_invalid_values_inside_json);
+                Error err(Error_type::startup_invalid_values_inside_json, "Inside file with tracked processes.");
                 return err;
             }
 
@@ -198,7 +198,7 @@ namespace G_state {
                     Error err_on_log = log_error("Error when reading tracked processes json, its value were of a different type from ones that were expected. GG. App cant run if this is the case.");
                     if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                    Error err(Error_type::startup_invalid_values_inside_json);
+                    Error err(Error_type::startup_invalid_values_inside_json, "Inside file with tracked processes.");
                     return err;
                 }
                 else {
@@ -314,6 +314,9 @@ namespace G_state {
                         }
                         else { return Error(Error_type::process_current_csv_file_contains_more_than_1_record); }
                     } 
+
+                    // Error unsaved_session_err = check_for_unsaved_session_write_to_overall(&process);
+                    // if (unsaved_session_err.type != Error_type::ok) { return unsaved_session_err; }
                       
                 }
 
@@ -375,7 +378,7 @@ namespace G_state {
                 Error err_on_log = log_error("Error when reading settings json, its values were of invalid type. GG. App cant run if this is the case.");
                 if (err_on_log.type != Error_type::ok) { return err_on_log; }
 
-                Error err(Error_type::startup_invalid_values_inside_json);
+                Error err(Error_type::startup_invalid_values_inside_json, "Inside file with settings");
                 return err;
             }
         }
@@ -630,13 +633,23 @@ namespace G_state {
             Client::data_thread_error_queue.push_back(new_err_status);
         }
         else {
+            // NOTE(damian): if this process is active, we need to get the session, write it to file, clear current csv. 
+            if (p_to_tracked->is_active) {
+                pair<Error, optional<Session>> result = p_to_tracked->update_inactive();
+                if (result.first.type != Error_type::ok) { return result.first; }
+                if (!result.second.has_value()) { return Error(Error_type::runtime_logics_failed, "Werent able to create a session for a tracked process that was also active."); } // It is tracked and active, it has to give out a sesscion.
+
+                write_new_session_to_csv(&result.second.value(), &(*p_to_tracked));
+                clear_current_session_csv(&(*p_to_tracked));
+            }
+
             G_state::tracked_processes.erase(p_to_tracked);
 
             std::error_code err_code_1;
             bool data_exists = fs::exists(G_state::path_file_tracked_processes, err_code_1);
             if (err_code_1) { return Error(Error_type::os_error); }
             if (!data_exists) {
-                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up, "File with tracked processes was not present during runtime. ");
             }
 
             Error err = write_tracked_to_json_file();
@@ -654,7 +667,7 @@ namespace G_state {
         if (!exists) {
             if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
             else { 
-                return Error(Error_type::runtime_filesystem_is_all_fucked_up); 
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up, "File with settings was not present during runtime. "); 
             }
         }
         
@@ -688,7 +701,7 @@ namespace G_state {
         if (!file_exists) {
             if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
             else {
-                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up, "File with tracked processes didnt exists during runtime. ");
             }
         }
         
@@ -699,8 +712,8 @@ namespace G_state {
         
         json j;
         j["tracked_processes_paths"] = j_tracked;
-        
-        std::fstream file(G_state::path_file_tracked_processes, std::ios::in | std::ios::out);
+
+        std::fstream file(G_state::path_file_tracked_processes, std::ios::in | std::ios::out | std::ios::trunc);
         if (!file.is_open()) { return Error(Error_type::os_error); }
         file << j.dump(4);
         file.close();
@@ -723,7 +736,7 @@ namespace G_state {
         if (!overall_exists) {
             if (err != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
             else {
-                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up, "CSV file for overall sessions for a process didnt exists during runtime. ");
             }
         }
         
@@ -755,7 +768,7 @@ namespace G_state {
         if (!current_exists) {
             if (err != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
             else {
-                return Error(Error_type::runtime_filesystem_is_all_fucked_up);
+                return Error(Error_type::runtime_filesystem_is_all_fucked_up, "CSV file for current session for a process didnt exist during runtime. ");
             }
         }
         
@@ -787,7 +800,7 @@ namespace G_state {
         bool current_exists = fs::is_regular_file(path, err);
         if (!current_exists) {
             if (err != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
-            else { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+            else { return Error(Error_type::runtime_filesystem_is_all_fucked_up, "CSV file for current session didnt exist during runtime. "); }
         }
 
         std::fstream csv_current_file(path, std::ios::out | std::ios::trunc);
@@ -797,6 +810,70 @@ namespace G_state {
 
         return Error(Error_type::ok);
     }
+
+    // static Error check_for_unsaved_session_write_to_overall(Process_data* process) {
+    //     fs::path path; 
+    //     path.append(G_state::path_dir_sessions);
+
+    //     string process_exe_path_copy = process->exe_path;
+    //     convert_path_to_windows_filename(&process_exe_path_copy);
+
+    //     path.append(process_exe_path_copy);
+        
+    //     fs::path path_current_csv = path;
+    //     path_current_csv.append(G_state::csv_file_name_for_current_session_for_process);
+
+    //     fs::path path_overall_csv = path;
+    //     path_overall_csv.append(G_state::csv_file_name_for_overall_sessions_for_process);
+
+    //     {
+    //         std::error_code err_code;
+    //         bool exists = fs::is_regular_file(path_current_csv, err_code);
+    //         if (!exists) {
+    //             if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+    //             else { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+    //         }
+    //     }
+
+    //     std::fstream file_current_csv(path_current_csv);
+    //     if (!file_current_csv.is_open()) { return Error(Error_type::os_error); }
+        
+    //     // Getting Session we didnt write last time.
+    //     optional<string> prev_session_csv_line = std::nullopt;
+    //     {
+    //         int line_count = 0;
+    //         string csv_line;
+    //         while (std::getline(file_current_csv, csv_line)) {
+    //             line_count += 1;
+    //             if      (line_count == 1) { continue; } // CSV header.
+    //             else if (line_count == 2) { prev_session_csv_line = csv_line; } // Line we need
+    //             else { return Error(Error_type::process_current_csv_file_contains_more_than_1_record); }
+    //         }
+    //     } 
+
+    //     // Writing the session we found to the overall csv file.
+    //     if (prev_session_csv_line.has_value()) {
+    //         {
+    //             std::error_code err_code;
+    //             bool exists = fs::is_regular_file(path_overall_csv, err_code);
+    //             if (!exists) {
+    //                 if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
+    //                 else { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+    //             }
+    //         }
+
+    //         std::fstream overall_csv_file(path_overall_csv, std::ios::app);
+    //         if (!overall_csv_file.is_open()) { return Error(Error_type::os_error); }
+
+    //         overall_csv_file << prev_session_csv_line.value() << "\n";
+    //         overall_csv_file.close();
+
+    //         Error err = clear_current_session_csv(process);
+    //         if (err.type != Error_type::ok) { return err; }
+    //     }   
+
+    //     return Error(Error_type::ok);
+    // }
 
     static Error handle_files_for_add_tracked(Process_data* process) {
         // Storirng tracked to file. 
@@ -810,7 +887,7 @@ namespace G_state {
             std::error_code err_code;
             bool newly_created = fs::create_directory(G_state::path_dir_sessions, err_code);
             if (err_code)      { return Error(Error_type::os_error); }
-            if (newly_created) { return Error(Error_type::runtime_filesystem_is_all_fucked_up); } 
+            if (newly_created) { return Error(Error_type::runtime_filesystem_is_all_fucked_up, "Dir with sessions was not present during runtime. "); } 
         }
 
         // Checking sessions folder specific for this process.
@@ -854,13 +931,13 @@ namespace G_state {
                 std::error_code err_1;
                 bool exists_overall = fs::exists(path_overall, err_1);
                 if (err_1)           { return Error(Error_type::os_error); }
-                if (!exists_overall) { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+                if (!exists_overall) { return Error(Error_type::runtime_filesystem_is_all_fucked_up, "CSV file with overall sessions for a process was not present during runtime. "); }
                 
                 // Checking existance of current session csv file.
                 std::error_code err_2;
                 bool exists_current = fs::exists(path_current, err_2);
                 if (err_2)           { return Error(Error_type::os_error); }
-                if (!exists_current) { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+                if (!exists_current) { return Error(Error_type::runtime_filesystem_is_all_fucked_up, "CSV file for current session for a process was not present during runtime. "); }
             }
         }
 

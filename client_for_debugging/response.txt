@@ -1,5 +1,5 @@
 {
     "data": null,
-    "err_code": -2,
-    "messege": "Request was too long"
+    "err_code": 105,
+    "messege": "CSV file for current session for a process didnt exist during runtime. "
 }

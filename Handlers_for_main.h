@@ -22,7 +22,7 @@ namespace Client {
     // TODO(damian): maybe this beeing on the data thread side would make more sense.
     extern list<Request_status> request_queue; 
 
-    extern bool   client_running;       
+    extern bool client_running;       
 
     extern optional<G_state::Error> fatal_error;
 
@@ -35,16 +35,15 @@ namespace Client {
     
     extern void handle_socker_error();
 
-    extern Error handle_report             (Report_request*           request);
-    extern void  handle_quit               (Quit_request*             request);
-    //extern void handle_shutdown          (Shutdown_request*         request);
-    extern void  handle_track              (Track_request*            request);
-    extern void  handle_untrack            (Untrack_request*          request);
-    extern Error handle_grouped_report     (Grouped_report_request*   request);
-    extern void  handle_pc_time            (Pc_time_request*          request);
-    extern Error handle_report_apps_only   (Report_apps_only_request* request);
-    extern Error handle_report_tracked_only(Report_tracked_only*      request);
-    extern void  handle_change_update_time (Change_update_time*       request);
+    extern Error handle_report             (Report_request*             request);
+    extern void  handle_quit               (Quit_request*               request);
+    extern void  handle_track              (Track_request*              request);
+    extern void  handle_untrack            (Untrack_request*            request);
+    extern Error handle_grouped_report     (Grouped_report_request*     request);
+    extern void  handle_pc_time            (Pc_time_request*            request);
+    extern Error handle_report_apps_only   (Report_apps_only_request*   request);
+    extern Error handle_report_tracked_only(Report_tracked_only*        request);
+    extern void  handle_change_update_time (Change_update_time_request* request);
 
 
       

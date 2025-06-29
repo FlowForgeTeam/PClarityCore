@@ -12,7 +12,7 @@ namespace Client {
 
     list<Request_status> request_queue; 
 
-    bool   client_running  = true;
+    bool client_running = true;
     optional<G_state::Error> fatal_error;
     
     SOCKET client_socket   = {0} ; // NOTE(damian): maybe use optional here, not sure yet.
@@ -22,9 +22,13 @@ namespace Client {
     
     static json create_json_from_tree_node(Process_node* root);
 
-    static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
-    static void free_process_tree  (vector<Process_node*>* roots);
-    static void free_tree_memory   (Process_node* root);
+    static Error create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data);
+    static void  free_process_tree  (vector<Process_node*>* roots);
+    static void  free_tree_memory   (Process_node* root);
+
+    static void handle_request_invalid();
+    static void handle_request_too_long();
+    static void handle_fatal_error(Error* err);
 
     static Data_thread_error_status* error_request_p = nullptr; // NOTE(damian): hate it here.
 
@@ -47,6 +51,7 @@ namespace Client {
 
             // TODO(damian): its stupid to have sigle message handeling at a time but also multiple message deletion each iteration. 
 
+            // == Checking validity of the queue
             // NOTE(damian): command_queue can can only have 2 parts. (HANDLED-UNHANDLED).
             bool is_handled = false;
 			for (Request_status& status : request_queue) {
@@ -54,9 +59,12 @@ namespace Client {
                     is_handled = true;
                 }
 				else if (!status.handled && is_handled) {
-                    assert(false); // TODO: stop client and data thread, since this is a fatal error.
+                    Error err(Error_type::runtime_logics_failed, "Request queue inside client thread had invalid structure of handled and unhandled requests. ");
+                    handle_fatal_error(&err);
+                    break;
 				}
             }
+            // =================================
 
             auto p_to_error    = Client::data_thread_error_queue.begin(); 
             for (; p_to_error != Client::data_thread_error_queue.end(); ) {
@@ -77,79 +85,47 @@ namespace Client {
                 Client::handle_socker_error();
                 continue;
             }
-            if (n_bytes_returned > 0) { // Messege overflow.
-                // TODO: err codes should not be hardcoded.
-                json responce;
-                Error err((Error_type) -2, "Request was too long");
-                create_responce(&err, nullptr, &responce);
-
-                string messege = std::move(responce.dump(4));
-
-                int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
-                if (send_err_code == SOCKET_ERROR) {
-                    Client::handle_socker_error();
-                }
+            if (n_bytes_returned > receive_buffer_size - 1) { // Messege overflow.
+                handle_request_too_long();
                 continue;
             }
             receive_buffer[n_bytes_returned] = '\0';
 
             std::cout << "Received a message of " << n_bytes_returned << " bytes." << std::endl;
-            std::cout << "Message: " << "'" << receive_buffer << "'" << "\n" << std::endl;
+            std::cout << "Messege: " << "'" << receive_buffer << "'" << "\n" << std::endl;
 
             if (fatal_error.has_value()) { 
-                json responce;
-                create_responce(&fatal_error.value(), nullptr, &responce);
-
-                string responce_as_str = responce.dump(4);
-                std::cout << "Message --> " << responce_as_str << std::endl;
-
-                int send_err_code = send(client_socket, responce_as_str.c_str(), responce_as_str.size(), NULL);
-                if (send_err_code == SOCKET_ERROR) {
-                    Client::handle_socker_error();                
-                }
-
-                closesocket(client_socket);
-                Client::client_running = false;
+                handle_fatal_error(&fatal_error.value());
+                break;
             }
             else {
                 // Parsing the request.
                 std::pair<Request, bool> result = request_from_json(receive_buffer);
                 if (!result.second) {
-                    
-                    // TODO: err codes should not be hardcoded.
-                    json responce;
-                    Error err((Error_type) -1, "Invalid request");
-                    create_responce(&err, nullptr, &responce);
-
-                    string messege = std::move(responce.dump(4));
-
-                    int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
-                    if (send_err_code == SOCKET_ERROR) {
-                        Client::handle_socker_error();
-                    }
+                    handle_request_invalid();
+                    continue;
                 }
                 else {
-                    Report_request*           report         = std::get_if<Report_request>          (&result.first.variant);
-                    Quit_request*             quit           = std::get_if<Quit_request>            (&result.first.variant);
-                    Shutdown_request*         shutdown       = std::get_if<Shutdown_request>        (&result.first.variant);
-                    Track_request*            track          = std::get_if<Track_request>           (&result.first.variant);
-                    Untrack_request*          untrack        = std::get_if<Untrack_request>         (&result.first.variant);
-                    Grouped_report_request*   grouped_report = std::get_if<Grouped_report_request>  (&result.first.variant);
-                    Pc_time_request*          pc_time        = std::get_if<Pc_time_request>         (&result.first.variant);
-                    Report_apps_only_request* apps_only      = std::get_if<Report_apps_only_request>(&result.first.variant);
-                    Report_tracked_only*      tracked_only   = std::get_if<Report_tracked_only>(&result.first.variant);
-                    Change_update_time*       change_time    = std::get_if<Change_update_time>(&result.first.variant);
+                    Report_request*             report         = std::get_if<Report_request>            (&result.first.variant);
+                    Quit_request*               quit           = std::get_if<Quit_request>              (&result.first.variant);
+                    Track_request*              track          = std::get_if<Track_request>             (&result.first.variant);
+                    Untrack_request*            untrack        = std::get_if<Untrack_request>           (&result.first.variant);
+                    Grouped_report_request*     grouped_report = std::get_if<Grouped_report_request>    (&result.first.variant);
+                    Pc_time_request*            pc_time        = std::get_if<Pc_time_request>           (&result.first.variant);
+                    Report_apps_only_request*   apps_only      = std::get_if<Report_apps_only_request>  (&result.first.variant);
+                    Report_tracked_only*        tracked_only   = std::get_if<Report_tracked_only>       (&result.first.variant);
+                    Change_update_time_request* change_time    = std::get_if<Change_update_time_request>(&result.first.variant);
 
                     if (report != nullptr) {
-                        Client::handle_report(report);
+                        Error err = Client::handle_report(report);
+                        if (err.type != Error_type::ok) {
+                            handle_fatal_error(&err);
+                            break;
+                        }
                     } 
                     else if (quit != nullptr) {
                         Client::handle_quit(quit);
                     }
-                    else if (shutdown != nullptr) {
-                        assert(false); // TODO: handle better.
-                        // Client::handle_shutdown(shutdown);
-                    } 
                     else if (track != nullptr) {
                         Client::handle_track(track);
                     }
@@ -157,22 +133,36 @@ namespace Client {
                         Client::handle_untrack(untrack);
                     }
                     else if (grouped_report != nullptr) {
-                        Client::handle_grouped_report(grouped_report);
+                        Error err = Client::handle_grouped_report(grouped_report);
+                        if (err.type != Error_type::ok) {
+                            handle_fatal_error(&err);
+                            break;
+                        }
                     }
                     else if (pc_time != nullptr) {
                         Client::handle_pc_time(pc_time);
                     }
                     else if (apps_only != nullptr) {
-                        Client::handle_report_apps_only(apps_only);
+                        Error err = Client::handle_report_apps_only(apps_only);
+                        if (err.type != Error_type::ok) {
+                            handle_fatal_error(&err);
+                            break;
+                        }
                     }
                     else if (tracked_only != nullptr) {
-                        Client::handle_report_tracked_only(tracked_only);
+                        Error err = Client::handle_report_tracked_only(tracked_only);
+                        if (err.type != Error_type::ok) {
+                            handle_fatal_error(&err);
+                            break;
+                        }
                     }
                     else if (change_time != nullptr) {
                         Client::handle_change_update_time(change_time);
                     }
                     else {
-                        assert(false); // TODO: handle better.
+                        Error err(Error_type::runtime_logics_failed, "Legal request but client thread had no handler for it. ");
+                        handle_fatal_error(&err);
+                        break;
                     }
 
                 }
@@ -193,7 +183,7 @@ namespace Client {
         pair<SOCKET, G_state::Error> result = initialise_tcp_connection_with_client();
         if (result.second.type == G_state::Error_type::ok) {
             Client::client_socket = result.first;
-            std::cout << "Client connected. \n" << std::endl;
+            std::cout << "Client connected." << std::endl;
         }
         else {
             std::cout << "Error trying to initialise connection with a client." << std::endl;
@@ -202,19 +192,65 @@ namespace Client {
     }
 
     void handle_socker_error() {
-        std::cout << "err_code: " << WSAGetLastError() << std::endl;
+        std::cout << "SOCKET err_code: " << WSAGetLastError() << std::endl;
         closesocket(Client::client_socket);
         Client::need_new_client = true;
     }
 
-    static void create_responce(G_state::Error* err, json* data, json* responce) {
+    void create_responce(G_state::Error* err, json* data, json* responce) {
         (*responce)["err_code"] = err->type;
         (*responce)["data"]     = (data == nullptr ? nullptr : *data);   
         (*responce)["messege"]  = err->message;
     }
 
+    void handle_request_invalid() {
+        // TODO: err codes should not be hardcoded.
+        json responce;
+        Error err((Error_type) -1, "Invalid request");
+        create_responce(&err, nullptr, &responce);
+
+        string messege = std::move(responce.dump(4));
+
+        int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error();
+        }
+    }
+
+    void handle_request_too_long() {
+        // TODO: err codes should not be hardcoded.
+        json responce;
+        Error err((Error_type) -2, "Request was too long");
+        create_responce(&err, nullptr, &responce);
+
+        string messege = std::move(responce.dump(4));
+
+        int send_err_code   = send(client_socket, messege.c_str(), messege.size(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error();
+        }
+    }
+
+    void handle_fatal_error(Error* err) {
+        json responce;
+        create_responce(err, nullptr, &responce);
+
+        string responce_as_str = responce.dump(4);
+        std::cout << "FATAL Messege --> " << responce_as_str << std::endl;
+
+        int send_err_code = send(client_socket, responce_as_str.c_str(), responce_as_str.size(), NULL);
+        if (send_err_code == SOCKET_ERROR) {
+            Client::handle_socker_error();                
+        }
+
+        closesocket(client_socket);
+        Client::client_running = false;
+    }
+
+    // =================================================
+
     Error handle_report(Report_request* report) {
-        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed, "For some reason the data thread was already preparing data for the client before it was supposed to."); }
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
         G_state::Client_data::need_data = true;
@@ -271,28 +307,6 @@ namespace Client {
         Client::need_new_client = true;
     }
 
-    // NOTE(damian): dont know if we even need this.
-    //void handle_shutdown(Shutdown_request* shutdown) {
-    //    json j_data = json::object();
-
-    //    G_state::Error err = error_request_p ? error_request_p->error : G_state::Error{G_state::Error_type::ok};
-    //    json responce;
-    //    create_responce(&err, &j_data, &responce);
-
-    //    std::string message = responce.dump(4);
-
-    //    int send_err_code = send(Client::client_socket, message.c_str(), message.length(), NULL);
-    //    if (send_err_code == SOCKET_ERROR) {
-    //        Client::handle_socker_error(); 
-    //    }
-
-    //    closesocket(Client::client_socket);
-
-    //    std::cout << "Message handling: " << message << "\n" << std::endl;
-    //    
-    //    Client::running = false;
-    //}
-
     void handle_track(Track_request* track) {
         Request request = {};
         request.variant = *track;
@@ -342,7 +356,7 @@ namespace Client {
     }
 
     Error handle_grouped_report(Grouped_report_request* report) {
-        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed, "For some reason the data thread was already preparing data for the client before it was supposed to."); }
 
         G_state::Client_data::need_data = true;
         while(G_state::Client_data::need_data);
@@ -357,7 +371,8 @@ namespace Client {
         }
 
         vector<Process_node*> roots;
-        create_process_tree(&roots, &data->copy_currently_active_processes);
+        Error tree_err = create_process_tree(&roots, &data->copy_currently_active_processes);
+        if (tree_err.type != Error_type::ok) { return tree_err; }
 
         vector<json> j_roots;
         for (Process_node* root : roots) { 
@@ -385,7 +400,7 @@ namespace Client {
     }
 
     void handle_pc_time(Pc_time_request* request) {
-        // TODO: see if data request from data thread is need here.
+        // TODO: see if data request from data thread is needed here.
 
         json system_json;
         system_json["up_time_ms"] = G_state::Dynamic_system_info::up_time;
@@ -414,7 +429,7 @@ namespace Client {
     }
 
     Error handle_report_apps_only(Report_apps_only_request* report_apps_only) {
-        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed, "For some reason the data thread was already preparing data for the client before it was supposed to."); }
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
         G_state::Client_data::need_data = true;
@@ -482,7 +497,7 @@ namespace Client {
     }
 
     Error handle_report_tracked_only(Report_tracked_only* request) {
-        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed); }
+        if (G_state::Client_data::need_data) { return Error(Error_type::runtime_logics_failed, "For some reason the data thread was already preparing data for the client before it was supposed to."); }
 
         // Telling the data thread to produce a copy of thread safe data for us to use 
         G_state::Client_data::need_data = true;
@@ -512,7 +527,7 @@ namespace Client {
         return Error(Error_type::ok);
     }
 
-    void handle_change_update_time(Change_update_time* update_time) {
+    void handle_change_update_time(Change_update_time_request* update_time) {
         Request request = {};
         request.variant = *update_time;
 
@@ -538,7 +553,7 @@ namespace Client {
 
     // == Helpers ========================================================
 
-    static void create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data) {
+    static Error create_process_tree(vector<Process_node*>* roots, vector<Process_data>* data) {
         // NOTE(damian): only handling active processes, since they have a hierarchy.
         //               tracked once are provided by the data thread, 
         //               but will be jsoned inside the client thread into a single json list.  
@@ -549,24 +564,17 @@ namespace Client {
 
         for (Process_data& process : *data) {
             Process_node* new_node = new Process_node{ &process, vector<Process_node*>() };
-            if (new_node == NULL) {
-                // TODO(damian): handle better.
-                assert(false);
-            }
+            if (new_node == NULL) { return Error(Error_type::runtime_logics_failed); }
 
-            if (!process.snapshot.has_value()) {
-               assert(false);
-            }
+            if (!process.snapshot.has_value()) { return Error(Error_type::runtime_logics_failed, "Error when creating tree of processes. 1 "); }
+
             tree[process.snapshot.value().pid] = new_node;
         }
 
         // Fill the tree up with current data
         for (Process_data& process : *data) {
             auto process_node = tree.find(process.snapshot.value().pid);
-            if (process_node == tree.end()) {
-                // TODO(damian): handle better.
-                assert(false); // This cant happend.
-            };
+            if (process_node == tree.end()) { return Error(Error_type::runtime_logics_failed, "Error when creating a tree of processes. 2 "); }
 
             auto parent_node = tree.find(process.snapshot.value().ppid);
             if (parent_node == tree.end()) continue;
@@ -585,6 +593,8 @@ namespace Client {
                 roots->push_back(node);
             }
         }
+
+        return Error(Error_type::ok);
     }
 
     static void free_process_tree(vector<Process_node*>* roots) {
@@ -606,10 +616,6 @@ namespace Client {
     }
 
     static json create_json_from_tree_node(Process_node* root) {
-        if (root == nullptr) {
-            assert(false);
-        }
-
         json j_process; 
         convert_to_json(root->process, &j_process);
 

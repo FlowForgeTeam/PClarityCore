@@ -1,14 +1,12 @@
 #include <fstream>
 #include <iostream>
 #include <filesystem>
-#include <assert.h>
 #include <vector>
 #include <string>
 #include <thread>
 #include <list>
 #include <nlohmann/json.hpp>
 
-#include "Functions_file_system.h"
 #include "Functions_networking.h"
 #include "Functions_win32.h"
 #include "Global_state.h"
@@ -36,6 +34,7 @@ int main() {
 	if (init_err.type != G_state::Error_type::ok) { std::cout << "Fatal error on startup. \n" << std::endl; }
 
 	client_thread = std::thread(Client::client_thread); // This starts right away.
+	std::cout << "Started the client thread. \n" << std::endl;
 
 	if (init_err.type != G_state::Error_type::ok) {
 		handle_fatal_error(&init_err);
@@ -50,11 +49,18 @@ int main() {
 		std::chrono::seconds sleep_length(G_state::Settings::n_sec_between_state_updates);
 		std::this_thread::sleep_for(sleep_length);
 		
-		std::cout << " ------------ N : " << n++ << " ------------ " << std::endl;
+		std::cout << " ------------ Data thread loop : " << n++ << " ------------ " << std::endl;
+
+		if (!Client::client_running) { // NOTE(damian): something weird happend to the client that made it stop itself.
+			std::cout << "Client broke down, GG. \n" << std::endl;
+			break;
+		}
 
 		G_state::Error err = G_state::update_state();
 		if (err.type != G_state::Error_type::ok) {
 			handle_fatal_error(&err);
+			
+			std::cout << "Error when updating state. GG. \n" << std::endl;
 			break;
 		}
 
@@ -72,7 +78,7 @@ int main() {
 		if (unhandled_found) {
 			Track_request*      track       = std::get_if<Track_request>  (&p_to_request->request.variant);
 			Untrack_request*    untrack     = std::get_if<Untrack_request>(&p_to_request->request.variant);
-			Change_update_time* change_time = std::get_if<Change_update_time>(&p_to_request->request.variant);
+			Change_update_time_request* change_time = std::get_if<Change_update_time_request>(&p_to_request->request.variant);
 
 			G_state::Error maybe_err(G_state::Error_type::ok);
 			if (track != nullptr) {
@@ -85,11 +91,17 @@ int main() {
 				maybe_err = G_state::update_settings_file(change_time->duration_in_sec);
 			}
 			else {
-				assert(false);
+				Error err(Error_type::runtime_logics_failed, "A request was given to the data thread to be handled, but there is no handler for that type of request. ");
+				handle_fatal_error(&err);
+				
+				std::cout << "A propogated request to the data thread by client is not handled inside main. GG. \n" << std::endl;
+				break;
 			}
 
 			if (maybe_err.type != G_state::Error_type::ok) {
 				handle_fatal_error(&maybe_err);
+
+				std::cout << "Error caught. \n" << std::endl;
 				break;
 			}
 
@@ -99,7 +111,7 @@ int main() {
 	}
 
 	std::cout << "\n";
-	std::cout << "Finished running." << std::endl;
+	std::cout << "Finished running. \n" << std::endl;
 
 	return 0;
 }

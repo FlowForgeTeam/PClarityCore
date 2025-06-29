@@ -53,7 +53,7 @@ static pair<Error, Session> create_session(Process_data* process) {
     if (   !process->steady_start.has_value()
         || !process->system_start.has_value()
     ) {
-        return pair(Error(Error_type::runtime_logics_failed), Session());
+        return pair(Error(Error_type::runtime_logics_failed, "Tried to create a session for a process clocks being nullopt. "), Session());
     }
 
     std::chrono::nanoseconds duration = std::chrono::steady_clock::now() - process->steady_start.value();
@@ -115,12 +115,6 @@ pair<Error, optional<Session>> Process_data::update_inactive() {
         this->is_active = false;
         
         if (this->is_tracked) {
-            if (   !this->steady_start.has_value() 
-                || !this->system_start.has_value() 
-            ) {
-                assert(false);
-            }
-
             pair<Error, Session> result = create_session(this);
             if (result.first.type != Error_type::ok) { 
                 return pair(result.first, std::nullopt); 
@@ -137,7 +131,7 @@ pair<Error, optional<Session>> Process_data::update_inactive() {
 }
 
 Error Process_data::update_data(Win32_process_data* new_win32_data) {
-    if (this->exe_path != new_win32_data->exe_path) { return Error(Error_type::runtime_logics_failed); }
+    if (this->exe_path != new_win32_data->exe_path) { return Error(Error_type::runtime_logics_failed, "Tried to update data for process with a different process. "); }
     
     this->snapshot       = new_win32_data->snapshot;
     this->product_name   = new_win32_data->product_name;
@@ -201,7 +195,7 @@ pair<Error, bool> Process_data::compare(Process_data* other) {
     if (   !this->times.has_value()
         || !other->times.has_value() 
     ) {
-        return pair(Error(Error_type::runtime_logics_failed), false);
+        return pair(Error(Error_type::runtime_logics_failed, "Tried to compare regular processes, but they had times set to nullopt. "), false);
     }
 
     bool comparison = (   this->exe_path == other->exe_path 
@@ -213,7 +207,7 @@ pair<Error, bool> Process_data::compare(Process_data* other) {
 
 pair<Error, bool> Process_data::compare(Win32_process_data* data) {
     if (!this->times.has_value()) {
-        return pair(Error(Error_type::runtime_logics_failed), false);
+        return pair(Error(Error_type::runtime_logics_failed, "Tried to compare processes, but the other process had times set to nullopt. "), false);
     }
 
     bool comparison = (   this->exe_path == data->exe_path 

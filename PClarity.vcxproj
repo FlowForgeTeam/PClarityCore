@@ -130,7 +130,6 @@
   <ItemGroup>
     <ClCompile Include="Get_process_exe_icon.cpp" />
     <ClCompile Include="Request.cpp" />
-    <ClCompile Include="Functions_file_system.cpp" />
     <ClCompile Include="Functions_win32.cpp" />
     <ClCompile Include="Global_state.cpp" />
     <ClCompile Include="Handlers_for_main.cpp" />
@@ -146,7 +145,6 @@
   <ItemGroup>
     <ClInclude Include="Get_process_exe_icon.h" />
     <ClInclude Include="Request.h" />
-    <ClInclude Include="Functions_file_system.h" />
     <ClInclude Include="Functions_win32.h" />
     <ClInclude Include="Global_state.h" />
     <ClInclude Include="Functions_networking.h" />

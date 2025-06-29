@@ -3,18 +3,18 @@
 #include <utility>
 using namespace std;
 
+// TODO(damian): hate that this is manual. This is SUPER error prone.
 pair<Request_type, bool> request_type_from_int(int id) {
     switch (id) {
         case 0:  return pair(Request_type::report,         true);
         case 1:  return pair(Request_type::quit,           true);
-        case 2:  return pair(Request_type::shutdown,       true);
-        case 3:  return pair(Request_type::track,          true);
-        case 4:  return pair(Request_type::untrack,        true);
-        case 5:  return pair(Request_type::grouped_report, true);
-        case 6:  return pair(Request_type::pc_time,        true);
-        case 7:  return pair(Request_type::report_apps_only, true);
-        case 8:  return pair(Request_type::tracked_only, true);
-        case 9:  return pair(Request_type::change_update_time, true);
+        case 2:  return pair(Request_type::track,          true);
+        case 3:  return pair(Request_type::untrack,        true);
+        case 4:  return pair(Request_type::grouped_report, true);
+        case 5:  return pair(Request_type::pc_time,        true);
+        case 6:  return pair(Request_type::report_apps_only, true);
+        case 7:  return pair(Request_type::tracked_only, true);
+        case 8:  return pair(Request_type::change_update_time, true);
 
         default: return pair(Request_type::report,         false);
     }
@@ -32,7 +32,6 @@ pair<Request, bool> request_from_json(const char* json_as_c_str) {
     switch (result.first) {
         case Request_type::report:           return report(&j);
         case Request_type::quit:             return quit(&j);
-        case Request_type::shutdown:         return shutdown(&j);
         case Request_type::track:            return track(&j);
         case Request_type::untrack:          return untrack(&j);
         case Request_type::grouped_report:   return grouped_report(&j);
@@ -55,13 +54,6 @@ pair<Request, bool> report(json* j) {
 pair<Request, bool> quit(json* j) {
     Request request = {};
     request.variant = Quit_request{}; 
-    
-    return pair(request, true);
-}
-
-pair<Request, bool> shutdown(json* j) {
-    Request request = {};
-    request.variant = Shutdown_request{}; 
     
     return pair(request, true);
 }
@@ -127,7 +119,7 @@ pair<Request, bool> change_update_time(json* j) {
         return pair(Request(), false);
     }
 
-    Change_update_time change_time = {};
+    Change_update_time_request change_time = {};
     change_time.duration_in_sec = (*j)["extra"]["update_time_sec"];
 
     Request request = {};

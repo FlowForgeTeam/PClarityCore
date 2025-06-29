@@ -31,7 +31,7 @@ tuple< G_state::Error,
     // Take a snapshot of all processes in the system.
     HANDLE process_shapshot_handle = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     if (process_shapshot_handle == INVALID_HANDLE_VALUE) {
-        return tuple(Error(Error_type::CreateToolhelp32Snapshot_failed),
+        return tuple(Error(Error_type::CreateToolhelp32Snapshot_failed, "CreateToolhelp32Snaphsot win32 function failed."),
                      vector<Win32_process_data>(),
                      std::nullopt,
                      ULONGLONG{},
@@ -42,7 +42,7 @@ tuple< G_state::Error,
     pe32.dwSize = sizeof(PROCESSENTRY32);
     if (!Process32First(process_shapshot_handle, &pe32)) {
         CloseHandle(process_shapshot_handle);
-        return tuple(Error(Error_type::Process32First_failed),
+        return tuple(Error(Error_type::Process32First_failed, "Process32First failed on the first iter."),
                      vector<Win32_process_data>(),
                      std::nullopt,
                      ULONGLONG{},
@@ -426,7 +426,7 @@ Error store_process_icon_image(Win32_process_data* data) {
     bool dir_exists = fs::is_directory(G_state::path_dir_process_icons, err_code);
     if (!dir_exists) {
         if (err_code != std::errc::no_such_file_or_directory) { return Error(Error_type::os_error); }
-        else { return Error(Error_type::runtime_filesystem_is_all_fucked_up); }
+        else { return Error(Error_type::runtime_filesystem_is_all_fucked_up, "Process icons dir was not present when data thread tried to store icons. "); }
     }
 
     // Creating image if doesnt exist.

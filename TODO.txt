@@ -1,18 +1,6 @@
-1. 
--- Maybe add a namesapce for G_state for constants
--- See if the way client is forward declared inside G_state is the way to go
-
-2. 
--- Global static data  (System start time, overall ram ...)
--- Global dynamic data (Current cpu overall, current ram overall ...)
-
-3. 
--- Remove all the fucking TODOs.
-
-4.
--- Think about reseting tracked processes that are not active. Right now, data from the last time they were active is sent.
-    They are only nulled at start up.
-
+-- Make Filesystem better. I did the best i could.
+-- Create more Error enum values for runtime errrors. 
+-- (IMPORTANT) Log fatal errors. Not logging is stupid and maked bug fixing worse since then we dont know what to fix.  
 
 
 
